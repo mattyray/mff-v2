@@ -1,7 +1,6 @@
-// src/components/UserMenu.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { LogOut, Settings, History, ChevronDown } from 'lucide-react';
-import { FaceSwapAPI } from '../services/api';
+import { DonationAPI } from '../services/api';
 
 interface UserData {
   id: number;
@@ -47,7 +46,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ onShowRegistrationGate, onUserState
       }
 
       // Try to get user info to verify token is valid
-      const userData = await FaceSwapAPI.refreshUserSession();
+      const userData = await DonationAPI.refreshUserSession();
       setUser(userData);
     } catch (error) {
       console.log('User not authenticated:', error);
@@ -66,7 +65,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ onShowRegistrationGate, onUserState
 
   const handleLogout = async () => {
     try {
-      await FaceSwapAPI.logout();
+      await DonationAPI.logout();
       setUser(null);
       setIsOpen(false);
       
@@ -159,7 +158,6 @@ const UserMenu: React.FC<UserMenuProps> = ({ onShowRegistrationGate, onUserState
             <button
               onClick={() => {
                 setIsOpen(false);
-                // TODO: Navigate to account settings
                 alert('Account settings coming soon!');
               }}
               className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
@@ -171,13 +169,12 @@ const UserMenu: React.FC<UserMenuProps> = ({ onShowRegistrationGate, onUserState
             <button
               onClick={() => {
                 setIsOpen(false);
-                // TODO: Navigate to transformation history
-                alert('Transformation history coming soon!');
+                alert('Donation history coming soon!');
               }}
               className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
             >
               <History size={16} />
-              My Transformations
+              My Donations
             </button>
           </div>
 

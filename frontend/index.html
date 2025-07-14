@@ -4,62 +4,22 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HistoryFace - AI Historical Transformation</title>
+    <title>Matt Freedom Fundraiser - Supporting Matt Raynor's Journey</title>
     
-    <!-- 🔥 UPDATED: Latest Open Graph Meta Tags -->
-    <meta property="og:title" content="HistoryFace - AI Historical Transformation" />
-    <meta property="og:description" content="Transform into historical figures with AI! See which historical personality you resemble most." />
-    <meta property="og:image" content="https://ai-convert.netlify.app/og-preview.jpg" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:url" content="https://ai-convert.netlify.app" />
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Matt Freedom Fundraiser - Supporting Matt Raynor's Journey" />
+    <meta property="og:description" content="Support Matt Raynor, a quadriplegic developer who taught himself to code after a diving accident. From commercial fisherman to inspiring full-stack developer." />
+    <meta property="og:image" content="https://mattfreedomfundraiser.com/og-image.jpg" />
+    <meta property="og:url" content="https://mattfreedomfundraiser.com" />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="HistoryFace" />
-    <meta property="fb:app_id" content="1430950704695809" />
     
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="HistoryFace - AI Historical Transformation" />
-    <meta name="twitter:description" content="Transform into historical figures with AI!" />
-    <meta name="twitter:image" content="https://ai-convert.netlify.app/og-preview.jpg" />
+    <meta name="twitter:title" content="Matt Freedom Fundraiser" />
+    <meta name="twitter:description" content="Supporting Matt Raynor's incredible journey from diving accident to inspiring developer." />
     
     <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    
-    <!-- 🔥 UPDATED: Facebook SDK v20.0 (Latest) -->
-    <script>
-      window.fbAsyncInit = function() {
-        try {
-          FB.init({
-            appId: '1430950704695809',
-            cookie: true,
-            xfbml: true,
-            version: 'v20.0'
-          });
-          window.fbReady = true;
-          console.log('✅ Facebook SDK v20.0 initialized');
-        } catch (error) {
-          console.error('❌ Facebook SDK error:', error);
-          window.fbSkipped = true;
-        }
-      };
-
-      (function(d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) return;
-        js = d.createElement(s); 
-        js.id = id;
-        
-        const isSecure = location.protocol === 'https:' || location.hostname === 'localhost';
-        if (isSecure) {
-          js.src = "https://connect.facebook.net/en_US/sdk.js";
-          js.onerror = () => { window.fbSkipped = true; };
-          fjs.parentNode.insertBefore(js, fjs);
-        } else {
-          window.fbSkipped = true;
-        }
-      }(document, 'script', 'facebook-jssdk'));
-    </script>
   </head>
   <body>
     <div id="root"></div>

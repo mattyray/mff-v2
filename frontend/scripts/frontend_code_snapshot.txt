@@ -1,6 +1,6 @@
 # FRONTEND CODE SNAPSHOT
 # Generated for AI Face Swap App
-# Total files: 29
+# Total files: 41
 
 
 
@@ -69,6 +69,157 @@ export interface UsageLimitError extends ApiError {
   usage: UsageData;
   registration_required: true;
 }
+
+
+
+# ==== src/hooks/useUsage.ts ====
+
+import { useState, useEffect, useCallback } from 'react';
+import { FaceSwapAPI } from '../services/api';
+import type { UsageData, UsageLimitError } from '../types/index';
+
+interface UseUsageReturn {
+  usage: UsageData | null;
+  loading: boolean;
+  error: string | null;
+  isLimited: boolean;
+  canUseFeature: (feature: 'match' | 'randomize') => boolean;
+  checkUsage: () => Promise<void>;
+  handleUsageLimitError: (error: UsageLimitError) => void;
+  resetUsage: () => void;
+}
+
+export const useUsage = (): UseUsageReturn => {
+  const [usage, setUsage] = useState<UsageData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Check if user has hit all limits
+  const isLimited = usage ? usage.is_limited && !usage.unlimited : false;
+
+  // Check if user can use a specific feature
+  const canUseFeature = useCallback((feature: 'match' | 'randomize'): boolean => {
+    if (!usage) return false;
+    if (usage.unlimited) return true;
+    
+    return feature === 'match' ? usage.can_match : usage.can_randomize;
+  }, [usage]);
+
+  // Fetch current usage status
+  const checkUsage = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const usageData = await FaceSwapAPI.getUsageStatus();
+      setUsage(usageData);
+    } catch (err) {
+      console.error('Failed to check usage:', err);
+      setError(err instanceof Error ? err.message : 'Failed to check usage');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Handle usage limit errors from API calls
+  const handleUsageLimitError = useCallback((error: UsageLimitError) => {
+    console.log('Usage limit reached:', error);
+    if (error.usage) {
+      setUsage(error.usage);
+    }
+    setError(error.message || 'Usage limit reached');
+  }, []);
+
+  // Reset usage state (for testing or after login)
+  const resetUsage = useCallback(() => {
+    setUsage(null);
+    setError(null);
+    checkUsage();
+  }, [checkUsage]);
+
+  // Load usage on mount
+  useEffect(() => {
+    checkUsage();
+  }, [checkUsage]);
+
+  return {
+    usage,
+    loading,
+    error,
+    isLimited,
+    canUseFeature,
+    checkUsage,
+    handleUsageLimitError,
+    resetUsage,
+  };
+};
+
+
+
+# ==== src/hooks/useFileUpload.ts ====
+
+// src/hooks/useFileUpload.ts
+
+import { useState } from 'react';
+
+// 📝 TypeScript: Define what our hook returns
+interface UseFileUploadReturn {
+  selectedFile: File | null;           // Either a File object or null
+  isFileSelected: boolean;            // true/false if file exists
+  handleFileSelect: (file: File) => void;  // Function that takes a File
+  handleClearFile: () => void;        // Function that takes nothing
+  error: string | null;               // Error message or null
+}
+
+// 📝 TypeScript: Define what file types we accept
+const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+
+export const useFileUpload = (): UseFileUploadReturn => {
+  // 🎯 State: Store the selected file
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // 🎯 Function: Handle when user selects a file
+  const handleFileSelect = (file: File) => {
+    // Clear any previous errors
+    setError(null);
+
+    // 📋 Validate file type
+    if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
+      setError('Please select a valid image file (JPG, PNG, WebP)');
+      return;
+    }
+
+    // 📋 Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      setError('File size must be less than 10MB');
+      return;
+    }
+
+    // ✅ File is valid, store it
+    setSelectedFile(file);
+    console.log(`📁 File selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)`);
+  };
+
+  // 🎯 Function: Clear the selected file
+  const handleClearFile = () => {
+    setSelectedFile(null);
+    setError(null);
+    console.log('🗑️ File cleared');
+  };
+
+  // 🎯 Computed value: Check if we have a file
+  const isFileSelected = selectedFile !== null;
+
+  // 📤 Return everything the component needs
+  return {
+    selectedFile,
+    isFileSelected,
+    handleFileSelect,
+    handleClearFile,
+    error,
+  };
+};
 
 
 
@@ -165,6 +316,284 @@ export const useAuth = (): UseAuthReturn => {
     logout,
     checkAuthStatus,
     clearError,
+  };
+};
+
+
+
+# ==== src/hooks/useProcessing.ts ====
+
+// src/hooks/useProcessing.ts
+
+import { useState } from 'react';
+import { FaceSwapAPI } from '../services/api';
+import type { FaceSwapResult, ProgressStep, UsageLimitError } from '../types/index';
+
+// 📝 TypeScript: Define the processing state
+interface ProcessingState {
+  step: ProgressStep;
+  progress: number;
+  message: string;
+  matchedFigure?: string;
+}
+
+// 📝 TypeScript: Define what this hook returns
+interface UseProcessingReturn {
+  isProcessing: boolean;
+  processing: ProcessingState;
+  result: FaceSwapResult | null;
+  error: string | null;
+  startProcessing: (file: File, isRandomize?: boolean) => Promise<void>;
+  clearResult: () => void;
+  clearError: () => void;
+}
+
+export const useProcessing = (
+  onUsageLimitReached: (error: UsageLimitError) => void
+): UseProcessingReturn => {
+  // 🎯 State: Track processing status
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [result, setResult] = useState<FaceSwapResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [processing, setProcessing] = useState<ProcessingState>({
+    step: 'uploading',
+    progress: 0,
+    message: 'Preparing your transformation...',
+  });
+
+  // 🎯 Helper: Update processing state
+  const updateProgress = (
+    step: ProgressStep, 
+    progress: number, 
+    message: string, 
+    matchedFigure?: string
+  ) => {
+    setProcessing({ step, progress, message, matchedFigure });
+  };
+
+  // 🎯 Main function: Start the face swap process
+  const startProcessing = async (file: File, isRandomize = false) => {
+    setIsProcessing(true);
+    setError(null);
+    setResult(null);
+
+    try {
+      // Step 1: Uploading
+      updateProgress('uploading', 10, 'Uploading your selfie securely...');
+      
+      // Step 2: Analysis
+      const analysisMessage = isRandomize 
+        ? 'AI is preparing a random transformation...' 
+        : 'AI is analyzing your facial features...';
+      updateProgress('analyzing', 25, analysisMessage);
+      
+      // 🚀 Start the API call
+      const apiPromise = isRandomize
+        ? FaceSwapAPI.randomizeFaceSwap(file, (uploadProgress) => {
+            updateProgress('uploading', Math.min(uploadProgress, 20), 'Uploading your selfie securely...');
+          })
+        : FaceSwapAPI.generateFaceSwap(file, (uploadProgress) => {
+            updateProgress('uploading', Math.min(uploadProgress, 20), 'Uploading your selfie securely...');
+          });
+      
+      // Simulate analysis step for better UX
+      setTimeout(() => {
+        const progressMessage = isRandomize 
+          ? 'Spinning the wheel of history...' 
+          : 'Identifying unique facial characteristics...';
+        updateProgress('analyzing', 45, progressMessage);
+      }, 1000);
+      
+      // Simulate matching step
+      setTimeout(() => {
+        const matchingMessage = isRandomize 
+          ? 'Selecting your random historical twin...' 
+          : 'Searching through historical figures...';
+        updateProgress('matching', 65, matchingMessage);
+      }, 2500);
+      
+      // 📡 Wait for API response
+      const apiResult = await apiPromise;
+      
+      // Step 3: Show match found
+      const matchMessage = isRandomize 
+        ? `Random selection: ${apiResult.match_name}!` 
+        : `Perfect match found: ${apiResult.match_name}!`;
+      updateProgress('matching', 80, matchMessage, apiResult.match_name);
+      
+      // Step 4: Face swapping
+      setTimeout(() => {
+        updateProgress('swapping', 95, `Transforming you into ${apiResult.match_name}...`, apiResult.match_name);
+      }, 1000);
+      
+      // Step 5: Complete
+      setTimeout(() => {
+        setResult(apiResult);
+        setIsProcessing(false);
+      }, 2000);
+      
+    } catch (err) {
+      console.error('Face swap error:', err);
+      
+      // 🚨 Check if it's a usage limit error
+      if (err && typeof err === 'object' && 'usage' in err) {
+        const usageLimitError = err as UsageLimitError;
+        console.log('Usage limit reached:', usageLimitError);
+        onUsageLimitReached(usageLimitError);
+        setIsProcessing(false);
+        return; // Don't set error state, let registration gate handle it
+      }
+      
+      // 🚨 Regular error handling
+      const errorMessage = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      setError(errorMessage);
+      setIsProcessing(false);
+    }
+  };
+
+  // 🎯 Function: Clear result and go back to upload
+  const clearResult = () => {
+    setResult(null);
+    setError(null);
+    setProcessing({
+      step: 'uploading',
+      progress: 0,
+      message: 'Preparing your transformation...',
+    });
+  };
+
+  // 🎯 Function: Clear error state
+  const clearError = () => {
+    setError(null);
+  };
+
+  // 📤 Return everything the component needs
+  return {
+    isProcessing,
+    processing,
+    result,
+    error,
+    startProcessing,
+    clearResult,
+    clearError,
+  };
+};
+
+
+
+# ==== src/hooks/useRegistrationGate.ts ====
+
+// src/hooks/useRegistrationGate.ts
+
+import { useState, useCallback } from 'react';
+import type { UsageLimitError, UsageData } from '../types/index';
+
+// 📝 TypeScript: Define what this hook returns
+interface UseRegistrationGateReturn {
+  isOpen: boolean;
+  lastFeatureAttempted: 'match' | 'randomize' | undefined;
+  showRegistrationGate: (error: UsageLimitError) => void;
+  hideRegistrationGate: () => void;
+  handleSignUp: () => void;
+  handleLogin: () => void;
+  canUseFeature: (feature: 'match' | 'randomize', usage?: UsageData | null) => boolean;
+}
+
+export const useRegistrationGate = (
+  onRefreshUsage?: () => void
+): UseRegistrationGateReturn => {
+  // 🎯 State: Track registration gate
+  const [isOpen, setIsOpen] = useState(false);
+  const [lastFeatureAttempted, setLastFeatureAttempted] = useState<'match' | 'randomize' | undefined>();
+
+  // 🎯 Function: Show registration gate when usage limit hit
+  const showRegistrationGate = useCallback((error: UsageLimitError) => {
+    console.log('🚪 Showing registration gate for:', error.feature_type);
+    setLastFeatureAttempted(error.feature_type);
+    setIsOpen(true);
+  }, []);
+
+  // 🎯 Function: Hide registration gate
+  const hideRegistrationGate = useCallback(() => {
+    console.log('🚪 Hiding registration gate');
+    setIsOpen(false);
+    setLastFeatureAttempted(undefined);
+  }, []);
+
+  // 🎯 Function: Handle signup click
+  const handleSignUp = useCallback(() => {
+    console.log('📝 Sign up clicked');
+    // TODO: Implement actual signup functionality
+    // For now, just close the gate and refresh usage
+    hideRegistrationGate();
+    if (onRefreshUsage) {
+      onRefreshUsage();
+    }
+    
+    // In a real app, you might:
+    // - Navigate to signup page
+    // - Open signup modal
+    // - Call authentication service
+    alert('Signup functionality coming soon! For now, you can continue using the app.');
+  }, [hideRegistrationGate, onRefreshUsage]);
+
+  // 🎯 Function: Handle login click  
+  const handleLogin = useCallback(() => {
+    console.log('🔑 Login clicked');
+    // TODO: Implement actual login functionality
+    // For now, just close the gate and refresh usage
+    hideRegistrationGate();
+    if (onRefreshUsage) {
+      onRefreshUsage();
+    }
+    
+    // In a real app, you might:
+    // - Navigate to login page
+    // - Open login modal
+    // - Call authentication service
+    alert('Login functionality coming soon! For now, you can continue using the app.');
+  }, [hideRegistrationGate, onRefreshUsage]);
+
+  // 🎯 Function: Check if user can use a specific feature
+  const canUseFeature = useCallback((
+    feature: 'match' | 'randomize', 
+    usage?: UsageData | null
+  ): boolean => {
+    // If no usage data, assume they can use it (first time user)
+    if (!usage) {
+      console.log(`✅ No usage data, allowing ${feature}`);
+      return true;
+    }
+
+    // If user has unlimited access (authenticated), allow everything
+    if (usage.unlimited) {
+      console.log(`✅ Unlimited access, allowing ${feature}`);
+      return true;
+    }
+
+    // Check specific feature limits
+    const canUse = feature === 'match' ? usage.can_match : usage.can_randomize;
+    console.log(`${canUse ? '✅' : '❌'} Can use ${feature}:`, {
+      feature,
+      canUse,
+      usage_summary: {
+        matches: `${usage.matches_used}/${usage.matches_limit}`,
+        randomizes: `${usage.randomizes_used}/${usage.randomizes_limit}`,
+      }
+    });
+
+    return canUse;
+  }, []);
+
+  // 📤 Return everything the component needs
+  return {
+    isOpen,
+    lastFeatureAttempted,
+    showRegistrationGate,
+    hideRegistrationGate,
+    handleSignUp,
+    handleLogin,
+    canUseFeature,
   };
 };
 
@@ -981,6 +1410,83 @@ console.log('✅ React app mounted successfully!');
 
 
 
+# ==== src/components/RandomizeButton.tsx ====
+
+import React from 'react';
+import { Shuffle, Lock } from 'lucide-react';
+import type { UsageData } from '../types/index';
+
+interface RandomizeButtonProps {
+  onRandomize: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+  usage?: UsageData | null;
+  hasSelectedFile: boolean;
+}
+
+const RandomizeButton: React.FC<RandomizeButtonProps> = ({
+  onRandomize,
+  disabled = false,
+  loading = false,
+  usage,
+  hasSelectedFile
+}) => {
+  const canRandomize = usage ? (usage.unlimited || usage.can_randomize) : true;
+  const isDisabled = disabled || loading || !hasSelectedFile || !canRandomize;
+  
+  const getButtonText = () => {
+    if (loading) return 'Randomizing...';
+    if (!hasSelectedFile) return 'Upload Photo First';
+    if (!canRandomize && usage) {
+      return `Randomize (${usage.randomizes_used}/${usage.randomizes_limit} used)`;
+    }
+    return '🎲 Surprise Me!';
+  };
+
+  const getButtonSubtext = () => {
+    if (!hasSelectedFile) return 'Select a selfie to get started';
+    if (!canRandomize && usage) return 'Upgrade to randomize more';
+    return 'Get matched with a random historical figure';
+  };
+
+  return (
+    <div className="text-center">
+      <button
+        onClick={onRandomize}
+        disabled={isDisabled}
+        className={`
+          relative px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 flex items-center justify-center gap-3 mx-auto
+          ${isDisabled 
+            ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+            : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+          }
+        `}
+      >
+        {!canRandomize && usage ? (
+          <Lock size={20} />
+        ) : (
+          <Shuffle size={20} className={loading ? 'animate-spin' : ''} />
+        )}
+        {getButtonText()}
+      </button>
+      
+      <p className={`text-sm mt-2 ${!canRandomize && usage ? 'text-red-600' : 'text-gray-600'}`}>
+        {getButtonSubtext()}
+      </p>
+      
+      {usage && !usage.unlimited && (
+        <div className="mt-3 text-xs text-gray-500">
+          Randomizes remaining: {usage.can_randomize ? usage.randomizes_limit - usage.randomizes_used : 0}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default RandomizeButton;
+
+
+
 # ==== src/components/UserMenu.tsx ====
 
 // src/components/UserMenu.tsx
@@ -1186,6 +1692,561 @@ export default UserMenu;
 
 
 
+# ==== src/components/HistoricalPreview.tsx ====
+
+const HistoricalPreview: React.FC = () => {
+  const figures = [
+    { name: 'Napoleon', emoji: '👑' },
+    { name: 'Cleopatra', emoji: '🏺' },
+    { name: 'Leonardo da Vinci', emoji: '🎨' },
+    { name: 'Marie Antoinette', emoji: '👸' },
+    { name: 'JFK', emoji: '🇺🇸' },
+    { name: 'Frida Kahlo', emoji: '🌺' },
+  ];
+
+  return (
+    <div className="mt-12 text-center">
+      <h3 className="text-lg font-semibold text-gray-900 mb-6">
+        Meet Some Historical Figures
+      </h3>
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+        {figures.map((figure) => (
+          <div key={figure.name} className="text-center p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+            <div className="text-2xl mb-2">{figure.emoji}</div>
+            <div className="text-xs text-gray-600 font-medium">{figure.name}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default HistoricalPreview;
+
+
+
+# ==== src/components/ProcessingStatus.tsx ====
+
+import { Loader2, Search, Users, Sparkles, CheckCircle } from 'lucide-react';
+import type { ProgressStep } from '../types/index';
+
+interface ProcessingStatusProps {
+  step: ProgressStep;
+  progress: number;
+  message: string;
+  matchedFigure?: string;
+}
+
+const ProcessingStatus: React.FC<ProcessingStatusProps> = ({
+  step,
+  progress,
+  message,
+  matchedFigure
+}) => {
+  const steps = [
+    {
+      key: 'uploading',
+      label: 'Uploading',
+      icon: Loader2,
+      description: 'Securely uploading your photo'
+    },
+    {
+      key: 'analyzing',
+      label: 'Analyzing',
+      icon: Search,
+      description: 'AI analyzing facial features'
+    },
+    {
+      key: 'matching',
+      label: 'Matching',
+      icon: Users,
+      description: 'Finding historical matches'
+    },
+    {
+      key: 'swapping',
+      label: 'Transforming',
+      icon: Sparkles,
+      description: 'Creating your transformation'
+    },
+  ];
+
+  const getStepStatus = (stepKey: string) => {
+    const stepIndex = steps.findIndex(s => s.key === stepKey);
+    const currentStepIndex = steps.findIndex(s => s.key === step);
+    
+    if (stepIndex < currentStepIndex) return 'completed';
+    if (stepIndex === currentStepIndex) return 'active';
+    return 'pending';
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-lg p-8">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <div className="flex items-center justify-center mb-4">
+          <div className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-full p-3">
+            <Sparkles className="w-8 h-8 text-white" />
+          </div>
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          Creating Your Transformation
+        </h2>
+        <p className="text-gray-600">
+          {message}
+        </p>
+        {matchedFigure && (
+          <div className="mt-4 inline-block bg-green-50 border border-green-200 rounded-lg px-4 py-2">
+            <p className="text-green-800 font-medium">
+              ✨ Matched with {matchedFigure}!
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Progress Bar */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+          <span>Progress</span>
+          <span>{progress}%</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-3">
+          <div
+            className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Steps */}
+      <div className="space-y-4">
+        {steps.map((stepItem) => {
+          const status = getStepStatus(stepItem.key);
+          const Icon = stepItem.icon;
+          
+          return (
+            <div
+              key={stepItem.key}
+              className={`flex items-center p-4 rounded-lg transition-all duration-300 ${
+                status === 'active'
+                  ? 'bg-blue-50 border border-blue-200'
+                  : status === 'completed'
+                  ? 'bg-green-50 border border-green-200'
+                  : 'bg-gray-50 border border-gray-200'
+              }`}
+            >
+              <div
+                className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-4 ${
+                  status === 'active'
+                    ? 'bg-blue-500 text-white'
+                    : status === 'completed'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-300 text-gray-600'
+                }`}
+              >
+                {status === 'completed' ? (
+                  <CheckCircle size={20} />
+                ) : status === 'active' ? (
+                  <Icon size={20} className="animate-spin" />
+                ) : (
+                  <Icon size={20} />
+                )}
+              </div>
+              
+              <div className="flex-grow">
+                <div
+                  className={`font-medium ${
+                    status === 'active'
+                      ? 'text-blue-900'
+                      : status === 'completed'
+                      ? 'text-green-900'
+                      : 'text-gray-600'
+                  }`}
+                >
+                  {stepItem.label}
+                </div>
+                <div
+                  className={`text-sm ${
+                    status === 'active'
+                      ? 'text-blue-700'
+                      : status === 'completed'
+                      ? 'text-green-700'
+                      : 'text-gray-500'
+                  }`}
+                >
+                  {stepItem.description}
+                </div>
+              </div>
+              
+              <div className="flex-shrink-0">
+                {status === 'active' && (
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" />
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                  </div>
+                )}
+                {status === 'completed' && (
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Fun fact while waiting */}
+      <div className="mt-8 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+        <p className="text-purple-800 text-sm text-center">
+          💡 <strong>Did you know?</strong> Our AI analyzes over 100 facial landmarks to find your perfect historical match!
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default ProcessingStatus;
+
+
+
+# ==== src/components/UsageIndicator.tsx ====
+
+import type { UsageData, UsageLimitError } from '../types/index';
+
+interface UsageIndicatorProps {
+  usage: UsageData;
+  onShowRegistrationGate: (error: UsageLimitError) => void;
+}
+
+const UsageIndicator: React.FC<UsageIndicatorProps> = ({ usage, onShowRegistrationGate }) => {
+  if (usage.unlimited) return null;
+
+  return (
+    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+      <h3 className="font-medium text-blue-900 mb-2">Your Free Usage</h3>
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="text-center">
+          <div className={`text-lg font-bold ${usage.can_match ? 'text-green-600' : 'text-red-600'}`}>
+            {usage.matches_used}/{usage.matches_limit}
+          </div>
+          <div className="text-gray-600">Face Matches</div>
+        </div>
+        <div className="text-center">
+          <div className={`text-lg font-bold ${usage.can_randomize ? 'text-green-600' : 'text-red-600'}`}>
+            {usage.randomizes_used}/{usage.randomizes_limit}
+          </div>
+          <div className="text-gray-600">Randomizes</div>
+        </div>
+      </div>
+      {usage.is_limited && (
+        <div className="mt-3 text-center">
+          <button
+            onClick={() => onShowRegistrationGate({ 
+              feature_type: 'match', 
+              usage, 
+              registration_required: true,
+              error: 'Usage limit reached',
+              message: 'Get unlimited access'
+            })}
+            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+          >
+            Get unlimited access →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default UsageIndicator;
+
+
+
+# ==== src/components/ResultDisplay.tsx ====
+
+import React, { useState } from 'react';
+import { Download, RefreshCw, Share2, Star, Loader2, CheckCircle, Copy } from 'lucide-react';
+import type { FaceSwapResult } from '../types/index';
+import FacebookShareButton from './FacebookShareButton';
+
+interface ResultDisplayProps {
+  result: FaceSwapResult;
+  onTryAgain: () => void;
+}
+
+const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, onTryAgain }) => {
+  const [downloadState, setDownloadState] = useState<'idle' | 'downloading' | 'success' | 'error'>('idle');
+
+  const handleDownload = async () => {
+    try {
+      setDownloadState('downloading');
+      console.log('🔽 Starting download for:', result.output_image_url);
+      
+      // Fetch the image as a blob to bypass CORS restrictions
+      const response = await fetch(result.output_image_url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${response.status}`);
+      }
+      
+      const blob = await response.blob();
+      console.log('✅ Image fetched as blob:', blob.size, 'bytes');
+      
+      // Create a temporary URL for the blob
+      const blobUrl = URL.createObjectURL(blob);
+      
+      // Create download link
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `historyface_${result.match_name.replace(/[^a-zA-Z0-9]/g, '_')}_transformation.jpg`;
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the blob URL to free memory
+      URL.revokeObjectURL(blobUrl);
+      
+      setDownloadState('success');
+      console.log('✅ Download completed');
+      
+      // Reset state after 2 seconds
+      setTimeout(() => setDownloadState('idle'), 2000);
+      
+    } catch (error) {
+      console.error('❌ Download failed:', error);
+      setDownloadState('error');
+      
+      // Reset state after 3 seconds
+      setTimeout(() => setDownloadState('idle'), 3000);
+      
+      // Fallback: open in new tab
+      setTimeout(() => {
+        window.open(result.output_image_url, '_blank');
+      }, 1000);
+    }
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `I transformed into ${result.match_name}!`,
+          text: `Check out my AI transformation into ${result.match_name}`,
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.log('Error sharing:', error);
+      }
+    } else {
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+      } catch (error) {
+        alert('Could not copy link');
+      }
+    }
+  };
+
+  const handleCopyImageUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(result.output_image_url);
+      alert('✅ Image URL copied! Paste it into any social media post.');
+    } catch (error) {
+      alert('📋 Copy this URL: ' + result.output_image_url);
+    }
+  };
+
+  const getConfidenceColor = (score: number) => {
+    if (score >= 0.9) return 'text-green-600 bg-green-50';
+    if (score >= 0.8) return 'text-yellow-600 bg-yellow-50';
+    return 'text-red-600 bg-red-50';
+  };
+
+  const getDownloadButtonContent = () => {
+    switch (downloadState) {
+      case 'downloading':
+        return (
+          <>
+            <Loader2 className="animate-spin" size={20} />
+            Downloading...
+          </>
+        );
+      case 'success':
+        return (
+          <>
+            <CheckCircle size={20} />
+            Downloaded!
+          </>
+        );
+      case 'error':
+        return (
+          <>
+            <Download size={20} />
+            Failed - Try Again
+          </>
+        );
+      default:
+        return (
+          <>
+            <Download size={20} />
+            Download Result
+          </>
+        );
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Success Message */}
+      <div className="text-center bg-green-50 border border-green-200 rounded-xl p-6">
+        <div className="flex items-center justify-center mb-4">
+          <Star className="w-8 h-8 text-yellow-500 fill-current" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          Transformation Complete! ✨
+        </h2>
+        <p className="text-gray-600">
+          {result.message}
+        </p>
+        <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-3 ${getConfidenceColor(result.match_score)}`}>
+          {(result.match_score * 100).toFixed(1)}% match confidence
+        </div>
+      </div>
+
+      {/* Image Comparison */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Original Selfie */}
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold text-center text-gray-900">
+            📸 Your Original
+          </h3>
+          <div className="relative overflow-hidden rounded-xl border-2 border-gray-200">
+            <img
+              src={result.original_selfie_url}
+              alt="Your original selfie"
+              className="w-full h-64 object-cover"
+            />
+          </div>
+        </div>
+
+        {/* Historical Figure */}
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold text-center text-gray-900">
+            👑 {result.match_name}
+          </h3>
+          <div className="relative overflow-hidden rounded-xl border-2 border-yellow-300">
+            <img
+              src={result.historical_figure_url}
+              alt={result.match_name}
+              className="w-full h-64 object-cover"
+            />
+          </div>
+        </div>
+
+        {/* Final Result */}
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold text-center text-gray-900">
+            ✨ Your Transformation
+          </h3>
+          <div className="relative overflow-hidden rounded-xl border-2 border-green-300">
+            <img
+              src={result.output_image_url}
+              alt="Face swap result"
+              className="w-full h-64 object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+            <div className="absolute bottom-3 left-3 right-3">
+              <p className="text-white text-sm font-medium bg-black/50 rounded px-2 py-1">
+                You as {result.match_name}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <button
+          onClick={handleDownload}
+          disabled={downloadState === 'downloading'}
+          className={`btn-primary flex items-center justify-center gap-2 ${
+            downloadState === 'success' ? 'bg-green-500 hover:bg-green-600' : 
+            downloadState === 'error' ? 'bg-red-500 hover:bg-red-600' : ''
+          }`}
+        >
+          {getDownloadButtonContent()}
+        </button>
+        
+        <button
+          onClick={handleCopyImageUrl}
+          className="btn-secondary flex items-center justify-center gap-2"
+        >
+          <Copy size={20} />
+          Copy Image Link
+        </button>
+        
+        <button
+          onClick={handleShare}
+          className="btn-secondary flex items-center justify-center gap-2"
+        >
+          <Share2 size={20} />
+          Share Transformation
+        </button>
+
+        <FacebookShareButton 
+          result={result}
+          className="w-full sm:w-auto"
+        />
+        
+        <button
+          onClick={onTryAgain}
+          className="btn-secondary flex items-center justify-center gap-2"
+        >
+          <RefreshCw size={20} />
+          Try Another Photo
+        </button>
+      </div>
+
+      {/* Download Error Message */}
+      {downloadState === 'error' && (
+        <div className="text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+            Download failed. Opening image in new tab instead...
+          </div>
+        </div>
+      )}
+
+      {/* Technical Details */}
+      <div className="bg-gray-50 rounded-xl p-6">
+        <h4 className="font-semibold text-gray-900 mb-3">Transformation Details</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+          <div>
+            <span className="font-medium text-gray-700">Historical Match:</span>
+            <span className="ml-2 text-gray-600">{result.match_name}</span>
+          </div>
+          <div>
+            <span className="font-medium text-gray-700">Confidence Score:</span>
+            <span className="ml-2 text-gray-600">{(result.match_score * 100).toFixed(1)}%</span>
+          </div>
+          <div>
+            <span className="font-medium text-gray-700">Transformation ID:</span>
+            <span className="ml-2 text-gray-600">#{result.id}</span>
+          </div>
+          <div>
+            <span className="font-medium text-gray-700">Processing Time:</span>
+            <span className="ml-2 text-gray-600">~30 seconds</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ResultDisplay;
+
+
+
 # ==== src/components/ErrorDisplay.tsx ====
 
 import { AlertCircle } from 'lucide-react';
@@ -1225,6 +2286,128 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, onTryAgain }) => {
 };
 
 export default ErrorDisplay;
+
+
+
+# ==== src/components/FileUpload.tsx ====
+
+import React, { useCallback, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { Upload, X, Image as ImageIcon } from 'lucide-react';
+
+interface FileUploadProps {
+  onFileSelect: (file: File) => void;
+  selectedFile: File | null;
+  onClear: () => void;
+  disabled?: boolean;
+}
+
+const FileUpload: React.FC<FileUploadProps> = ({
+  onFileSelect,
+  selectedFile,
+  onClear,
+  disabled = false
+}) => {
+  const [preview, setPreview] = useState<string | null>(null);
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (file) {
+      onFileSelect(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  }, [onFileSelect]);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'image/*': ['.jpeg', '.jpg', '.png', '.webp']
+    },
+    maxFiles: 1,
+    disabled
+  });
+
+  const handleClear = () => {
+    onClear();
+    setPreview(null);
+  };
+
+  if (selectedFile && preview) {
+    return (
+      <div className="relative">
+        <div className="relative overflow-hidden rounded-xl border-2 border-gray-200">
+          <img
+            src={preview}
+            alt="Selected selfie"
+            className="w-full h-64 object-cover"
+          />
+          {!disabled && (
+            <button
+              onClick={handleClear}
+              className="absolute top-3 right-3 bg-red-500 hover:bg-red-600 text-white rounded-full p-2 transition-colors"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
+        <div className="mt-3 text-center">
+          <p className="text-sm text-gray-600">
+            📸 <strong>{selectedFile.name}</strong>
+          </p>
+          <p className="text-xs text-gray-500">
+            {(selectedFile.size / 1024 / 1024).toFixed(1)} MB
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      {...getRootProps()}
+      className={`
+        border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200
+        ${isDragActive 
+          ? 'border-blue-500 bg-blue-50' 
+          : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
+        }
+        ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+      `}
+    >
+      <input {...getInputProps()} />
+      
+      <div className="space-y-4">
+        <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+          {isDragActive ? (
+            <Upload className="w-8 h-8 text-blue-500" />
+          ) : (
+            <ImageIcon className="w-8 h-8 text-gray-400" />
+          )}
+        </div>
+        
+        <div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            {isDragActive ? 'Drop your selfie here!' : 'Upload Your Selfie'}
+          </h3>
+          <p className="text-gray-500 mb-4">
+            Drag and drop your photo, or click to browse
+          </p>
+          <div className="text-xs text-gray-400">
+            Supports: JPG, PNG, WebP • Max size: 10MB
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default FileUpload;
 
 
 
@@ -1706,6 +2889,234 @@ const RegistrationGate: React.FC<RegistrationGateProps> = ({
 };
 
 export default RegistrationGate;
+
+
+
+# ==== src/components/FacebookShareButton.tsx ====
+
+import React, { useState } from 'react';
+import { Share2, CheckCircle } from 'lucide-react';
+import type { FaceSwapResult } from '../types/index';
+
+interface FacebookShareButtonProps {
+  result: FaceSwapResult;
+  className?: string;
+}
+
+const FacebookShareButton: React.FC<FacebookShareButtonProps> = ({ 
+  result, 
+  className = "" 
+}) => {
+  const [copyState, setCopyState] = useState<'idle' | 'copying' | 'copied'>('idle');
+
+  const shareText = result.is_randomized 
+    ? `🎭 I just transformed into ${result.match_name} using AI! Check out HistoryFace and see which historical figure you become! ✨`
+    : `🎭 AI matched my face with ${result.match_name} (${(result.match_score * 100).toFixed(0)}% confidence)! Try HistoryFace and discover your historical twin! ✨`;
+
+  const shareUrl = window.location.origin;
+  const fullShareText = `${shareText}\n\n🌐 Try it: ${shareUrl}\n📸 My result: ${result.output_image_url}`;
+
+  const handleShare = async () => {
+    // 🔥 METHOD 1: Try Web Share API first (modern, works great on mobile)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `I transformed into ${result.match_name}!`,
+          text: shareText,
+          url: shareUrl,
+        });
+        return; // Success, we're done
+      } catch (error) {
+        console.log('Web Share cancelled or failed, trying fallback');
+      }
+    }
+
+    // 🔥 METHOD 2: Copy comprehensive text + open Facebook
+    try {
+      setCopyState('copying');
+      await navigator.clipboard.writeText(fullShareText);
+      setCopyState('copied');
+      
+      // Open Facebook after brief delay
+      setTimeout(() => {
+        const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+        window.open(facebookUrl, '_blank', 'width=600,height=500');
+      }, 500);
+      
+      // Reset after 3 seconds
+      setTimeout(() => setCopyState('idle'), 3000);
+      
+    } catch (error) {
+      // 🔥 METHOD 3: Fallback - just open Facebook
+      console.error('Clipboard failed, opening Facebook directly');
+      const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+      window.open(facebookUrl, '_blank');
+    }
+  };
+
+  const getButtonContent = () => {
+    switch (copyState) {
+      case 'copying':
+        return (
+          <>
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+            Preparing...
+          </>
+        );
+      case 'copied':
+        return (
+          <>
+            <CheckCircle size={20} />
+            Text Copied! Opening Facebook...
+          </>
+        );
+      default:
+        return (
+          <>
+            <Share2 size={20} />
+            Share to Facebook
+          </>
+        );
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <button
+        onClick={handleShare}
+        disabled={copyState === 'copying'}
+        className={`flex items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-75 disabled:hover:scale-100 ${className}`}
+      >
+        {getButtonContent()}
+      </button>
+      
+      {copyState === 'copied' && (
+        <div className="text-xs text-gray-600 text-center animate-pulse">
+          📋 Share text copied! Paste it in Facebook and add your image.
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default FacebookShareButton;
+
+
+
+
+# ==== src/components/UploadSection.tsx ====
+
+import { Sparkles } from 'lucide-react';
+import FileUpload from './FileUpload';
+import RandomizeButton from './RandomizeButton';
+import UsageIndicator from './UsageIndicator';
+import HistoricalPreview from './HistoricalPreview';
+import type { UsageData, UsageLimitError } from '../types/index';
+
+interface UploadSectionProps {
+  selectedFile: File | null;
+  onFileSelect: (file: File) => void;
+  onClearFile: () => void;
+  onRegularMatch: () => void;
+  onRandomize: () => void;
+  onShowRegistrationGate: (error: UsageLimitError) => void;
+  canUseMatch: boolean;
+  usage: UsageData | null;
+  usageLoading: boolean;
+}
+
+const UploadSection: React.FC<UploadSectionProps> = ({
+  selectedFile,
+  onFileSelect,
+  onClearFile,
+  onRegularMatch,
+  onRandomize,
+  onShowRegistrationGate,
+  canUseMatch,
+  usage,
+  usageLoading
+}) => {
+  return (
+    <div className="max-w-2xl mx-auto">
+      <div className="text-center mb-8">
+        <div className="flex items-center justify-center mb-4">
+          <div className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-full p-3">
+            <Sparkles className="w-8 h-8 text-white" />
+          </div>
+        </div>
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          AI Historical Face Swap
+        </h1>
+        <p className="text-xl text-gray-600 mb-6">
+          Discover which historical figure you resemble and see yourself transformed!
+        </p>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+          <p className="text-blue-800 text-sm">
+            🎭 Our AI will analyze your facial features and match you with historical figures like Napoleon, Cleopatra, Leonardo da Vinci, and more!
+          </p>
+        </div>
+      </div>
+
+      {/* Usage Indicator */}
+      {!usageLoading && usage && !usage.unlimited && (
+        <UsageIndicator 
+          usage={usage} 
+          onShowRegistrationGate={onShowRegistrationGate} 
+        />
+      )}
+
+      <FileUpload
+        onFileSelect={onFileSelect}
+        selectedFile={selectedFile}
+        onClear={onClearFile}
+      />
+
+      {selectedFile && (
+        <div className="mt-8 space-y-4">
+          {/* Regular Match Button */}
+          <div className="text-center">
+            <button
+              onClick={onRegularMatch}
+              disabled={!canUseMatch}
+              className={`text-lg px-8 py-4 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-3 mx-auto ${
+                canUseMatch
+                  ? 'btn-primary'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              <Sparkles size={20} />
+              🔮 Find My Historical Twin
+            </button>
+            <p className="text-sm text-gray-500 mt-2">
+              AI analyzes your face to find the best match
+            </p>
+          </div>
+
+          {/* OR Divider */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">OR</span>
+            </div>
+          </div>
+
+          {/* Randomize Button */}
+          <RandomizeButton
+            onRandomize={onRandomize}
+            hasSelectedFile={!!selectedFile}
+            usage={usage}
+          />
+        </div>
+      )}
+
+      <HistoricalPreview />
+    </div>
+  );
+};
+
+export default UploadSection;
 
 
 
