@@ -1,564 +1,309 @@
-# HistoryFace - AI Historical Transformation
+Absolutely! Here's the updated README that reflects our current progress and guides future development:
+README.md
+markdown# Matt Freedom Fundraiser v2 🌊
 
-Transform yourself into historical figures using cutting-edge AI face swap technology! Upload a selfie and discover which historical personality you resemble most, then see yourself transformed into iconic figures like Napoleon, Cleopatra, Leonardo da Vinci, and more.
+A simple, focused donation platform built for **Matt Raynor** - a quadriplegic developer whose story of resilience and determination inspires thousands.
 
-## ✨ Features
+## ✅ Current Status (Development Progress)
 
-- **🎭 AI Face Matching**: Advanced facial recognition matches you with historical figures
-- **🎲 Random Transformations**: Get surprised with random historical figure transformations  
-- **⚡ Real-time Processing**: Live progress tracking with detailed status updates
-- **🔐 Google Authentication**: Secure login with Google OAuth
-- **📱 Responsive Design**: Works seamlessly on desktop and mobile
-- **☁️ Cloud Storage**: Images stored securely with Cloudinary
-- **🚀 Background Processing**: Celery-powered async image processing
-- **📊 Processing Analytics**: Detailed logging and monitoring
+### Completed:
+- ✅ **Backend foundation** - Django + Docker setup working on port 8003
+- ✅ **Frontend foundation** - React + TypeScript setup working on port 8004  
+- ✅ **Database models** - Campaign, Donation, CampaignUpdate, EmailTemplate, EmailLog
+- ✅ **Migrations** - All models migrated successfully to PostgreSQL
+- ✅ **Apps created** - accounts, donations, emails apps configured
+- ✅ **Authentication** - Google OAuth + custom user model ready
 
-## 🏗️ Architecture Overview
+### Next Steps:
+- 🚧 **Django Admin setup** - Register models for easy campaign management
+- 🚧 **API endpoints** - Create REST API for frontend integration
+- 🚧 **Stripe integration** - Payment processing and webhooks
+- 🚧 **Email automation** - Thank you emails and update notifications
+- 🚧 **Frontend components** - Donation form, progress bar, video updates
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  React Frontend │    │  Django Backend │    │  External APIs  │
-│                 │    │                 │    │                 │
-│  ┌─────────────┐│    │ ┌─────────────┐ │    │ ┌─────────────┐ │
-│  │   Upload    ││────│ │    API      │ │────│ │ HuggingFace │ │
-│  │   Component ││    │ │  Endpoints  │ │    │ │   Spaces    │ │
-│  └─────────────┘│    │ └─────────────┘ │    │ └─────────────┘ │
-│  ┌─────────────┐│    │ ┌─────────────┐ │    │ ┌─────────────┐ │
-│  │ Auth Modal  ││────│ │ User Models │ │────│ │   Google    │ │
-│  └─────────────┘│    │ └─────────────┘ │    │ │   OAuth     │ │
-│  ┌─────────────┐│    │ ┌─────────────┐ │    │ └─────────────┘ │
-│  │   Results   ││────│ │   Celery    │ │    │ ┌─────────────┐ │
-│  │   Display   ││    │ │   Workers   │ │────│ │ Cloudinary  │ │
-│  └─────────────┘│    │ └─────────────┘ │    │ │   Storage   │ │
-└─────────────────┘    └─────────────────┘    │ └─────────────┘ │
-                                              │ ┌─────────────┐ │
-                       ┌─────────────────┐    │ │   Stripe    │ │
-                       │   Data Storage  │    │ │  Payments   │ │
-                       │                 │    │ └─────────────┘ │
-                       │ ┌─────────────┐ │    └─────────────────┘
-                       │ │ PostgreSQL  │ │
-                       │ │  Database   │ │
-                       │ └─────────────┘ │
-                       │ ┌─────────────┐ │
-                       │ │    Redis    │ │
-                       │ │   Cache     │ │
-                       │ └─────────────┘ │
-                       └─────────────────┘
-```
+## 📋 Instructions for Continued Pair Programming with Claude
 
-## 📋 API Flow Diagram
+When starting a new chat session with Claude:
 
-```
-Frontend Upload → Django API → Face Recognition → HuggingFace → Result Storage
-     │              │              │                 │              │
-     │              │              │                 │              │
-     ▼              ▼              ▼                 ▼              ▼
-┌─────────┐   ┌─────────────┐  ┌──────────┐    ┌──────────┐   ┌──────────┐
-│ User    │   │ Image       │  │ Facial   │    │ AI Face  │   │ Result   │
-│ Uploads │──▶│ Validation  │─▶│ Analysis │───▶│ Swapping │──▶│ Storage  │
-│ Selfie  │   │ & Storage   │  │ & Match  │    │ Process  │   │ & Return │
-└─────────┘   └─────────────┘  └──────────┘    └──────────┘   └──────────┘
-                    │              │                 │              │
-                    ▼              ▼                 ▼              ▼
-              ┌─────────────┐  ┌──────────┐    ┌──────────┐   ┌──────────┐
-              │ Cloudinary  │  │ Database │    │ Celery   │   │ Frontend │
-              │ Image CDN   │  │ Logging  │    │ Queue    │   │ Display  │
-              └─────────────┘  └──────────┘    └──────────┘   └──────────┘
-```
+1. **Attach this README** + your current project code
+2. **State your goal**: "Let's continue building Matt's donation platform. We need to work on [specific feature]"
+3. **Reference this README**: "Check the README for current status and next steps"
 
-## 🛠️ Tech Stack
-
-### Backend
-- **Django 5.1.6** - Web framework
-- **Django REST Framework** - API development
-- **PostgreSQL** - Primary database
-- **Redis** - Caching and Celery broker
-- **Celery** - Background task processing
-- **HuggingFace Spaces** - AI face swap processing
-- **Cloudinary** - Image storage and CDN
-- **face-recognition** - Facial analysis library
-
-### Frontend  
-- **React 19** - UI framework
-- **TypeScript** - Type safety
-- **Vite** - Build tool and dev server
-- **Tailwind CSS** - Styling framework
-- **Axios** - HTTP client
-- **Lucide React** - Icon library
-
-### Infrastructure
-- **Docker** - Containerization
-- **Fly.io** - Backend deployment
-- **Netlify** - Frontend deployment
-- **GitHub Actions** - CI/CD (planned)
-
-## 📁 Project Structure & Apps
-
-### Django Applications
-
-#### **🔐 accounts/**
-Custom user authentication and profile management
-```
-accounts/
-├── models.py          # CustomUser model with email-based auth
-├── views.py           # User registration, login, profile APIs
-├── serializers.py     # User data serialization
-├── social_auth.py     # Google/Facebook OAuth integration
-├── admin.py           # Django admin customization
-└── urls.py            # Authentication API endpoints
-```
-**Purpose**: Handles all user-related functionality including custom email-based authentication, social login (Google/Facebook), and user profile management.
-
-#### **🎭 faceswap/**
-Core face swapping functionality
-```
-faceswap/
-├── models.py          # FaceSwapJob model for tracking operations
-├── views.py           # Face swap API endpoints
-├── serializers.py     # Face swap request/response serialization
-├── huggingface_utils.py # HuggingFace Spaces integration
-├── admin.py           # Admin interface for job monitoring
-└── urls.py            # Face swap API routes
-```
-**Purpose**: Manages the core face swapping operations, integrating with HuggingFace Spaces for AI processing and tracking job status.
-
-#### **🖼️ imagegen/**
-Image generation and processing pipeline
-```
-imagegen/
-├── models.py          # GeneratedImage model and usage tracking
-├── views/
-│   ├── generation_views.py   # Main image processing endpoints
-│   └── management_views.py   # Image management and status
-├── serializers.py     # Image data serialization
-├── face_match.py      # Facial recognition and historical matching
-├── utils.py           # Image compression and optimization
-├── middleware.py      # Usage limit enforcement
-├── admin.py           # Admin interface for image management
-└── urls.py            # Image processing API routes
-```
-**Purpose**: Handles the complete image processing workflow from upload to historical figure matching to final result generation.
-
-#### **💬 chat/** *(Optional/Future)*
-Chat and communication features
-```
-chat/
-├── models.py          # Chat models (planned feature)
-├── views.py           # Chat API endpoints
-└── urls.py            # Chat routes
-```
-**Purpose**: Placeholder for future chat functionality, customer support, or AI chat features.
-
-### **🏢 django_project/**
-Main project configuration
-```
-django_project/
-├── settings/
-│   ├── base.py        # Base configuration
-│   ├── dev.py         # Development settings
-│   └── prod.py        # Production settings
-├── celery.py          # Celery configuration
-├── urls.py            # Main URL routing
-├── wsgi.py            # WSGI application
-└── asgi.py            # ASGI application (for future websockets)
-```
-
-## 📦 Third-Party Packages
-
-### **Core Django Packages**
-```python
-Django==5.1.6                    # Main web framework
-djangorestframework==3.16.0      # REST API framework
-django-environ==0.12.0           # Environment variable management
-django-extensions==4.1           # Useful Django extensions
-django-cors-headers==4.6.0       # CORS handling for frontend
-whitenoise==6.9.0                # Static file serving
-gunicorn==23.0.0                 # WSGI HTTP server
-```
-
-### **Authentication & Security**
-```python
-django-allauth==65.6.0           # Social authentication (Google/Facebook)
-django-crispy-forms==2.3         # Better form rendering
-crispy-bootstrap5==2024.10       # Bootstrap 5 support for forms
-cryptography==44.0.3             # Cryptographic functions
-PyJWT==2.10.1                    # JSON Web Token handling
-```
-
-### **Database & Caching**
-```python
-psycopg2-binary==2.9.10          # PostgreSQL adapter
-dj-database-url==2.1.0           # Database URL parsing
-redis==5.2.0                     # Redis client for caching
-```
-
-### **Background Tasks**
-```python
-celery==5.5.3                    # Distributed task queue
-django-celery-beat==2.8.1        # Periodic task scheduling
-django-celery-results==2.6.0     # Task result storage
-```
-
-### **Cloud Services & APIs**
-```python
-cloudinary==1.44.0               # Cloud image storage
-django-cloudinary-storage==0.3.0 # Django integration for Cloudinary
-openai==1.78.1                   # OpenAI API client
-stripe==12.0.1                   # Payment processing
-httpx==0.28.1                    # Modern HTTP client
-requests==2.32.3                 # HTTP library
-gradio-client==1.10.3            # HuggingFace Spaces client
-```
-
-### **Image Processing & AI**
-```python
-face-recognition==1.3.0          # Facial recognition library
-dlib==20.0.0                     # Machine learning toolkit
-Pillow==10.0.0                   # Python Imaging Library
-opencv-python==4.8.1.78          # Computer vision library
-numpy==2.2.4                     # Numerical computing
-```
-
-### **Authentication Services**
-```python
-google-auth==2.40.3              # Google authentication
-google-auth-oauthlib==1.2.2      # Google OAuth2 client
-google-auth-httplib2==0.2.0      # Google HTTP transport
-```
-
-### **Data Processing**
-```python
-pandas==2.2.3                    # Data manipulation (for analytics)
-openpyxl==3.1.5                  # Excel file handling
-tablib==3.8.0                    # Dataset manipulation
-python-dateutil==2.9.0.post0     # Date/time utilities
-```
-
-### **Development & Testing**
-```python
-# In requirements-dev.txt
-flake8==7.2.0                    # Code linting
-mypy==1.15.0                     # Static type checking
-pytest==8.3.5                    # Testing framework
-pytest-django==4.11.1            # Django integration for pytest
-safety==3.5.0                    # Security vulnerability scanner
-```
-
-### **System Monitoring**
-```python
-psutil==5.9.0                    # System and process utilities
-```
-
-## 🚀 Quick Start
-
-### Prerequisites
-- **Python 3.10+**
-- **Node.js 18+**
-- **Docker & Docker Compose**
-- **Git**
-
-### 1. Clone Repository
+### Current Development Commands:
 ```bash
-git clone https://github.com/yourusername/historyface.git
-cd historyface
-```
+# Start the stack
+docker-compose -p mff-v2 up -d
 
-### 2. Environment Setup
-```bash
-# Backend environment
-cp .env.example .env
-# Edit .env with your configuration (see Environment Variables section)
+# Django commands  
+docker-compose -p mff-v2 exec backend python manage.py shell
+docker-compose -p mff-v2 exec backend python manage.py createsuperuser
+docker-compose -p mff-v2 exec backend python manage.py makemigrations
+docker-compose -p mff-v2 exec backend python manage.py migrate
 
-# Frontend environment  
-cd frontend
-cp .env.example .env.local
-# Edit .env.local with your configuration
-```
+# Access points
+# Backend: http://localhost:8003
+# Frontend: http://localhost:8004
+# Admin: http://localhost:8003/admin
+Matt's Story
+Matt Raynor was a commercial fisherman working the waters off Montauk when a diving accident on April 18, 2019, changed everything. The accident left him paralyzed from the collarbone down as a C5-C6 quadriplegic with no hand function.
+Instead of giving up, Matt taught himself to code from a nursing home - typing one key at a time with a stylus on an old Windows PC. Today, he's a professional full-stack developer, aerial photographer, published author, and inspirational content creator who builds production-grade applications using adaptive tools, voice commands, and AI assistance.
+Learn more about Matt:
 
-### 3. Start with Docker (Recommended)
-```bash
-# From project root
-docker-compose up --build
+🌐 MatthewRaynor.com - Portfolio & Story
+📖 Book: "Before Me After Me" - His memoir
+📸 Photography Portfolio - Aerial drone photography
+🎥 YouTube Tutorials - Coding & life content
+📰 DEV.to Article - His developer journey
 
-# Services will be available at:
-# - Backend: http://localhost:8002
-# - Frontend: http://localhost:5173
-# - PostgreSQL: localhost:5432
-# - Redis: localhost:6379
-```
+Project Purpose
+This platform provides Matt with:
 
-### 4. Manual Setup (Development)
+Simple donation system with any amount ($5 to $5,000+)
+Real-time progress tracking toward specific goals (housing, equipment, etc.)
+Video blog updates to keep supporters engaged
+Professional fundraising alternative to scattered GoFundMe pages
+Automated email communication with supporters
 
-#### Backend Setup
-```bash
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+Current Database Models
+Donations App (donations/models.py)
+pythonCampaign                    # Matt's fundraising goals
+├── title                  # "Help Matt Secure Accessible Housing"
+├── description            # Full campaign story
+├── goal_amount           # Target amount ($25,000)
+├── current_amount        # Auto-calculated from donations
+├── progress_percentage   # Real-time percentage (property)
+├── is_active            # Only one active campaign
+├── featured_image       # Hero image URL (Cloudinary)
+└── start/end dates      # Campaign timeline
 
-# Install dependencies
-pip install -r requirements.txt
+Donation                   # Individual contributions  
+├── campaign              # ForeignKey to Campaign
+├── amount               # Any amount donor chooses
+├── donor_name/email     # Optional contact info
+├── user                 # Optional account link
+├── is_anonymous         # Privacy option
+├── message              # Personal note to Matt
+├── stripe_session_id    # Payment tracking
+├── payment_status       # pending → completed → updates campaign total
+├── receipt_sent         # Email automation tracking
+└── is_recurring         # Future: monthly donations
 
-# Database setup
-python manage.py migrate
-python manage.py createsuperuser
+CampaignUpdate            # Matt's video blog posts
+├── campaign             # ForeignKey to Campaign  
+├── title                # "Week 2: Found Great Apartments!"
+├── content              # Text summary/description
+├── video_url            # YouTube/Vimeo link
+├── video_embed_code     # Full embed HTML
+├── image_url            # Thumbnail or photo
+└── has_video            # Property: bool check
+Emails App (emails/models.py)
+pythonEmailTemplate             # Reusable email designs
+├── name                 # "Thank You Email" 
+├── subject              # "Thank you for supporting Matt!"
+├── html_content         # Email template with {{variables}}
+└── is_active           # Enable/disable templates
 
-# Start services
-python manage.py runserver 8002
-celery -A django_project worker --loglevel=info
-celery -A django_project beat --loglevel=info
-```
+EmailLog                 # Track all emails sent
+├── recipient_email      # Who got the email
+├── subject              # What was sent
+├── donation             # If thank you email (optional)
+├── campaign_update      # If update notification (optional)  
+├── was_sent            # Success/failure tracking
+└── sent_at             # Timestamp
+Accounts App (accounts/models.py)
+pythonCustomUser               # Email-based authentication
+├── email               # Primary login (no username)
+├── first_name          # For personalization
+├── last_name           # For thank you emails  
+├── is_staff           # Admin access
+└── date_joined        # Account creation
+Core Features & Flow
+🎯 Donation Flow
+1. Visitor sees: "Help Matt Get Housing - $5,000 of $25,000 raised"
+2. Clicks "Donate" → Enters amount ($50) → Stripe checkout
+3. Payment succeeds → Webhook updates donation.payment_status = 'completed' 
+4. Campaign.current_amount automatically increases: $5,000 → $5,050
+5. Progress bar updates in real-time
+6. Thank you email sent automatically
+📹 Video Update Flow
+1. Matt creates video blog post via admin panel
+2. CampaignUpdate created with YouTube link + summary
+3. Email task triggered → Notifies all past donors
+4. Donors see update on website → Increased engagement
+📧 Email Automation Flow
+Donation completed → send_thank_you_email.delay(donation_id)
+Video update posted → send_update_notification.delay(update_id)
+Both create EmailLog records for tracking
+Tech Stack
+Backend
 
-#### Frontend Setup  
-```bash
-cd frontend
-npm install
-npm run dev
-```
+Framework: Django 5.1.6 + Django REST Framework
+Database: PostgreSQL 16 (port 5433)
+Task Queue: Celery + Redis (port 6380)
+Payments: Stripe Checkout + Webhooks
+Email: SendGrid with HTML templates
+Storage: Cloudinary for images/videos
+Containerization: Docker + Docker Compose
 
-## 🔧 Environment Variables
+Frontend
 
-### Backend (.env)
-```bash
-# Django Settings
+Framework: React 19 + TypeScript
+Build Tool: Vite
+Styling: Tailwind CSS
+Icons: Lucide React
+HTTP Client: Axios (API: DonationAPI class)
+
+Deployment
+
+Backend: Fly.io with Docker containers
+Frontend: Netlify with automatic deployments
+Database: PostgreSQL on Fly.io
+
+Development Setup
+Prerequisites
+
+Docker & Docker Compose
+Node.js 18+ (for frontend development)
+Git
+
+Quick Start
+bash# 1. Clone and start services
+git clone <repository-url>
+cd matt-freedom-fundraiser-v2
+docker-compose -p mff-v2 up -d
+
+# 2. Verify services running
+docker-compose -p mff-v2 ps
+
+# 3. Create superuser (if needed)
+docker-compose -p mff-v2 exec backend python manage.py createsuperuser
+
+# 4. Start frontend
+cd frontend && npm install && npm run dev
+Access Points
+
+Backend API: http://localhost:8003
+Frontend: http://localhost:8004
+Admin Panel: http://localhost:8003/admin
+Database: PostgreSQL on port 5433
+Redis: Port 6380
+
+Environment Variables
+Backend (.env)
+bash# Django
+DJANGO_SECRET_KEY=your-secret-key
 DEBUG=True
-DJANGO_SECRET_KEY=your-secret-key-here
-DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+DATABASE_URL=postgresql://postgres:postgres_password@db:5432/donations_db
 
-# Database
-DATABASE_URL=postgresql://postgres:postgres_password@db:5432/faceswap_db
+# Stripe payments
+STRIPE_SECRET_KEY=sk_test_your_key
+STRIPE_PUBLISHABLE_KEY=pk_test_your_key
+STRIPE_WEBHOOK_SECRET=whsec_your_secret
 
-# Redis & Celery
-CELERY_BROKER_URL=redis://redis:6379/0
-CELERY_RESULT_BACKEND=redis://redis:6379/0
+# Email automation
+SENDGRID_API_KEY=your_sendgrid_key
+DEFAULT_FROM_EMAIL=donations@mattfreedomfundraiser.com
 
-# Cloud Storage
+# Media storage
 CLOUDINARY_URL=cloudinary://api_key:api_secret@cloud_name
 
-# AI Services
-HUGGINGFACE_SPACE_NAME=your-space-name
-HUGGINGFACE_API_TOKEN=hf_your_token_here
+# Social auth (optional)
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_secret
+Frontend (.env)
+bashVITE_API_BASE_URL=http://localhost:8003
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+Next Development Priorities
+1. Django Admin Setup (High Priority)
+python# donations/admin.py - Register models for easy management
+@admin.register(Campaign)
+class CampaignAdmin(admin.ModelAdmin):
+    list_display = ['title', 'current_amount', 'goal_amount', 'progress_percentage', 'is_active']
+    readonly_fields = ['current_amount', 'progress_percentage']
+2. API Endpoints (High Priority)
+python# donations/views.py - REST API for frontend
+GET  /api/donations/campaign/     # Current active campaign
+POST /api/donations/create/       # Create donation + Stripe session
+GET  /api/donations/recent/       # Recent donations feed
+GET  /api/donations/updates/      # Campaign video updates
+POST /api/stripe/webhook/         # Handle payment completion
+3. Stripe Integration (High Priority)
+python# donations/stripe_views.py - Payment processing
+def create_donation_session(amount, donor_info):
+    # Create Stripe checkout session
+    # Save donation with status='pending'
+    # Return checkout URL to frontend
+    
+def stripe_webhook(request):
+    # Handle payment_intent.succeeded
+    # Update donation.payment_status = 'completed'
+    # Trigger thank you email
+4. Email Automation (Medium Priority)
+python# emails/tasks.py - Celery tasks
+@shared_task
+def send_thank_you_email(donation_id):
+    # Get donation, render template, send via SendGrid
+    
+@shared_task  
+def send_update_notification(update_id):
+    # Get all donor emails, send batch notification
+5. Frontend Components (Medium Priority)
+typescript// Components needed:
+- DonationForm.tsx      // Amount input + Stripe checkout
+- CampaignProgress.tsx  // Progress bar + stats
+- VideoUpdates.tsx      // List of Matt's video blogs
+- DonorWall.tsx        // Recent supporters (optional)
+Troubleshooting
+Migration Issues
+bash# If migrations fail, reset and recreate:
+docker-compose -p mff-v2 exec backend find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
 
-# Authentication
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
+# Create in correct order:
+docker-compose -p mff-v2 exec backend python manage.py makemigrations accounts
+docker-compose -p mff-v2 exec backend python manage.py makemigrations donations  
+docker-compose -p mff-v2 exec backend python manage.py makemigrations emails
+docker-compose -p mff-v2 exec backend python manage.py migrate
+Common Commands
+bash# View logs
+docker-compose -p mff-v2 logs -f backend
 
-# Optional: Payment & Social
-STRIPE_SECRET_KEY=sk_test_your_stripe_key
-STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_key
-FACEBOOK_CLIENT_ID=your-facebook-app-id
-FACEBOOK_CLIENT_SECRET=your-facebook-secret
-```
+# Database shell
+docker-compose -p mff-v2 exec backend python manage.py shell
 
-### Frontend (.env.local)
-```bash
-# API Configuration
-VITE_API_BASE_URL=http://127.0.0.1:8002
+# PostgreSQL direct access
+docker-compose -p mff-v2 exec db psql -U postgres -d donations_db
+Project Structure
+matt-freedom-fundraiser-v2/
+├── backend/
+│   ├── accounts/           # ✅ Custom user model (migrated)
+│   ├── donations/          # ✅ Core models (migrated)
+│   │   ├── models.py      # Campaign, Donation, CampaignUpdate
+│   │   ├── admin.py       # 🚧 TODO: Register models
+│   │   ├── views.py       # 🚧 TODO: API endpoints
+│   │   └── urls.py        # 🚧 TODO: URL routing
+│   ├── emails/            # ✅ Email automation (migrated)
+│   │   ├── models.py      # EmailTemplate, EmailLog  
+│   │   ├── tasks.py       # 🚧 TODO: Celery email tasks
+│   │   └── templates/     # 🚧 TODO: Email HTML templates
+│   ├── django_project/    # ✅ Settings configured
+│   └── requirements.txt   # ✅ All dependencies
+├── frontend/              # ✅ Basic React setup
+│   ├── src/
+│   │   ├── components/    # 🚧 TODO: Donation components
+│   │   ├── hooks/         # ✅ useAuth hook exists
+│   │   ├── services/      # ✅ DonationAPI class ready
+│   │   └── types/         # ✅ TypeScript definitions
+│   └── package.json       # ✅ Dependencies installed
+└── README.md              # ✅ This file - updated with current status
+Support Matt's Work
 
-# Authentication
-VITE_GOOGLE_CLIENT_ID=your-google-client-id
-VITE_FACEBOOK_APP_ID=your-facebook-app-id
-```
+💝 Make a donation (coming soon!)
+📚 Buy his book "Before Me After Me"
+🎨 Purchase his photography prints
+📢 Share his story with others
+⭐ Star this repository
 
-## 📖 Usage
 
-### 1. Upload Your Selfie
-- Drag and drop or click to select an image
-- Supports JPG, PNG, WebP formats
-- Maximum file size: 10MB
-
-### 2. Choose Processing Mode
-- **🔮 Find My Historical Twin**: AI analyzes your features to find the best match
-- **🎲 Surprise Me**: Get randomly matched with any historical figure
-
-### 3. Watch the Magic
-- Real-time progress tracking through 4 stages:
-  - 📤 Uploading your image securely
-  - 🔍 AI analyzing facial features  
-  - 👥 Matching with historical figures
-  - ✨ Creating your transformation
-
-### 4. Share Your Results
-- Download high-quality result images
-- Share directly to social media
-- Copy image links for posting
-
-## 🔌 API Documentation
-
-### Authentication
-```bash
-# Google OAuth
-POST /api/accounts/auth/google/
-Content-Type: application/json
-{
-  "credential": "google_jwt_token",
-  "user_info": { "email": "user@example.com", ... }
-}
-
-# Get user profile
-GET /api/accounts/me/
-Authorization: Token your_auth_token
-```
-
-### Image Processing
-```bash
-# Generate face swap
-POST /api/imagegen/generate/
-Authorization: Token your_auth_token
-Content-Type: multipart/form-data
-selfie: [image_file]
-
-# Random transformation
-POST /api/imagegen/randomize/
-Authorization: Token your_auth_token  
-Content-Type: multipart/form-data
-selfie: [image_file]
-
-# Check processing status
-GET /api/imagegen/status/{job_id}/
-Authorization: Token your_auth_token
-```
-
-### Response Format
-```json
-{
-  "id": 123,
-  "match_name": "Napoleon Bonaparte",
-  "match_score": 0.87,
-  "message": "Successfully transformed you into Napoleon Bonaparte!",
-  "output_image_url": "https://cloudinary.com/...",
-  "original_selfie_url": "https://cloudinary.com/...",
-  "historical_figure_url": "https://cloudinary.com/...",
-  "created_at": "2024-01-15T10:30:00Z"
-}
-```
-
-## 🚀 Deployment
-
-### Backend (Fly.io)
-```bash
-# Install Fly CLI
-curl -L https://fly.io/install.sh | sh
-
-# Deploy
-fly deploy
-
-# Set environment variables
-fly secrets set DJANGO_SECRET_KEY=your-secret
-fly secrets set DATABASE_URL=your-db-url
-fly secrets set CLOUDINARY_URL=your-cloudinary-url
-```
-
-### Frontend (Netlify)
-```bash
-# Build for production
-npm run build
-
-# Deploy to Netlify (via CLI or drag-and-drop)
-npx netlify deploy --prod --dir=dist
-```
-
-## 🧪 Development
-
-### Running Tests
-```bash
-# Backend tests
-python manage.py test
-
-# Frontend tests  
-npm run test
-
-# End-to-end tests
-npm run test:e2e
-```
-
-### Code Quality
-```bash
-# Backend formatting
-black .
-isort .
-flake8 .
-
-# Frontend formatting
-npm run lint
-npm run format
-```
-
-### Database Migrations
-```bash
-# Create migration
-python manage.py makemigrations
-
-# Apply migrations
-python manage.py migrate
-
-# Reset database (development only)
-python manage.py flush
-```
-
-## 📊 Monitoring & Logging
-
-### Application Logs
-```bash
-# View Django logs
-docker-compose logs backend
-
-# View Celery worker logs
-docker-compose logs celery_worker
-
-# View frontend logs
-docker-compose logs frontend
-```
-
-### Performance Monitoring
-- Backend: Django Debug Toolbar (development)
-- Frontend: Vite bundle analyzer
-- Database: PostgreSQL query logging
-- Celery: Flower monitoring (planned)
-
-## 🤝 Contributing
-
-1. **Fork the repository**
-2. **Create feature branch**: `git checkout -b feature/amazing-feature`
-3. **Commit changes**: `git commit -m 'Add amazing feature'`
-4. **Push to branch**: `git push origin feature/amazing-feature`  
-5. **Open Pull Request**
-
-### Development Guidelines
-- Follow existing code style (use Black/Prettier)
-- Write tests for new features
-- Update documentation as needed
-- Keep commits atomic and well-described
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **HuggingFace** - AI model hosting and inference
-- **Cloudinary** - Image storage and optimization
-- **Historical Figure Images** - Various public domain sources
-- **Open Source Libraries** - All the amazing tools that make this possible
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/yourusername/historyface/issues)
-- **Documentation**: [Wiki](https://github.com/yourusername/historyface/wiki)
-- **Email**: support@historyface.com
-
-## 🗺️ Roadmap
-
-- [ ] **Enhanced AI Models**: More accurate face matching
-- [ ] **Historical Figure Expansion**: Add more personalities 
-- [ ] **Video Processing**: Transform videos, not just images
-- [ ] **Mobile App**: Native iOS/Android applications
-- [ ] **Social Features**: Share galleries, user profiles
-- [ ] **API Rate Limiting**: Advanced usage controls
-- [ ] **Analytics Dashboard**: Processing statistics
-- [ ] **Multi-language Support**: Internationalization
-
----
-
-**Built with ❤️ using Django, React, and AI**
-
-Transform into history. Discover your past. Share your story.
+Development Philosophy: Keep it simple. Focus on core donation functionality. Let Matt's story and video updates drive engagement.
+For Claude: This README is the single source of truth. When continuing development, always reference current status and next priorities listed above.
+Built with ❤️ for an incredible journey of resilience and determination.
