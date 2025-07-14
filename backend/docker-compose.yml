@@ -30,13 +30,13 @@ services:
       timeout: 5s
       retries: 5
 
-  # Django Backend
+  # Django Backend - BOUND TO 8003
   backend:
     build: 
       context: .
       dockerfile: Dockerfile.dev
     ports:
-      - "8000:8000"
+      - "8003:8000"  # 🔥 CHANGED: External port 8003, internal port 8000
     environment:
       - DEBUG=True
       - DJANGO_SETTINGS_MODULE=django_project.settings.dev
@@ -64,8 +64,8 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       
-      # Frontend URL for CORS
-      - FRONTEND_URL=http://localhost:5173
+      # Frontend URL for CORS - UPDATED FOR PORT 8003
+      - FRONTEND_URL=http://localhost:8004
     volumes:
       - .:/app
       - static_volume:/app/staticfiles
@@ -76,6 +76,24 @@ services:
       redis:
         condition: service_healthy
     command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+  # React Frontend - BOUND TO 8004 for development
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8004:5173"  # 🔥 NEW: Frontend on 8004 to work with backend on 8003
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8003
+      - VITE_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - VITE_FACEBOOK_APP_ID=${FACEBOOK_APP_ID}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 
   # Celery Worker
   celery_worker:
