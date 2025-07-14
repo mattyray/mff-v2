@@ -50,3 +50,5 @@ pytz==2025.2
 # PDF Generation for receipts
 reportlab==4.2.5
 WeasyPrint==64.1
+
+cryptography==42.0.8  # 🔥 ADD THIS LINE
