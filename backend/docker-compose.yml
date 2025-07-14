@@ -1,0 +1,136 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: donations_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for Celery
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Django Backend
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - DJANGO_SETTINGS_MODULE=django_project.settings.dev
+      - DATABASE_URL=postgresql://postgres:postgres_password@db:5432/donations_db
+      - DJANGO_SECRET_KEY=dev-secret-key-change-in-production
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,backend,0.0.0.0
+      
+      # Storage
+      - CLOUDINARY_URL=${CLOUDINARY_URL}
+      
+      # Stripe
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      
+      # Email (SendGrid or AWS SES)
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-donations@mattfreedomfundraiser.com}
+      
+      # Google OAuth (optional for admin)
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      
+      # Celery
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      
+      # Frontend URL for CORS
+      - FRONTEND_URL=http://localhost:5173
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+  # Celery Worker
+  celery_worker:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      - DEBUG=True
+      - DJANGO_SETTINGS_MODULE=django_project.settings.dev
+      - DATABASE_URL=postgresql://postgres:postgres_password@db:5432/donations_db
+      - DJANGO_SECRET_KEY=dev-secret-key-change-in-production
+      - CLOUDINARY_URL=${CLOUDINARY_URL}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-donations@mattfreedomfundraiser.com}
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - IS_CELERY_WORKER=true
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["celery", "-A", "django_project", "worker", "--loglevel=info"]
+
+  # Celery Beat
+  celery_beat:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      - DEBUG=True
+      - DJANGO_SETTINGS_MODULE=django_project.settings.dev
+      - DATABASE_URL=postgresql://postgres:postgres_password@db:5432/donations_db
+      - DJANGO_SECRET_KEY=dev-secret-key-change-in-production
+      - CLOUDINARY_URL=${CLOUDINARY_URL}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-donations@mattfreedomfundraiser.com}
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - IS_CELERY_WORKER=true
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["celery", "-A", "django_project", "beat", "--loglevel=info", "--scheduler", "django_celery_beat.schedulers:DatabaseScheduler"]
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+  redis_data:
