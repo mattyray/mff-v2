@@ -28,9 +28,11 @@
 │   │   ├── celery.py
 │   │   ├── urls.py
 │   │   └── wsgi.py
+│   ├── frontend
 │   ├── scripts
 │   │   ├── back_export.py
-│   │   └── clean_backend_snapshot.txt
+│   │   ├── donation_platform_snapshot_20250714_160258.txt
+│   │   └── donation_platform_snapshot_20250714_164932.txt
 │   ├── templates
 │   │   ├── account
 │   │   │   ├── dashboard.html
@@ -50,11 +52,9 @@
 │   │   └── base.html
 │   ├── uploads
 │   │   └── selfies
-│   │       └── test_selfie.jpg
 │   ├── .dockerignore
 │   ├── .env.example
 │   ├── .gitignore
-│   ├── cookies.txt
 │   ├── docker-compose.yml
 │   ├── Dockerfile
 │   ├── Dockerfile.dev
@@ -111,4 +111,4 @@
 ├── project_structure.txt
 └── README.md
 
-22 directories, 90 files
+23 directories, 89 files

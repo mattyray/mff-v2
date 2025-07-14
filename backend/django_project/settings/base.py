@@ -106,9 +106,9 @@ if IS_CELERY:
         
         # Donation platform apps
         'accounts.apps.AccountsConfig',
-        'donations.apps.DonationsConfig',
-        'profiles.apps.ProfilesConfig',
-        'emails.apps.EmailsConfig',
+       # 'donations.apps.DonationsConfig',
+        #'profiles.apps.ProfilesConfig',
+        #'emails.apps.EmailsConfig',
         
         # Celery
         'django_celery_beat',
@@ -140,12 +140,14 @@ else:
         'django.contrib.staticfiles',
         'cloudinary_storage',
         'cloudinary',
+        
+        'accounts.apps.AccountsConfig',
+
 
         # Donation platform apps
-        'accounts.apps.AccountsConfig',
-        'donations.apps.DonationsConfig',
-        'profiles.apps.ProfilesConfig', 
-        'emails.apps.EmailsConfig',
+      #  'donations.apps.DonationsConfig',
+       # 'profiles.apps.ProfilesConfig', 
+        #'emails.apps.EmailsConfig',
 
         # Auth (optional - remove if not using Google auth)
         'django.contrib.sites',
