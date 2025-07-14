@@ -1,20 +1,23 @@
-# backend/django_project/settings/dev.py
 from .base import *
 
 DEBUG = True
 
-# Database for local development
+# Fixed database name!
 DATABASES = {
-    "default": env.db_url("DATABASE_URL", default="postgresql://postgres:postgres_password@db:5432/faceswap_db")
+    "default": env.db_url("DATABASE_URL", default="postgresql://postgres:postgres_password@db:5432/donations_db")
 }
 
-# Add localhost to allowed hosts
-ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[
-    "localhost", "127.0.0.1", "0.0.0.0", "backend"
-])
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0", "backend"]
 
-# CORS settings for local development
+# Fixed CORS ports!
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Vite dev server
-    "http://127.0.0.1:5173",
+    "http://localhost:8004",  # Frontend on 8004
+    "http://127.0.0.1:8004",
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8004",
+    "http://127.0.0.1:8004",
+]
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

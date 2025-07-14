@@ -1,38 +1,26 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
 from django.http import JsonResponse
 
 def api_root(request):
     return JsonResponse({
-        "message": "MattFreedomFundraiser API",
-        "version": "1.0",
+        "message": "Matt Freedom Fundraiser API v2",
         "endpoints": {
-            "campaigns": "/api/campaigns/",
-            "donations": "/api/donations/",
-            "profile": "/api/profile/",
+            "accounts": "/api/accounts/",
+            "admin": "/admin/",
         }
     })
 
 def health_check(request):
-    return JsonResponse({"status": "healthy", "service": "donations-api"})
+    return JsonResponse({"status": "healthy", "service": "matt-freedom-fundraiser"})
 
 urlpatterns = [
     path("", api_root),
-    path("health/", health_check, name="health-check"),
+    path("health/", health_check),
     path("admin/", admin.site.urls),
-    
-    # API endpoints
     path("api/accounts/", include("accounts.urls")),
-    path("api/campaigns/", include("donations.urls_campaigns")),
-    path("api/donations/", include("donations.urls_donations")),
-    path("api/profile/", include("profiles.urls")),
-    
-    # Stripe webhook
-    path("api/stripe/webhook/", include("donations.urls_stripe")),
+    # Add these as we create the URL files:
+    # path("api/donations/", include("donations.urls")),
+    # path("api/campaigns/", include("donations.urls_campaigns")),  
+    # path("api/profile/", include("profiles.urls")),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
