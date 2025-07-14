@@ -1,52 +1,45 @@
-export interface FaceSwapResult {
+// Donation Platform Types
+
+export interface Campaign {
   id: number;
-  match_name: string;
-  match_score: number;
-  message: string;
-  output_image_url: string;
-  original_selfie_url: string;
-  historical_figure_url: string;
-  is_randomized?: boolean;
-  usage?: UsageData | null;
+  title: string;
+  description: string;
+  goal_amount: number;
+  current_amount: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DonationTier {
+  id: number;
+  name: string;
+  amount: number;
+  description: string;
+  campaign: number;
+}
+
+export interface Donation {
+  id: number;
+  amount: number;
+  donor_name?: string;
+  donor_email?: string;
+  message?: string;
+  is_anonymous: boolean;
+  created_at: string;
+  campaign: number;
+  tier?: DonationTier;
+}
+
+export interface User {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
 }
 
 export interface ApiError {
   error: string;
   message?: string;
-  feature_type?: 'match' | 'randomize';
-  usage?: UsageData;
-  registration_required?: boolean;
-}
-
-export type ProgressStep = 'uploading' | 'analyzing' | 'matching' | 'swapping' | 'complete';
-
-export interface UploadProgress {
-  step: ProgressStep;
-  progress: number;
-  message: string;
-}
-
-export interface HistoricalFigure {
-  name: string;
-  description: string;
-  imageUrl: string;
-  confidence?: number;
-}
-
-// NEW - Usage tracking types
-export interface UsageData {
-  matches_used: number;
-  matches_limit: number;
-  randomizes_used: number;
-  randomizes_limit: number;
-  can_match: boolean;
-  can_randomize: boolean;
-  is_limited: boolean;
-  unlimited?: boolean;
-  user_authenticated?: boolean;
-}
-
-export interface UsageLimitError extends ApiError {
-  usage: UsageData;
-  registration_required: true;
+  details?: any;
 }

@@ -1,19 +1,19 @@
 import axios from 'axios';
-import type { FaceSwapResult, ApiError, UsageData, UsageLimitError } from '../types/index';
+import type { Campaign, Donation, DonationTier, User, ApiError } from '../types/index';
 
 // Read from environment variables
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8002';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8003';
 
 console.log('🔧 Environment check:');
 console.log('  - API_BASE_URL:', API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 300000,
-  withCredentials: true, // Include cookies for session management
+  timeout: 30000,
+  withCredentials: true,
 });
 
-// 🔥 FIXED: Add request interceptor to include auth token in headers
+// Add request interceptor to include auth token in headers
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('authToken');
@@ -38,81 +38,52 @@ api.interceptors.response.use(
   }
 );
 
-export class FaceSwapAPI {
-  static async generateFaceSwap(
-    selfieFile: File,
-    onProgress?: (progress: number) => void
-  ): Promise<FaceSwapResult> {
-    const formData = new FormData();
-    formData.append('selfie', selfieFile);
-
+export class DonationAPI {
+  // Campaign endpoints
+  static async getCampaign(): Promise<Campaign> {
     try {
-      const response = await api.post<FaceSwapResult>('/api/imagegen/generate/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total && onProgress) {
-            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            onProgress(progress);
-          }
-        },
-      });
+      const response = await api.get<Campaign>('/api/donations/campaign/');
       return response.data;
     } catch (error) {
       throw this.handleApiError(error);
     }
   }
 
-  static async randomizeFaceSwap(
-    selfieFile: File,
-    onProgress?: (progress: number) => void
-  ): Promise<FaceSwapResult> {
-    const formData = new FormData();
-    formData.append('selfie', selfieFile);
-
+  static async getDonationTiers(): Promise<DonationTier[]> {
     try {
-      const response = await api.post<FaceSwapResult>('/api/imagegen/randomize/', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total && onProgress) {
-            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            onProgress(progress);
-          }
-        },
-      });
+      const response = await api.get<DonationTier[]>('/api/donations/tiers/');
       return response.data;
     } catch (error) {
       throw this.handleApiError(error);
     }
   }
 
-  static async getUsageStatus(): Promise<UsageData> {
+  static async createDonation(donationData: {
+    amount: number;
+    donor_name?: string;
+    donor_email?: string;
+    message?: string;
+    is_anonymous: boolean;
+    tier_id?: number;
+  }): Promise<{ checkout_url: string }> {
     try {
-      const response = await api.get<UsageData>('/api/imagegen/usage/');
+      const response = await api.post('/api/donations/create/', donationData);
       return response.data;
     } catch (error) {
-      throw new Error('Failed to check usage status');
+      throw this.handleApiError(error);
     }
   }
 
-  static async getImageStatus(id: number): Promise<FaceSwapResult> {
+  static async getRecentDonations(): Promise<Donation[]> {
     try {
-      const response = await api.get<FaceSwapResult>(`/api/imagegen/status/${id}/`);
+      const response = await api.get<Donation[]>('/api/donations/recent/');
       return response.data;
     } catch (error) {
-      throw new Error('Failed to check image status');
+      throw this.handleApiError(error);
     }
   }
 
-  static async testConnection(): Promise<boolean> {
-    try {
-      await api.get('/health/');
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
-  // 🔥 NEW: Google Authentication
+  // Auth endpoints (keep existing)
   static async googleAuth(credential: string, userInfo: any) {
     try {
       console.log('🔑 Sending Google auth request...');
@@ -128,24 +99,7 @@ export class FaceSwapAPI {
     }
   }
 
-  // 🔥 NEW: Facebook Authentication
-  static async facebookAuth(accessToken: string, userInfo: any) {
-    try {
-      console.log('🔑 Sending Facebook auth request...');
-      const response = await api.post('/api/accounts/auth/facebook/', { 
-        access_token: accessToken,
-        user_info: userInfo
-      });
-      console.log('✅ Facebook auth successful:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('❌ Facebook auth failed:', error);
-      throw this.handleApiError(error);
-    }
-  }
-
-  // 🔥 NEW: Refresh User Session
-  static async refreshUserSession() {
+  static async refreshUserSession(): Promise<User> {
     try {
       const response = await api.get('/api/accounts/me/');
       return response.data;
@@ -154,45 +108,23 @@ export class FaceSwapAPI {
     }
   }
 
-  // 🔥 NEW: Email/Password Signup (for future use)
-  static async signUp(email: string, password: string, firstName?: string, lastName?: string) {
-    try {
-      const response = await api.post('/api/accounts/signup/', {
-        email,
-        password,
-        first_name: firstName || '',
-        last_name: lastName || ''
-      });
-      return response.data;
-    } catch (error) {
-      throw this.handleApiError(error);
-    }
-  }
-
-  // 🔥 NEW: Email/Password Login (for future use)
-  static async login(email: string, password: string) {
-    try {
-      const response = await api.post('/api/accounts/login/', {
-        email,
-        password
-      });
-      return response.data;
-    } catch (error) {
-      throw this.handleApiError(error);
-    }
-  }
-
-  // 🔥 NEW: Logout
   static async logout() {
     try {
       await api.post('/api/accounts/logout/');
-      // Clear local storage
       localStorage.removeItem('authToken');
       return true;
     } catch (error) {
       console.error('Logout error:', error);
-      // Clear local storage even if API call fails
       localStorage.removeItem('authToken');
+      return false;
+    }
+  }
+
+  static async testConnection(): Promise<boolean> {
+    try {
+      await api.get('/health/');
+      return true;
+    } catch (error) {
       return false;
     }
   }
@@ -203,16 +135,6 @@ export class FaceSwapAPI {
         throw new Error('Cannot connect to server. Make sure the backend is running.');
       }
       
-      if (error.response?.status === 429) {
-        const errorData = error.response.data as UsageLimitError;
-        const usageLimitError = new Error(errorData.message || 'Usage limit reached') as Error & UsageLimitError;
-        usageLimitError.usage = errorData.usage;
-        usageLimitError.registration_required = errorData.registration_required;
-        usageLimitError.feature_type = errorData.feature_type;
-        throw usageLimitError;
-      }
-      
-      // Handle authentication errors
       if (error.response?.status === 401) {
         const errorData = error.response.data as ApiError;
         throw new Error(errorData.error || 'Authentication failed');

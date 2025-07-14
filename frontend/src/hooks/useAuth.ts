@@ -1,6 +1,5 @@
-// src/hooks/useAuth.ts
 import { useState, useEffect, useCallback } from 'react';
-import { FaceSwapAPI } from '../services/api';
+import { DonationAPI } from '../services/api';
 
 interface User {
   id: number;
@@ -37,7 +36,7 @@ export const useAuth = (): UseAuthReturn => {
       }
 
       // Verify token is still valid by getting user info
-      const userData = await FaceSwapAPI.refreshUserSession();
+      const userData = await DonationAPI.refreshUserSession();
       setUser(userData);
     } catch (err) {
       console.log('Auth check failed:', err);
@@ -59,7 +58,7 @@ export const useAuth = (): UseAuthReturn => {
 
   const logout = useCallback(async () => {
     try {
-      await FaceSwapAPI.logout();
+      await DonationAPI.logout();
     } catch (err) {
       console.error('Logout API call failed:', err);
       // Continue with logout even if API call fails
