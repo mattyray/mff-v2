@@ -1,5 +1,13 @@
 import axios from 'axios';
-import type { Campaign, Donation, CampaignUpdate, User, ApiError } from '../types/index';
+import type { 
+  Campaign, 
+  Donation, 
+  CampaignUpdate, 
+  User, 
+  ApiError,
+  CreateDonationRequest,
+  CreateDonationResponse
+} from '../types/index';
 
 // Read from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8003';
@@ -67,13 +75,7 @@ export class DonationAPI {
     }
   }
 
-  static async createDonation(donationData: {
-    amount: number;
-    donor_name?: string;
-    donor_email?: string;
-    message?: string;
-    is_anonymous: boolean;
-  }): Promise<{ checkout_url: string; donation_id: number }> {
+  static async createDonation(donationData: CreateDonationRequest): Promise<CreateDonationResponse> {
     try {
       const response = await api.post('/api/donations/create/', donationData);
       return response.data;
