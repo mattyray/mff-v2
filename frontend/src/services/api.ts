@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Campaign, Donation, DonationTier, User, ApiError } from '../types/index';
+import type { Campaign, Donation, CampaignUpdate, User, ApiError } from '../types/index';
 
 // Read from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8003';
@@ -49,25 +49,9 @@ export class DonationAPI {
     }
   }
 
-  static async getDonationTiers(): Promise<DonationTier[]> {
+  static async getCampaignUpdates(): Promise<CampaignUpdate[]> {
     try {
-      const response = await api.get<DonationTier[]>('/api/donations/tiers/');
-      return response.data;
-    } catch (error) {
-      throw this.handleApiError(error);
-    }
-  }
-
-  static async createDonation(donationData: {
-    amount: number;
-    donor_name?: string;
-    donor_email?: string;
-    message?: string;
-    is_anonymous: boolean;
-    tier_id?: number;
-  }): Promise<{ checkout_url: string }> {
-    try {
-      const response = await api.post('/api/donations/create/', donationData);
+      const response = await api.get<CampaignUpdate[]>('/api/donations/updates/');
       return response.data;
     } catch (error) {
       throw this.handleApiError(error);
@@ -83,7 +67,22 @@ export class DonationAPI {
     }
   }
 
-  // Auth endpoints (keep existing)
+  static async createDonation(donationData: {
+    amount: number;
+    donor_name?: string;
+    donor_email?: string;
+    message?: string;
+    is_anonymous: boolean;
+  }): Promise<{ checkout_url: string; donation_id: number }> {
+    try {
+      const response = await api.post('/api/donations/create/', donationData);
+      return response.data;
+    } catch (error) {
+      throw this.handleApiError(error);
+    }
+  }
+
+  // Auth endpoints
   static async googleAuth(credential: string, userInfo: any) {
     try {
       console.log('🔑 Sending Google auth request...');
@@ -99,9 +98,50 @@ export class DonationAPI {
     }
   }
 
+  static async facebookAuth(accessToken: string, userInfo: any) {
+    try {
+      console.log('🔑 Sending Facebook auth request...');
+      const response = await api.post('/api/accounts/auth/facebook/', { 
+        access_token: accessToken,
+        user_info: userInfo
+      });
+      console.log('✅ Facebook auth successful:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Facebook auth failed:', error);
+      throw this.handleApiError(error);
+    }
+  }
+
   static async refreshUserSession(): Promise<User> {
     try {
       const response = await api.get('/api/accounts/me/');
+      return response.data;
+    } catch (error) {
+      throw this.handleApiError(error);
+    }
+  }
+
+  static async signUp(email: string, password: string, firstName?: string, lastName?: string) {
+    try {
+      const response = await api.post('/api/accounts/signup/', {
+        email,
+        password,
+        first_name: firstName || '',
+        last_name: lastName || ''
+      });
+      return response.data;
+    } catch (error) {
+      throw this.handleApiError(error);
+    }
+  }
+
+  static async login(email: string, password: string) {
+    try {
+      const response = await api.post('/api/accounts/login/', {
+        email,
+        password
+      });
       return response.data;
     } catch (error) {
       throw this.handleApiError(error);
