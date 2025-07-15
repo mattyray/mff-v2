@@ -145,9 +145,9 @@ def collect_files():
 
 def write_snapshot(files):
     """Write the clean snapshot with better organization"""
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # 🔥 FIXED: Use static filename instead of timestamp
     os.makedirs("scripts", exist_ok=True)
-    output_path = f"scripts/donation_platform_snapshot_{timestamp}.txt"
+    output_path = "scripts/donation_platform_snapshot.txt"  # Always the same filename
     
     # Organize files by category
     categorized = {
@@ -165,7 +165,7 @@ def write_snapshot(files):
     with open(output_path, "w", encoding="utf-8") as out:
         out.write("# MATT FREEDOM FUNDRAISER V2 - CODE SNAPSHOT\n")
         out.write("# Generated for donation platform development and debugging\n")
-        out.write(f"# Created: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        out.write(f"# Created: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")  # Still show when it was created
         out.write(f"# Total files: {len(files)}\n")
         out.write("# Focus: Donation platform, emails, profiles, authentication\n\n")
         
@@ -239,6 +239,7 @@ def main():
     print_summary(collected_files, output_path)
     
     print(f"\n✅ Snapshot ready for debugging Matt's donation platform!")
+    print(f"🔄 File will be overwritten on next run (no more duplicates!)")
 
 if __name__ == "__main__":
     main()

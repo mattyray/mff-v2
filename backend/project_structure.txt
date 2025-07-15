@@ -1,0 +1,90 @@
+.
+├── accounts
+│   ├── tests
+│   │   ├── __init__.py
+│   │   └── test_placeholder.py
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── api_auth.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── social_auth.py
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── django_project
+│   ├── settings
+│   │   ├── __init__.py
+│   │   ├── base.py
+│   │   ├── dev.py
+│   │   ├── prod.py
+│   │   └── test.py
+│   ├── __init__.py
+│   ├── asgi.py
+│   ├── celery_urls.py
+│   ├── celery.py
+│   ├── urls.py
+│   └── wsgi.py
+├── donations
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── emails
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── tests.py
+│   └── views.py
+├── frontend
+├── profiles
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── tests.py
+│   └── views.py
+├── scripts
+│   ├── back_export.py
+│   └── donation_platform_snapshot_20250715_142502.txt
+├── templates
+│   ├── account
+│   │   ├── dashboard.html
+│   │   ├── login.html
+│   │   ├── password_change_done.html
+│   │   ├── password_change.html
+│   │   ├── password_reset_done.html
+│   │   ├── password_reset.html
+│   │   ├── profile_edit.html
+│   │   └── signup.html
+│   ├── chat
+│   │   ├── chat_interface.html
+│   │   └── chat_widget.html
+│   ├── socialaccount
+│   │   ├── login.html
+│   │   └── signup.html
+│   └── base.html
+├── uploads
+│   └── selfies
+├── .dockerignore
+├── .env.example
+├── .gitignore
+├── docker-compose.yml
+├── Dockerfile
+├── Dockerfile.dev
+├── fly.toml
+├── manage.py
+├── project_structure.txt
+├── README.md
+├── requirements-dev.txt
+└── requirements.txt
+
+16 directories, 72 files

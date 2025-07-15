@@ -66,24 +66,8 @@ services:
     command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
   # React Frontend - PORT 8004
-  frontend:
-    build: 
-      context: ../frontend
-      dockerfile: Dockerfile.dev
-    ports:
-      - "8004:5173"
-    environment:
-      - VITE_API_BASE_URL=http://localhost:8003
-      - VITE_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - VITE_FACEBOOK_APP_ID=${FACEBOOK_APP_ID}
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    depends_on:
-      - backend
-    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 
-  # Celery Worker
+    # Celery Worker
   celery_worker:
     build: 
       context: .
