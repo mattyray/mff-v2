@@ -1,4 +1,4 @@
-// Donation Platform Types
+// Donation Platform Types - CORRECTED VERSION
 
 export interface Campaign {
   id: number;
@@ -6,7 +6,11 @@ export interface Campaign {
   description: string;
   goal_amount: number;
   current_amount: number;
+  progress_percentage: number;
   is_active: boolean;
+  start_date: string;
+  end_date?: string;
+  featured_image?: string;
   created_at: string;
   updated_at: string;
 }
@@ -26,6 +30,7 @@ export interface Donation {
   donor_email?: string;
   message?: string;
   is_anonymous: boolean;
+  payment_status: 'pending' | 'completed' | 'failed' | 'refunded';
   created_at: string;
   campaign: number;
   tier?: DonationTier;
@@ -53,4 +58,17 @@ export interface CampaignUpdate {
   image_url?: string;
   has_video: boolean;
   created_at: string;
+}
+
+export interface CreateDonationRequest {
+  amount: number;
+  donor_name?: string;
+  donor_email?: string;
+  message?: string;
+  is_anonymous: boolean;
+}
+
+export interface CreateDonationResponse {
+  checkout_url: string;
+  donation_id: number;
 }
