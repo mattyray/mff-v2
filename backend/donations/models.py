@@ -26,15 +26,13 @@ class Campaign(models.Model):
     
     def __str__(self):
         return self.title
-    
+        
     @property
     def progress_percentage(self):
         """Calculate percentage toward goal"""
-        if self.goal_amount > 0:
+        if self.goal_amount and self.goal_amount > 0:
             return min(100, (self.current_amount / self.goal_amount) * 100)
         return 0
-
-
 class Donation(models.Model):
     """
     Individual donations - people can donate any amount they want
