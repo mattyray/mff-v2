@@ -43,3 +43,14 @@ export interface ApiError {
   message?: string;
   details?: any;
 }
+
+export interface CampaignUpdate {
+  id: number;
+  title: string;
+  content: string;
+  video_url?: string;
+  video_embed_code?: string;
+  image_url?: string;
+  has_video: boolean;
+  created_at: string;
+}
