@@ -262,11 +262,11 @@ REST_FRAMEWORK = {
 # CORS (only for non-Celery)
 if not IS_CELERY:
     CORS_ALLOWED_ORIGINS = [
-        "http://localhost:8004",  # Fixed port!
-        "http://127.0.0.1:8004",
+        "http://localhost:5174",  # ✅ Your actual frontend port
+        "http://127.0.0.1:5174",  # ✅ Same but with 127.0.0.1
+        # Production Netlify domain will be added here later
     ]
     CORS_ALLOW_CREDENTIALS = True
-
 # Celery
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://redis:6379/0')
 CELERY_RESULT_BACKEND = 'django-db'
