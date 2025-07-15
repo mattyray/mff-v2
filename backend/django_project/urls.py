@@ -6,6 +6,10 @@ def api_root(request):
     return JsonResponse({
         "message": "Matt Freedom Fundraiser API v2",
         "endpoints": {
+            "current_campaign": "/api/donations/campaign/",
+            "recent_donations": "/api/donations/recent/",
+            "campaign_updates": "/api/donations/updates/",
+            "create_donation": "/api/donations/create/",
             "accounts": "/api/accounts/",
             "admin": "/admin/",
         }
@@ -19,8 +23,5 @@ urlpatterns = [
     path("health/", health_check),
     path("admin/", admin.site.urls),
     path("api/accounts/", include("accounts.urls")),
-    # Add these as we create the URL files:
-    # path("api/donations/", include("donations.urls")),
-    # path("api/campaigns/", include("donations.urls_campaigns")),  
-    # path("api/profile/", include("profiles.urls")),
+    path("api/donations/", include("donations.urls")),
 ]
