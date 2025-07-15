@@ -1,6 +1,6 @@
 # FRONTEND CODE SNAPSHOT
 # Generated for AI Face Swap App
-# Total files: 36
+# Total files: 30
 
 
 
@@ -17,7 +17,7 @@
 
 # ==== src/types/index.ts ====
 
-// Donation Platform Types
+// Donation Platform Types - CORRECTED VERSION
 
 export interface Campaign {
   id: number;
@@ -25,7 +25,11 @@ export interface Campaign {
   description: string;
   goal_amount: number;
   current_amount: number;
+  progress_percentage: number;
   is_active: boolean;
+  start_date: string;
+  end_date?: string;
+  featured_image?: string;
   created_at: string;
   updated_at: string;
 }
@@ -45,6 +49,7 @@ export interface Donation {
   donor_email?: string;
   message?: string;
   is_anonymous: boolean;
+  payment_status: 'pending' | 'completed' | 'failed' | 'refunded';
   created_at: string;
   campaign: number;
   tier?: DonationTier;
@@ -72,6 +77,19 @@ export interface CampaignUpdate {
   image_url?: string;
   has_video: boolean;
   created_at: string;
+}
+
+export interface CreateDonationRequest {
+  amount: number;
+  donor_name?: string;
+  donor_email?: string;
+  message?: string;
+  is_anonymous: boolean;
+}
+
+export interface CreateDonationResponse {
+  checkout_url: string;
+  donation_id: number;
 }
 
 
@@ -176,7 +194,15 @@ export const useAuth = (): UseAuthReturn => {
 # ==== src/services/api.ts ====
 
 import axios from 'axios';
-import type { Campaign, Donation, CampaignUpdate, User, ApiError } from '../types/index';
+import type { 
+  Campaign, 
+  Donation, 
+  CampaignUpdate, 
+  User, 
+  ApiError,
+  CreateDonationRequest,
+  CreateDonationResponse
+} from '../types/index';
 
 // Read from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8003';
@@ -244,13 +270,7 @@ export class DonationAPI {
     }
   }
 
-  static async createDonation(donationData: {
-    amount: number;
-    donor_name?: string;
-    donor_email?: string;
-    message?: string;
-    is_anonymous: boolean;
-  }): Promise<{ checkout_url: string; donation_id: number }> {
+  static async createDonation(donationData: CreateDonationRequest): Promise<CreateDonationResponse> {
     try {
       const response = await api.post('/api/donations/create/', donationData);
       return response.data;
@@ -545,31 +565,6 @@ export default {
 
 
 
-# ==== ./fly.toml ====
-
-# fly.toml app configuration file generated for frontend-delicate-pine-6591 on 2025-06-17T18:14:08-04:00
-#
-# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
-#
-
-app = 'frontend-delicate-pine-6591'
-primary_region = 'ewr'
-
-[build]
-
-[http_service]
-  internal_port = 80
-  force_https = true
-  auto_stop_machines = 'stop'
-  auto_start_machines = true
-  min_machines_running = 0
-  processes = ['app']
-
-[[vm]]
-  memory = '1gb'
-  cpu_kind = 'shared'
-  cpus = 1
-
 
 
 
@@ -652,6 +647,7 @@ export default {
     autoprefixer: {},
   },
 }
+
 
 
 
@@ -1011,48 +1007,6 @@ export default CampaignPage;
 
 
 
-# ==== src/components/ErrorDisplay.tsx ====
-
-import { AlertCircle } from 'lucide-react';
-
-interface ErrorDisplayProps {
-  error: string;
-  onTryAgain: () => void;
-}
-
-const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, onTryAgain }) => {
-  return (
-    <div className="max-w-xl mx-auto">
-      <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
-        <div className="flex items-center justify-center mb-4">
-          <AlertCircle className="w-12 h-12 text-red-500" />
-        </div>
-        <h3 className="text-xl font-semibold text-red-900 mb-4">
-          Oops! Something went wrong
-        </h3>
-        <p className="text-red-700 mb-6">
-          {error}
-        </p>
-        <div className="space-y-3">
-          <button
-            onClick={onTryAgain}
-            className="btn-primary w-full"
-          >
-            Try Again
-          </button>
-          <p className="text-sm text-red-600">
-            Make sure your photo shows a clear face and is under 10MB
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default ErrorDisplay;
-
-
-
 # ==== src/components/SocialAuth.tsx ====
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -1333,316 +1287,6 @@ const SocialAuth: React.FC<SocialAuthProps> = ({
 };
 
 export default SocialAuth;
-
-
-
-# ==== src/components/RegistrationGate.tsx ====
-
-import React from 'react';
-import { X, Crown, Sparkles, Users, Infinity } from 'lucide-react';
-import type { UsageData } from '../types/index';
-import SocialAuth from './SocialAuth';
-import { FaceSwapAPI } from '../services/api';
-import { useAuth } from '../hooks/useAuth';
-
-interface RegistrationGateProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSignUp: () => void;
-  onLogin: () => void;
-  usage?: UsageData | null;
-  lastFeatureAttempted?: 'match' | 'randomize';
-}
-
-const RegistrationGate: React.FC<RegistrationGateProps> = ({
-  isOpen,
-  onClose,
-  usage,
-  lastFeatureAttempted
-}) => {
-  const { login } = useAuth();
-
-  if (!isOpen) return null;
-
-  const getFeatureIcon = (feature?: string) => {
-    switch (feature) {
-      case 'match': return <Users className="w-6 h-6" />;
-      case 'randomize': return <Sparkles className="w-6 h-6" />;
-      default: return <Crown className="w-6 h-6" />;
-    }
-  };
-
-  const handleGoogleSuccess = async (credential: string, userInfo: any) => {
-    try {
-      console.log('🔑 Google auth success:', userInfo);
-      const response = await FaceSwapAPI.googleAuth(credential, userInfo);
-      
-      // 🔥 FIXED: Store token and update auth state
-      localStorage.setItem('authToken', response.token);
-      login(response.token, response.user);
-      
-      // 🔥 FIXED: Close modal and show success
-      onClose();
-      
-      // 🔥 FIXED: Reload page to refresh all state
-      window.location.reload();
-      
-    } catch (error) {
-      console.error('Google auth failed:', error);
-      alert('Google authentication failed. Please try again.');
-    }
-  };
-
-  const handleFacebookSuccess = async (accessToken: string, userInfo: any) => {
-    try {
-      console.log('🔑 Facebook auth success:', userInfo);
-      const response = await FaceSwapAPI.facebookAuth(accessToken, userInfo);
-      
-      // 🔥 FIXED: Store token and update auth state
-      localStorage.setItem('authToken', response.token);
-      login(response.token, response.user);
-      
-      // 🔥 FIXED: Close modal and show success
-      onClose();
-      
-      // 🔥 FIXED: Reload page to refresh all state
-      window.location.reload();
-      
-    } catch (error) {
-      console.error('Facebook auth failed:', error);
-      alert('Facebook authentication failed. Please try again.');
-    }
-  };
-
-  const handleSocialAuthError = (error: string) => {
-    console.error('Social auth error:', error);
-    alert(`Authentication error: ${error}`);
-  };
-
-  const handleEmailSignup = () => {
-    alert('Email signup coming soon! For now, please use Google.');
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-2xl">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 text-white hover:text-gray-200 transition-colors"
-          >
-            <X size={24} />
-          </button>
-          
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-3">
-              <Crown className="w-8 h-8 text-yellow-300 mr-2" />
-              <h2 className="text-2xl font-bold">Unlock Full Access</h2>
-            </div>
-            <p className="text-blue-100">
-              Join to get unlimited transformations!
-            </p>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-6">
-          {/* Usage Status */}
-          {usage && (
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                {getFeatureIcon(lastFeatureAttempted)}
-                Your Usage Summary
-              </h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Face Matches:</span>
-                  <span className={`font-medium ${usage.can_match ? 'text-green-600' : 'text-red-600'}`}>
-                    {usage.matches_used}/{usage.matches_limit}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Randomizes:</span>
-                  <span className={`font-medium ${usage.can_randomize ? 'text-green-600' : 'text-red-600'}`}>
-                    {usage.randomizes_used}/{usage.randomizes_limit}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Benefits */}
-          <div className="mb-6">
-            <h3 className="font-semibold text-gray-900 mb-4 text-center">
-              ✨ What you'll get with an account:
-            </h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 text-gray-700">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <Infinity className="w-4 h-4 text-green-600" />
-                </div>
-                <span>Unlimited face matching</span>
-              </div>
-              <div className="flex items-center gap-3 text-gray-700">
-                <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-purple-600" />
-                </div>
-                <span>Unlimited randomize feature</span>
-              </div>
-              <div className="flex items-center gap-3 text-gray-700">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Users className="w-4 h-4 text-blue-600" />
-                </div>
-                <span>Access to all historical figures</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Social Auth Buttons */}
-          <div className="space-y-4">
-            <SocialAuth 
-              onGoogleSuccess={handleGoogleSuccess}
-              onFacebookSuccess={handleFacebookSuccess}
-              onError={handleSocialAuthError}
-            />
-            
-            <div className="text-center">
-              <div className="text-sm text-gray-500 mb-2">or</div>
-              <button
-                onClick={handleEmailSignup}
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-              >
-                Create account with email
-              </button>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="text-center mt-6 pt-4 border-t border-gray-200">
-            <p className="text-xs text-gray-500">
-              Free to join • No credit card required • Start creating immediately
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default RegistrationGate;
-
-
-
-# ==== src/components/FacebookShareButton.tsx ====
-
-import React, { useState } from 'react';
-import { Share2, CheckCircle } from 'lucide-react';
-import type { FaceSwapResult } from '../types/index';
-
-interface FacebookShareButtonProps {
-  result: FaceSwapResult;
-  className?: string;
-}
-
-const FacebookShareButton: React.FC<FacebookShareButtonProps> = ({ 
-  result, 
-  className = "" 
-}) => {
-  const [copyState, setCopyState] = useState<'idle' | 'copying' | 'copied'>('idle');
-
-  const shareText = result.is_randomized 
-    ? `🎭 I just transformed into ${result.match_name} using AI! Check out HistoryFace and see which historical figure you become! ✨`
-    : `🎭 AI matched my face with ${result.match_name} (${(result.match_score * 100).toFixed(0)}% confidence)! Try HistoryFace and discover your historical twin! ✨`;
-
-  const shareUrl = window.location.origin;
-  const fullShareText = `${shareText}\n\n🌐 Try it: ${shareUrl}\n📸 My result: ${result.output_image_url}`;
-
-  const handleShare = async () => {
-    // 🔥 METHOD 1: Try Web Share API first (modern, works great on mobile)
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `I transformed into ${result.match_name}!`,
-          text: shareText,
-          url: shareUrl,
-        });
-        return; // Success, we're done
-      } catch (error) {
-        console.log('Web Share cancelled or failed, trying fallback');
-      }
-    }
-
-    // 🔥 METHOD 2: Copy comprehensive text + open Facebook
-    try {
-      setCopyState('copying');
-      await navigator.clipboard.writeText(fullShareText);
-      setCopyState('copied');
-      
-      // Open Facebook after brief delay
-      setTimeout(() => {
-        const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-        window.open(facebookUrl, '_blank', 'width=600,height=500');
-      }, 500);
-      
-      // Reset after 3 seconds
-      setTimeout(() => setCopyState('idle'), 3000);
-      
-    } catch (error) {
-      // 🔥 METHOD 3: Fallback - just open Facebook
-      console.error('Clipboard failed, opening Facebook directly');
-      const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-      window.open(facebookUrl, '_blank');
-    }
-  };
-
-  const getButtonContent = () => {
-    switch (copyState) {
-      case 'copying':
-        return (
-          <>
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-            Preparing...
-          </>
-        );
-      case 'copied':
-        return (
-          <>
-            <CheckCircle size={20} />
-            Text Copied! Opening Facebook...
-          </>
-        );
-      default:
-        return (
-          <>
-            <Share2 size={20} />
-            Share to Facebook
-          </>
-        );
-    }
-  };
-
-  return (
-    <div className="space-y-2">
-      <button
-        onClick={handleShare}
-        disabled={copyState === 'copying'}
-        className={`flex items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-75 disabled:hover:scale-100 ${className}`}
-      >
-        {getButtonContent()}
-      </button>
-      
-      {copyState === 'copied' && (
-        <div className="text-xs text-gray-600 text-center animate-pulse">
-          📋 Share text copied! Paste it in Facebook and add your image.
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default FacebookShareButton;
-
 
 
 
@@ -2312,71 +1956,6 @@ code {
 
 
 
-# ==== ./Dockerfile ====
-
-# backend/Dockerfile
-
-FROM python:3.10.3-slim-bullseye
-
-# Avoid prompts during install
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install system dependencies only once
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    cmake \
-    gfortran \
-    git \
-    libatlas-base-dev \
-    libjpeg-dev \
-    liblapack-dev \
-    libswscale-dev \
-    libavcodec-dev \
-    libavformat-dev \
-    libgtk2.0-dev \
-    libpq-dev \
-    curl \
-    wget \
-    && rm -rf /var/lib/apt/lists/*
-
-# Pre-create working dir
-WORKDIR /app
-
-# 👇 Copy and install only requirements first (layer cache win)
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir --upgrade pip wheel && \
-    pip install --no-cache-dir numpy && \
-    pip install --no-cache-dir dlib && \
-    pip install --no-cache-dir face-recognition && \
-    pip install --no-cache-dir -r requirements.txt
-
-# Copy entire project
-COPY . /app/
-
-# Create necessary dirs for media/static
-RUN mkdir -p /app/media/uploads/selfies /app/staticfiles
-
-# Optional: run collectstatic here if needed
-# RUN python manage.py collectstatic --noinput || echo "Skipping collectstatic"
-
-# Non-root user
-RUN adduser --disabled-password --gecos '' appuser && \
-    chown -R appuser:appuser /app
-USER appuser
-
-EXPOSE 8000
-
-# Health check (optional)
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-  CMD python3 -c "import requests; requests.get('http://localhost:8000/health/', timeout=10)" || exit 1
-
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "300", "django_project.wsgi:application"]
-
-
-
-
 # ==== ./README.md ====
 
 # React + TypeScript + Vite
@@ -2434,29 +2013,4 @@ export default tseslint.config({
 })
 ```
 
-
-
-
-# ==== ./Dockerfile.dev ====
-
-# Development Dockerfile for React frontend
-FROM node:18-alpine
-
-# Set working directory
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm install
-
-# Copy source code
-COPY . .
-
-# Expose port
-EXPOSE 5173
-
-# Start development server
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 

@@ -45,7 +45,6 @@
 │   │   ├── serializers.py
 │   │   ├── tests.py
 │   │   └── views.py
-│   ├── frontend
 │   ├── profiles
 │   │   ├── __init__.py
 │   │   ├── admin.py
@@ -55,7 +54,7 @@
 │   │   └── views.py
 │   ├── scripts
 │   │   ├── back_export.py
-│   │   └── donation_platform_snapshot_20250714_164932.txt
+│   │   └── donation_platform_snapshot_20250715_142502.txt
 │   ├── templates
 │   │   ├── account
 │   │   │   ├── dashboard.html
@@ -83,6 +82,7 @@
 │   ├── Dockerfile.dev
 │   ├── fly.toml
 │   ├── manage.py
+│   ├── project_structure.txt
 │   ├── README.md
 │   ├── requirements-dev.txt
 │   └── requirements.txt
@@ -104,9 +104,6 @@
 │   │   │   │   └── UpdatesSection.tsx
 │   │   │   ├── CampaignPage.tsx
 │   │   │   ├── ErrorBoundary.tsx
-│   │   │   ├── ErrorDisplay.tsx
-│   │   │   ├── FacebookShareButton.tsx
-│   │   │   ├── RegistrationGate.tsx
 │   │   │   ├── SocialAuth.tsx
 │   │   │   └── UserMenu.tsx
 │   │   ├── hooks
@@ -120,13 +117,9 @@
 │   │   ├── index.css
 │   │   ├── main.tsx
 │   │   └── vite-env.d.ts
-│   ├── .dockerignore
 │   ├── .env.local
 │   ├── .env.production
-│   ├── Dockerfile
-│   ├── Dockerfile.dev
 │   ├── eslint.config.js
-│   ├── fly.toml
 │   ├── index.html
 │   ├── netlify.toml
 │   ├── package-lock.json
@@ -144,4 +137,4 @@
 ├── project_structure.txt
 └── README.md
 
-27 directories, 118 files
+26 directories, 112 files
