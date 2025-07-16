@@ -53,7 +53,8 @@ services:
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - FRONTEND_URL=http://localhost:8004
+      - FRONTEND_URL=http://localhost:5173  # Force correct value
+
     volumes:
       - .:/app
       - static_volume:/app/staticfiles
