@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Heart, MessageCircle } from 'lucide-react';
 import { DonationAPI } from '../../services/api';
 import type { Donation } from '../../types/index';
 
@@ -17,44 +18,57 @@ const SupportersSection: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchDonations();
   }, []);
 
+  if (loading) {
+    return (
+      <section className="section-spacing bg-white">
+        <div className="container-custom text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--ocean-blue)] mx-auto"></div>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section className="py-20 bg-white">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Recent Supporters</h2>
-          <p className="text-gray-600">Amazing people making this possible</p>
+    <section className="section-spacing bg-white">
+      <div className="container-custom">
+        <div className="text-center mb-16">
+          <h2 className="mb-4">Recent Supporters</h2>
+          <p className="text-xl text-[var(--ocean-driftwood)]">
+            Amazing people making this journey possible
+          </p>
         </div>
 
-        {loading ? (
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          </div>
-        ) : donations.length === 0 ? (
+        {donations.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500">Be the first to support Matt's journey!</p>
+            <Heart className="w-12 h-12 text-[var(--ocean-blue)] mx-auto mb-4" />
+            <p className="text-[var(--ocean-driftwood)]">Be the first to support Matt's journey!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {donations.map((donation) => (
-              <div key={donation.id} className="bg-gray-50 rounded-xl p-6">
+              <div key={donation.id} className="card-ocean">
                 <div className="flex justify-between items-start mb-3">
-                  <div className="font-semibold text-gray-900">
+                  <div className="font-semibold text-[var(--ocean-deep)]">
                     {donation.donor_name || 'Anonymous Supporter'}
                   </div>
-                  <div className="text-lg font-bold text-blue-600">
+                  <div className="text-lg font-bold text-[var(--ocean-blue)]">
                     ${donation.amount}
                   </div>
                 </div>
                 
                 {donation.message && (
-                  <p className="text-gray-600 text-sm italic">"{donation.message}"</p>
+                  <div className="flex items-start gap-2 mb-3">
+                    <MessageCircle className="w-4 h-4 text-[var(--ocean-teal)] mt-1 flex-shrink-0" />
+                    <p className="text-[var(--ocean-driftwood)] text-sm italic">
+                      "{donation.message}"
+                    </p>
+                  </div>
                 )}
                 
-                <div className="text-xs text-gray-500 mt-3">
+                <div className="text-xs text-[var(--ocean-driftwood)]">
                   {new Date(donation.created_at).toLocaleDateString()}
                 </div>
               </div>

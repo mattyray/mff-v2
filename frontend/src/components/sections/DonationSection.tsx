@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Heart, CreditCard, Shield, AlertCircle } from 'lucide-react';
 import type { Campaign } from '../../types/index';
 
 interface DonationSectionProps {
@@ -7,9 +8,13 @@ interface DonationSectionProps {
 
 const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
   const [amount, setAmount] = useState('');
+  const [donorName, setDonorName] = useState('');
+  const [donorEmail, setDonorEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const quickAmounts = [25, 50, 100, 250, 500];
+  const quickAmounts = [25, 50, 100, 250, 500, 1000];
 
   const handleQuickAmount = (value: number) => {
     setAmount(value.toString());
@@ -19,79 +24,106 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
     if (!amount || parseFloat(amount) < 1) return;
     
     setLoading(true);
-    // TODO: Integrate with Stripe
-    console.log('Donating:', amount);
-    setLoading(false);
+    try {
+      // TODO: Integrate with Stripe
+      console.log('Donation:', {
+        amount: parseFloat(amount),
+        donorName: isAnonymous ? '' : donorName,
+        donorEmail: isAnonymous ? '' : donorEmail,
+        message,
+        isAnonymous
+      });
+      
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      alert('Donation processing will be implemented with Stripe!');
+    } catch (error) {
+      console.error('Donation error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <section id="donate" className="py-20 bg-white">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Support Matt's Journey</h2>
-          <p className="text-gray-600">
-            Every contribution helps Matt achieve independence and continue inspiring others
+    <section id="donate" className="section-spacing bg-white">
+      <div className="container-custom">
+        
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 bg-[var(--ocean-blue)]/10 rounded-full px-4 py-2 mb-4">
+            <Heart className="w-4 h-4 text-[var(--ocean-blue)]" />
+            <span className="text-[var(--ocean-blue)] text-sm font-medium">Make a Difference</span>
+          </div>
+          
+          <h2 className="mb-4">Support My Journey</h2>
+          <p className="text-xl text-[var(--ocean-driftwood)] max-w-2xl mx-auto">
+            Every contribution helps me continue building, creating, and inspiring others
           </p>
         </div>
 
-        <div className="bg-gray-50 rounded-2xl p-8">
-          {/* Quick amount buttons */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Choose an amount:
-            </label>
-            <div className="grid grid-cols-5 gap-3">
-              {quickAmounts.map((value) => (
-                <button
-                  key={value}
-                  onClick={() => handleQuickAmount(value)}
-                  className={`py-3 px-4 rounded-lg border-2 transition-colors ${
-                    amount === value.toString()
-                      ? 'border-blue-500 bg-blue-50 text-blue-600'
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                >
-                  ${value}
-                </button>
-              ))}
+        <div className="max-w-2xl mx-auto">
+          <div className="card-ocean">
+            
+            {/* Quick Amount Buttons */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-[var(--ocean-deep)] mb-3">
+                Choose an amount:
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                {quickAmounts.map((value) => (
+                  <button
+                    key={value}
+                    onClick={() => handleQuickAmount(value)}
+                    className={`py-3 px-4 rounded-xl border-2 transition-all duration-300 ${
+                      amount === value.toString()
+                        ? 'border-[var(--ocean-blue)] bg-[var(--ocean-blue)]/10 text-[var(--ocean-blue)]'
+                        : 'border-gray-200 hover:border-[var(--ocean-blue)]/50'
+                    }`}
+                  >
+                    ${value}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Custom amount */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Or enter custom amount:
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                $
-              </span>
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+            {/* Custom Amount */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-[var(--ocean-deep)] mb-2">
+                Or enter custom amount:
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--ocean-driftwood)]">
+                  $
+                </span>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="input-ocean pl-8"
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Donate button */}
-          <button
-            onClick={handleDonate}
-            disabled={!amount || parseFloat(amount) < 1 || loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-semibold py-4 rounded-lg transition-colors"
-          >
-            {loading ? 'Processing...' : `Donate $${amount || '0'}`}
-          </button>
+            {/* Donor Information */}
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-[var(--ocean-deep)] mb-1">
+                  Full Name (optional)
+                </label>
+                <input
+                  type="text"
+                  value={donorName}
+                  onChange={(e) => setDonorName(e.target.value)}
+                  disabled={isAnonymous}
+                  placeholder="Your name"
+                  className={`input-ocean ${isAnonymous ? 'opacity-50' : ''}`}
+                />
+              </div>
 
-          <p className="text-xs text-gray-500 text-center mt-4">
-            Secure payment processing powered by Stripe
-          </p>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-export default DonationSection;
+              <div>
+                <label className="block text-sm font-medium text-[var(--ocean-deep)] mb-1">
+                  Email Address (optional)
+                </label>
+                <input
+                  type="email"
+                  value={donorEmail}
+                  onChange={(e) => setDonorEmail(e.target.value)

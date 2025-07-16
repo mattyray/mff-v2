@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { Play, Calendar, ExternalLink } from 'lucide-react';
 import { DonationAPI } from '../../services/api';
-import type { Campaign, CampaignUpdate } from '../../types/index';
+import type { CampaignUpdate } from '../../types/index';
 
-interface UpdatesSectionProps {
-  campaign: Campaign;
-}
-
-const UpdatesSection: React.FC<UpdatesSectionProps> = ({ campaign }) => {
+const UpdatesSection: React.FC = () => {
   const [updates, setUpdates] = useState<CampaignUpdate[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,55 +18,65 @@ const UpdatesSection: React.FC<UpdatesSectionProps> = ({ campaign }) => {
         setLoading(false);
       }
     };
-
     fetchUpdates();
   }, []);
 
+  if (loading) {
+    return (
+      <section className="section-spacing section-ocean-mist">
+        <div className="container-custom text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--ocean-blue)] mx-auto"></div>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section id="updates" className="py-20 bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Campaign Updates</h2>
-          <p className="text-gray-600">Follow Matt's progress and journey</p>
+    <section id="updates" className="section-spacing section-ocean-mist">
+      <div className="container-custom">
+        <div className="text-center mb-16">
+          <h2 className="mb-4">Latest Updates</h2>
+          <p className="text-xl text-[var(--ocean-driftwood)] max-w-2xl mx-auto">
+            Follow my journey and see how your support is making a difference
+          </p>
         </div>
 
-        {loading ? (
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          </div>
-        ) : updates.length === 0 ? (
+        {updates.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500">No updates yet. Check back soon!</p>
+            <p className="text-[var(--ocean-driftwood)]">No updates yet. Check back soon!</p>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {updates.map((update) => (
-              <div key={update.id} className="bg-white rounded-2xl p-8 shadow-sm">
-                <div className="flex items-start justify-between mb-4">
-                  <h3 className="text-xl font-semibold text-gray-900">{update.title}</h3>
-                  <span className="text-sm text-gray-500">
-                    {new Date(update.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-
-                {update.has_video && update.video_url && (
-                  <div className="mb-6">
-                    <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
-                      <a 
-                        href={update.video_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-700 font-medium"
-                      >
-                        ▶ Watch Video Update
-                      </a>
-                    </div>
-                  </div>
+              <div key={update.id} className="card-ocean">
+                {update.image_url && (
+                  <img 
+                    src={update.image_url} 
+                    alt={update.title}
+                    className="w-full h-48 object-cover rounded-lg mb-4"
+                  />
                 )}
-
-                <div className="prose text-gray-600">
-                  <p>{update.content}</p>
+                
+                <div className="flex items-center gap-2 text-[var(--ocean-driftwood)] text-sm mb-2">
+                  <Calendar className="w-4 h-4" />
+                  {new Date(update.created_at).toLocaleDateString()}
                 </div>
+                
+                <h3 className="text-[var(--ocean-deep)] mb-3">{update.title}</h3>
+                <p className="text-[var(--ocean-driftwood)] mb-4">{update.content}</p>
+                
+                {update.video_url && (
+                  
+                    href={update.video_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-[var(--ocean-blue)] hover:text-[var(--ocean-teal)] font-medium"
+                  >
+                    <Play className="w-4 h-4" />
+                    Watch Video
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
               </div>
             ))}
           </div>
