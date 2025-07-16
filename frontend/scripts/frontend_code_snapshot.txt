@@ -936,7 +936,6 @@ import React, { useState, useEffect } from 'react';
 import { DonationAPI } from '../services/api';
 import type { Campaign } from '../types/index';
 
-// Section components we'll build
 import HeroSection from './sections/HeroSection';
 import ProgressSection from './sections/ProgressSection';
 import DonationSection from './sections/DonationSection';
@@ -966,8 +965,8 @@ const CampaignPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading campaign...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--ocean-blue)] mx-auto mb-4"></div>
+          <p className="text-[var(--ocean-driftwood)]">Loading campaign...</p>
         </div>
       </div>
     );
@@ -977,7 +976,7 @@ const CampaignPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600">No active campaign found.</p>
+          <p className="text-[var(--ocean-driftwood)]">No active campaign found.</p>
         </div>
       </div>
     );
@@ -985,19 +984,10 @@ const CampaignPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero - Matt's story + campaign intro */}
       <HeroSection campaign={campaign} />
-      
-      {/* Progress - Visual progress + stats */}
       <ProgressSection campaign={campaign} />
-      
-      {/* Donation Form */}
       <DonationSection campaign={campaign} />
-      
-      {/* Video Updates Feed */}
-      <UpdatesSection campaign={campaign} />
-      
-      {/* Recent Supporters */}
+      <UpdatesSection />
       <SupportersSection />
     </div>
   );
@@ -1381,6 +1371,7 @@ export default ErrorBoundary;
 # ==== src/components/sections/SupportersSection.tsx ====
 
 import React, { useState, useEffect } from 'react';
+import { Heart, MessageCircle } from 'lucide-react';
 import { DonationAPI } from '../../services/api';
 import type { Donation } from '../../types/index';
 
@@ -1399,44 +1390,57 @@ const SupportersSection: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchDonations();
   }, []);
 
+  if (loading) {
+    return (
+      <section className="section-spacing bg-white">
+        <div className="container-custom text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--ocean-blue)] mx-auto"></div>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section className="py-20 bg-white">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Recent Supporters</h2>
-          <p className="text-gray-600">Amazing people making this possible</p>
+    <section className="section-spacing bg-white">
+      <div className="container-custom">
+        <div className="text-center mb-16">
+          <h2 className="mb-4">Recent Supporters</h2>
+          <p className="text-xl text-[var(--ocean-driftwood)]">
+            Amazing people making this journey possible
+          </p>
         </div>
 
-        {loading ? (
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          </div>
-        ) : donations.length === 0 ? (
+        {donations.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500">Be the first to support Matt's journey!</p>
+            <Heart className="w-12 h-12 text-[var(--ocean-blue)] mx-auto mb-4" />
+            <p className="text-[var(--ocean-driftwood)]">Be the first to support Matt's journey!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {donations.map((donation) => (
-              <div key={donation.id} className="bg-gray-50 rounded-xl p-6">
+              <div key={donation.id} className="card-ocean">
                 <div className="flex justify-between items-start mb-3">
-                  <div className="font-semibold text-gray-900">
+                  <div className="font-semibold text-[var(--ocean-deep)]">
                     {donation.donor_name || 'Anonymous Supporter'}
                   </div>
-                  <div className="text-lg font-bold text-blue-600">
+                  <div className="text-lg font-bold text-[var(--ocean-blue)]">
                     ${donation.amount}
                   </div>
                 </div>
                 
                 {donation.message && (
-                  <p className="text-gray-600 text-sm italic">"{donation.message}"</p>
+                  <div className="flex items-start gap-2 mb-3">
+                    <MessageCircle className="w-4 h-4 text-[var(--ocean-teal)] mt-1 flex-shrink-0" />
+                    <p className="text-[var(--ocean-driftwood)] text-sm italic">
+                      "{donation.message}"
+                    </p>
+                  </div>
                 )}
                 
-                <div className="text-xs text-gray-500 mt-3">
+                <div className="text-xs text-[var(--ocean-driftwood)]">
                   {new Date(donation.created_at).toLocaleDateString()}
                 </div>
               </div>
@@ -1455,14 +1459,11 @@ export default SupportersSection;
 # ==== src/components/sections/UpdatesSection.tsx ====
 
 import React, { useState, useEffect } from 'react';
+import { Play, Calendar, ExternalLink } from 'lucide-react';
 import { DonationAPI } from '../../services/api';
-import type { Campaign, CampaignUpdate } from '../../types/index';
+import type { CampaignUpdate } from '../../types/index';
 
-interface UpdatesSectionProps {
-  campaign: Campaign;
-}
-
-const UpdatesSection: React.FC<UpdatesSectionProps> = ({ campaign }) => {
+const UpdatesSection: React.FC = () => {
   const [updates, setUpdates] = useState<CampaignUpdate[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -1477,55 +1478,65 @@ const UpdatesSection: React.FC<UpdatesSectionProps> = ({ campaign }) => {
         setLoading(false);
       }
     };
-
     fetchUpdates();
   }, []);
 
+  if (loading) {
+    return (
+      <section className="section-spacing section-ocean-mist">
+        <div className="container-custom text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--ocean-blue)] mx-auto"></div>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section id="updates" className="py-20 bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Campaign Updates</h2>
-          <p className="text-gray-600">Follow Matt's progress and journey</p>
+    <section id="updates" className="section-spacing section-ocean-mist">
+      <div className="container-custom">
+        <div className="text-center mb-16">
+          <h2 className="mb-4">Latest Updates</h2>
+          <p className="text-xl text-[var(--ocean-driftwood)] max-w-2xl mx-auto">
+            Follow my journey and see how your support is making a difference
+          </p>
         </div>
 
-        {loading ? (
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          </div>
-        ) : updates.length === 0 ? (
+        {updates.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500">No updates yet. Check back soon!</p>
+            <p className="text-[var(--ocean-driftwood)]">No updates yet. Check back soon!</p>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {updates.map((update) => (
-              <div key={update.id} className="bg-white rounded-2xl p-8 shadow-sm">
-                <div className="flex items-start justify-between mb-4">
-                  <h3 className="text-xl font-semibold text-gray-900">{update.title}</h3>
-                  <span className="text-sm text-gray-500">
-                    {new Date(update.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-
-                {update.has_video && update.video_url && (
-                  <div className="mb-6">
-                    <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
-                      <a 
-                        href={update.video_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-700 font-medium"
-                      >
-                        ▶ Watch Video Update
-                      </a>
-                    </div>
-                  </div>
+              <div key={update.id} className="card-ocean">
+                {update.image_url && (
+                  <img 
+                    src={update.image_url} 
+                    alt={update.title}
+                    className="w-full h-48 object-cover rounded-lg mb-4"
+                  />
                 )}
-
-                <div className="prose text-gray-600">
-                  <p>{update.content}</p>
+                
+                <div className="flex items-center gap-2 text-[var(--ocean-driftwood)] text-sm mb-2">
+                  <Calendar className="w-4 h-4" />
+                  {new Date(update.created_at).toLocaleDateString()}
                 </div>
+                
+                <h3 className="text-[var(--ocean-deep)] mb-3">{update.title}</h3>
+                <p className="text-[var(--ocean-driftwood)] mb-4">{update.content}</p>
+                
+                {update.video_url && (
+                  <a
+                    href={update.video_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-[var(--ocean-blue)] hover:text-[var(--ocean-teal)] font-medium"
+                  >
+                    <Play className="w-4 h-4" />
+                    Watch Video
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
               </div>
             ))}
           </div>
@@ -1542,6 +1553,7 @@ export default UpdatesSection;
 # ==== src/components/sections/DonationSection.tsx ====
 
 import React, { useState } from 'react';
+import { Heart, CreditCard, Shield, AlertCircle } from 'lucide-react';
 import type { Campaign } from '../../types/index';
 
 interface DonationSectionProps {
@@ -1550,9 +1562,13 @@ interface DonationSectionProps {
 
 const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
   const [amount, setAmount] = useState('');
+  const [donorName, setDonorName] = useState('');
+  const [donorEmail, setDonorEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const quickAmounts = [25, 50, 100, 250, 500];
+  const quickAmounts = [25, 50, 100, 250, 500, 1000];
 
   const handleQuickAmount = (value: number) => {
     setAmount(value.toString());
@@ -1562,75 +1578,165 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
     if (!amount || parseFloat(amount) < 1) return;
     
     setLoading(true);
-    // TODO: Integrate with Stripe
-    console.log('Donating:', amount);
-    setLoading(false);
+    try {
+      // TODO: Integrate with Stripe
+      console.log('Donation:', {
+        amount: parseFloat(amount),
+        donorName: isAnonymous ? '' : donorName,
+        donorEmail: isAnonymous ? '' : donorEmail,
+        message,
+        isAnonymous
+      });
+      
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      alert('Donation processing will be implemented with Stripe!');
+    } catch (error) {
+      console.error('Donation error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <section id="donate" className="py-20 bg-white">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Support Matt's Journey</h2>
-          <p className="text-gray-600">
-            Every contribution helps Matt achieve independence and continue inspiring others
+    <section id="donate" className="section-spacing bg-white">
+      <div className="container-custom">
+        
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 bg-[var(--ocean-blue)]/10 rounded-full px-4 py-2 mb-4">
+            <Heart className="w-4 h-4 text-[var(--ocean-blue)]" />
+            <span className="text-[var(--ocean-blue)] text-sm font-medium">Make a Difference</span>
+          </div>
+          
+          <h2 className="mb-4">Support My Journey</h2>
+          <p className="text-xl text-[var(--ocean-driftwood)] max-w-2xl mx-auto">
+            Every contribution helps me continue building, creating, and inspiring others
           </p>
         </div>
 
-        <div className="bg-gray-50 rounded-2xl p-8">
-          {/* Quick amount buttons */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Choose an amount:
-            </label>
-            <div className="grid grid-cols-5 gap-3">
-              {quickAmounts.map((value) => (
-                <button
-                  key={value}
-                  onClick={() => handleQuickAmount(value)}
-                  className={`py-3 px-4 rounded-lg border-2 transition-colors ${
-                    amount === value.toString()
-                      ? 'border-blue-500 bg-blue-50 text-blue-600'
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                >
-                  ${value}
-                </button>
-              ))}
+        <div className="max-w-2xl mx-auto">
+          <div className="card-ocean">
+            
+            {/* Quick Amount Buttons */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-[var(--ocean-deep)] mb-3">
+                Choose an amount:
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                {quickAmounts.map((value) => (
+                  <button
+                    key={value}
+                    onClick={() => handleQuickAmount(value)}
+                    className={`py-3 px-4 rounded-xl border-2 transition-all duration-300 ${
+                      amount === value.toString()
+                        ? 'border-[var(--ocean-blue)] bg-[var(--ocean-blue)]/10 text-[var(--ocean-blue)]'
+                        : 'border-gray-200 hover:border-[var(--ocean-blue)]/50'
+                    }`}
+                  >
+                    ${value}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom Amount */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-[var(--ocean-deep)] mb-2">
+                Or enter custom amount:
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--ocean-driftwood)]">
+                  $
+                </span>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="input-ocean pl-8"
+                />
+              </div>
+            </div>
+
+            {/* Donor Information */}
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-[var(--ocean-deep)] mb-1">
+                  Full Name (optional)
+                </label>
+                <input
+                  type="text"
+                  value={donorName}
+                  onChange={(e) => setDonorName(e.target.value)}
+                  disabled={isAnonymous}
+                  placeholder="Your name"
+                  className={`input-ocean ${isAnonymous ? 'opacity-50' : ''}`}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--ocean-deep)] mb-1">
+                  Email Address (optional)
+                </label>
+                <input
+                  type="email"
+                  value={donorEmail}
+                  onChange={(e) => setDonorEmail(e.target.value)}
+                  disabled={isAnonymous}
+                  placeholder="your@email.com"
+                  className={`input-ocean ${isAnonymous ? 'opacity-50' : ''}`}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--ocean-deep)] mb-1">
+                  Message (optional)
+                </label>
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Share a message of support..."
+                  rows={3}
+                  className="input-ocean resize-none"
+                />
+              </div>
+
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isAnonymous}
+                  onChange={(e) => setIsAnonymous(e.target.checked)}
+                  className="w-5 h-5 text-[var(--ocean-blue)] border-gray-300 rounded focus:ring-[var(--ocean-blue)]"
+                />
+                <span className="text-[var(--ocean-deep)] text-sm">
+                  Make this donation anonymous
+                </span>
+              </label>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              onClick={handleDonate}
+              disabled={!amount || parseFloat(amount) < 1 || loading}
+              className={`w-full btn-ocean-primary text-lg ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {loading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  Processing...
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2">
+                  <CreditCard className="w-5 h-5" />
+                  Donate ${amount || '0'}
+                </div>
+              )}
+            </button>
+
+            <div className="flex items-center justify-center gap-2 mt-4 text-sm text-[var(--ocean-driftwood)]">
+              <Shield className="w-4 h-4" />
+              Secure payment processing by Stripe
             </div>
           </div>
-
-          {/* Custom amount */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Or enter custom amount:
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                $
-              </span>
-              <input
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-
-          {/* Donate button */}
-          <button
-            onClick={handleDonate}
-            disabled={!amount || parseFloat(amount) < 1 || loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white font-semibold py-4 rounded-lg transition-colors"
-          >
-            {loading ? 'Processing...' : `Donate $${amount || '0'}`}
-          </button>
-
-          <p className="text-xs text-gray-500 text-center mt-4">
-            Secure payment processing powered by Stripe
-          </p>
         </div>
       </div>
     </section>
@@ -1643,7 +1749,8 @@ export default DonationSection;
 
 # ==== src/components/sections/HeroSection.tsx ====
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { ArrowDown, Play, Heart, Code2 } from 'lucide-react';
 import type { Campaign } from '../../types/index';
 
 interface HeroSectionProps {
@@ -1651,89 +1758,186 @@ interface HeroSectionProps {
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
+  const [currentAmount, setCurrentAmount] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Animate numbers on mount
+  useEffect(() => {
+    setIsVisible(true);
+    const timer = setTimeout(() => {
+      animateNumber(campaign.current_amount);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [campaign.current_amount]);
+
+  const animateNumber = (target: number) => {
+    const duration = 2000;
+    const steps = 60;
+    const increment = target / steps;
+    const stepDuration = duration / steps;
+    
+    let current = 0;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        setCurrentAmount(target);
+        clearInterval(timer);
+      } else {
+        setCurrentAmount(Math.floor(current));
+      }
+    }, stepDuration);
+  };
+
+  const handleDonateClick = () => {
+    document.getElementById('donate')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleLearnMoreClick = () => {
+    document.getElementById('updates')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
-    <section className="relative bg-gradient-to-br from-blue-50 to-white py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <section className="relative min-h-screen overflow-hidden hero-ocean">
+      {/* Simple Background Pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent animate-pulse-slow"></div>
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 container-custom">
+        <div className="flex flex-col lg:flex-row items-center justify-between min-h-screen py-20">
           
-          {/* Left: Matt's story */}
-          <div>
-            <div className="text-sm font-medium text-blue-600 mb-4">
-              SUPPORT MATT'S JOURNEY
-            </div>
+          {/* Left Content - Story */}
+          <div className={`lg:w-1/2 lg:pr-12 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-              {campaign.title}
-            </h1>
-            
-            <div className="prose prose-lg text-gray-600 mb-8">
-              <p className="text-xl mb-4">
-                From commercial fisherman to self-taught developer after a life-changing diving accident.
-              </p>
-              <p>
-                {campaign.description}
-              </p>
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
+              <Heart className="w-4 h-4 text-[var(--ocean-sunrise)]" />
+              <span className="text-white/90 text-sm font-medium">Supporting Matt's Journey</span>
             </div>
 
-            {/* Quick stats */}
-            <div className="grid grid-cols-3 gap-6 mb-8">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  ${campaign.current_amount.toLocaleString()}
+            {/* Main Headline */}
+            <h1 className="text-white mb-6 text-shadow-ocean">
+              From Sea to 
+              <span className="block text-[var(--ocean-seafoam)]">Source Code</span>
+            </h1>
+
+            {/* Updated Subtitle */}
+            <p className="text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed">
+              I'm working diligently towards a life as a successful disabled person outside the nursing home. 
+              My career is progressing every day, but I need your help raising money to renovate a bathroom 
+              for my new apartment. It's the last thing standing in my way — your donations will help add 
+              an element of security while I establish my new life.
+            </p>
+
+            {/* Story Hook */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8">
+              <div className="flex items-start gap-4">
+                <Code2 className="w-6 h-6 text-[var(--ocean-seafoam)] mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="text-white font-semibold mb-2">The Challenge</h3>
+                  <p className="text-white/80 text-base">
+                    {campaign.description}
+                  </p>
                 </div>
-                <div className="text-sm text-gray-600">Raised</div>
               </div>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+              <button 
+                onClick={handleDonateClick}
+                className="btn-ocean-primary bg-white text-[var(--ocean-blue)] hover:bg-[var(--ocean-mist)] shadow-2xl"
+              >
+                <Heart className="w-5 h-5 mr-2" />
+                Support My Journey
+              </button>
+              
+              <button 
+                onClick={handleLearnMoreClick}
+                className="btn-ocean-secondary bg-transparent border-white text-white hover:bg-white/10"
+              >
+                <Play className="w-5 h-5 mr-2" />
+                Watch My Story
+              </button>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-3 gap-6">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
+                <div className={`text-3xl font-bold text-white mb-1 transition-all duration-1000 ${isVisible ? 'animate-count-up' : ''}`}>
+                  ${currentAmount.toLocaleString()}
+                </div>
+                <div className="text-white/70 text-sm">Raised</div>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-3xl font-bold text-white mb-1">
                   ${campaign.goal_amount.toLocaleString()}
                 </div>
-                <div className="text-sm text-gray-600">Goal</div>
+                <div className="text-white/70 text-sm">Goal</div>
               </div>
+              
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
+                <div className="text-3xl font-bold text-[var(--ocean-sunrise)] mb-1">
                   {Math.round(campaign.progress_percentage)}%
                 </div>
-                <div className="text-sm text-gray-600">Complete</div>
+                <div className="text-white/70 text-sm">Complete</div>
               </div>
             </div>
 
-            {/* CTA */}
-            <div className="flex gap-4">
-              <button 
-                onClick={() => document.getElementById('donate')?.scrollIntoView({ behavior: 'smooth' })}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
-              >
-                Support Matt
-              </button>
-              <button 
-                onClick={() => document.getElementById('updates')?.scrollIntoView({ behavior: 'smooth' })}
-                className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-3 rounded-lg font-semibold transition-colors"
-              >
-                View Updates
-              </button>
+          </div>
+
+          {/* Right Content - Visual */}
+          <div className={`lg:w-1/2 mt-12 lg:mt-0 transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            <div className="relative">
+              
+              {/* Main Image Container */}
+              <div className="relative bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
+                {campaign.featured_image ? (
+                  <img 
+                    src={campaign.featured_image} 
+                    alt="Matt Raynor - From fisherman to developer"
+                    className="w-full h-96 object-cover rounded-2xl"
+                  />
+                ) : (
+                  <div className="w-full h-96 bg-gradient-to-br from-white/20 to-white/5 rounded-2xl flex flex-col items-center justify-center text-white">
+                    <div className="text-6xl mb-4">⚓</div>
+                    <h3 className="text-2xl font-bold mb-2">Matt's Story</h3>
+                    <p className="text-white/80 text-center max-w-xs">
+                      From commercial fishing to coding — a journey of transformation
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Floating Elements */}
+              <div className="absolute -top-6 -right-6 bg-[var(--ocean-sunrise)] rounded-2xl p-4 animate-pulse-slow">
+                <Code2 className="w-8 h-8 text-white" />
+              </div>
+              
+              <div className="absolute -bottom-6 -left-6 bg-white/20 backdrop-blur-sm rounded-2xl p-4 border border-white/30">
+                <div className="text-white text-sm font-medium">Self-taught</div>
+                <div className="text-white/70 text-xs">Full-stack developer</div>
+              </div>
             </div>
           </div>
 
-          {/* Right: Hero image placeholder */}
-          <div className="relative">
-            <div className="aspect-square bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center">
-              {campaign.featured_image ? (
-                <img 
-                  src={campaign.featured_image} 
-                  alt="Matt Raynor"
-                  className="w-full h-full object-cover rounded-2xl"
-                />
-              ) : (
-                <div className="text-center text-blue-600">
-                  <div className="text-6xl mb-4">📸</div>
-                  <p className="text-lg font-medium">Matt's Photo</p>
-                  <p className="text-sm">Coming soon</p>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       </div>
+
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+        <button 
+          onClick={() => document.getElementById('progress')?.scrollIntoView({ behavior: 'smooth' })}
+          className="text-white/60 hover:text-white transition-colors"
+        >
+          <ArrowDown className="w-6 h-6" />
+        </button>
+      </div>
+
+      {/* Wave Transition */}
+      <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white to-transparent"></div>
     </section>
   );
 };
@@ -1744,7 +1948,8 @@ export default HeroSection;
 
 # ==== src/components/sections/ProgressSection.tsx ====
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Target, TrendingUp, Users, Calendar } from 'lucide-react';
 import type { Campaign } from '../../types/index';
 
 interface ProgressSectionProps {
@@ -1752,36 +1957,203 @@ interface ProgressSectionProps {
 }
 
 const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [animatedProgress, setAnimatedProgress] = useState(0);
+  const [animatedAmount, setAnimatedAmount] = useState(0);
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  // Intersection Observer for scroll-triggered animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          setTimeout(() => {
+            animateProgress();
+            animateAmount();
+          }, 200);
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  const animateProgress = () => {
+    const duration = 2000;
+    const steps = 60;
+    const increment = campaign.progress_percentage / steps;
+    const stepDuration = duration / steps;
+    
+    let current = 0;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= campaign.progress_percentage) {
+        setAnimatedProgress(campaign.progress_percentage);
+        clearInterval(timer);
+      } else {
+        setAnimatedProgress(current);
+      }
+    }, stepDuration);
+  };
+
+  const animateAmount = () => {
+    const duration = 2000;
+    const steps = 60;
+    const increment = campaign.current_amount / steps;
+    const stepDuration = duration / steps;
+    
+    let current = 0;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= campaign.current_amount) {
+        setAnimatedAmount(campaign.current_amount);
+        clearInterval(timer);
+      } else {
+        setAnimatedAmount(Math.floor(current));
+      }
+    }, stepDuration);
+  };
+
+  const remainingAmount = campaign.goal_amount - campaign.current_amount;
+
   return (
-    <section className="py-16 bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Campaign Progress</h2>
-          <p className="text-gray-600">Every donation brings Matt closer to his goal</p>
+    <section id="progress" ref={sectionRef} className="section-spacing section-ocean-mist">
+      <div className="container-custom">
+        
+        {/* Section Header */}
+        <div className={`text-center mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div className="inline-flex items-center gap-2 bg-[var(--ocean-blue)]/10 rounded-full px-4 py-2 mb-4">
+            <TrendingUp className="w-4 h-4 text-[var(--ocean-blue)]" />
+            <span className="text-[var(--ocean-blue)] text-sm font-medium">Campaign Progress</span>
+          </div>
+          
+          <h2 className="mb-4">Every Step Counts</h2>
+          <p className="text-xl text-[var(--ocean-driftwood)] max-w-2xl mx-auto">
+            Your support brings me closer to securing accessible housing and continuing to inspire others through technology
+          </p>
         </div>
 
-        {/* Progress bar */}
-        <div className="bg-white rounded-2xl p-8 shadow-sm">
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-lg font-semibold text-gray-900">
-              ${campaign.current_amount.toLocaleString()}
-            </span>
-            <span className="text-lg font-semibold text-gray-900">
-              ${campaign.goal_amount.toLocaleString()}
-            </span>
-          </div>
+        {/* Main Progress Card */}
+        <div className={`card-ocean max-w-4xl mx-auto mb-12 transition-all duration-1000 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           
-          <div className="w-full bg-gray-200 rounded-full h-4 mb-4">
-            <div 
-              className="bg-gradient-to-r from-blue-500 to-blue-600 h-4 rounded-full transition-all duration-500"
-              style={{ width: `${Math.min(campaign.progress_percentage, 100)}%` }}
-            ></div>
+          {/* Progress Header */}
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8">
+            <div>
+              <h3 className="text-[var(--ocean-deep)] mb-2">Current Progress</h3>
+              <p className="text-[var(--ocean-driftwood)]">
+                Help me reach the next milestone in my journey
+              </p>
+            </div>
+            
+            <div className="mt-4 lg:mt-0 text-right">
+              <div className="text-3xl font-bold text-[var(--ocean-blue)]">
+                ${animatedAmount.toLocaleString()}
+              </div>
+              <div className="text-[var(--ocean-driftwood)] text-sm">
+                of ${campaign.goal_amount.toLocaleString()} goal
+              </div>
+            </div>
           </div>
+
+          {/* Progress Bar */}
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-3">
+              <span className="text-sm font-medium text-[var(--ocean-deep)]">
+                {Math.round(animatedProgress)}% Complete
+              </span>
+              <span className="text-sm text-[var(--ocean-driftwood)]">
+                ${remainingAmount.toLocaleString()} remaining
+              </span>
+            </div>
+            
+            <div className="progress-ocean">
+              <div 
+                className="progress-ocean-fill"
+                style={{ width: `${animatedProgress}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Updated Impact Statement */}
+          <div className="bg-[var(--ocean-mist)] rounded-xl p-6">
+            <div className="flex items-start gap-4">
+              <Target className="w-6 h-6 text-[var(--ocean-blue)] mt-1 flex-shrink-0" />
+              <div>
+                <h4 className="text-[var(--ocean-deep)] mb-2">What This Funding Achieves</h4>
+                <p className="text-[var(--ocean-driftwood)] mb-4">
+                  This campaign will help me secure accessible housing in Hampton Bays — the perfect location 
+                  next to my family, friends, and caregivers. The funding will enable me to live independently 
+                  with the accessibility features I need.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-[var(--ocean-blue)] rounded-full"></div>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Roll-in shower and bathroom modifications</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-[var(--ocean-teal)] rounded-full"></div>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Caregiver-friendly living accommodations</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-[var(--ocean-seafoam)] rounded-full"></div>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Strategic location near my support network</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-[var(--ocean-sunrise)] rounded-full"></div>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Complete accessibility setup for independence</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 transition-all duration-1000 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           
-          <div className="text-center">
-            <span className="text-2xl font-bold text-blue-600">
-              {Math.round(campaign.progress_percentage)}% Complete
-            </span>
+          {/* Donation Count */}
+          <div className="card-ocean text-center">
+            <div className="w-12 h-12 bg-[var(--ocean-blue)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Users className="w-6 h-6 text-[var(--ocean-blue)]" />
+            </div>
+            <div className="text-2xl font-bold text-[var(--ocean-deep)] mb-2">
+              47
+            </div>
+            <div className="text-[var(--ocean-driftwood)] text-sm">
+              Supporters
+            </div>
+          </div>
+
+          {/* Average Donation */}
+          <div className="card-ocean text-center">
+            <div className="w-12 h-12 bg-[var(--ocean-teal)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <TrendingUp className="w-6 h-6 text-[var(--ocean-teal)]" />
+            </div>
+            <div className="text-2xl font-bold text-[var(--ocean-deep)] mb-2">
+              ${Math.round(campaign.current_amount / 47)}
+            </div>
+            <div className="text-[var(--ocean-driftwood)] text-sm">
+              Average Gift
+            </div>
+          </div>
+
+          {/* Time Remaining */}
+          <div className="card-ocean text-center">
+            <div className="w-12 h-12 bg-[var(--ocean-sunrise)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Calendar className="w-6 h-6 text-[var(--ocean-sunrise)]" />
+            </div>
+            <div className="text-2xl font-bold text-[var(--ocean-deep)] mb-2">
+              Ongoing
+            </div>
+            <div className="text-[var(--ocean-driftwood)] text-sm">
+              No deadline
+            </div>
           </div>
         </div>
       </div>
@@ -1851,6 +2223,18 @@ export default ProgressSection;
 @tailwind components;
 @tailwind utilities;
 
+/* Ocean Theme CSS Variables */
+:root {
+  --ocean-deep: #0F172A;
+  --ocean-blue: #1E40AF;
+  --ocean-teal: #0891B2;
+  --ocean-seafoam: #06B6D4;
+  --ocean-mist: #F0F9FF;
+  --ocean-sunrise: #F59E0B;
+  --ocean-coral: #EF4444;
+  --ocean-driftwood: #6B7280;
+}
+
 /* Reset and base styles */
 * {
   box-sizing: border-box;
@@ -1864,30 +2248,142 @@ html, body, #root {
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  color: var(--ocean-deep);
+  background-color: #ffffff;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* Typography Scale */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  color: var(--ocean-deep);
+}
+
+h1 {
+  font-size: 4rem; /* 64px */
+  font-weight: 800;
+}
+
+h2 {
+  font-size: 3rem; /* 48px */
+}
+
+h3 {
+  font-size: 2rem; /* 32px */
+}
+
+h4 {
+  font-size: 1.5rem; /* 24px */
+}
+
+p {
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  color: var(--ocean-driftwood);
+}
+
+/* Mobile Typography */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 3rem; /* 48px */
+  }
+  
+  h2 {
+    font-size: 2.25rem; /* 36px */
+  }
+  
+  h3 {
+    font-size: 1.5rem; /* 24px */
+  }
+  
+  h4 {
+    font-size: 1.25rem; /* 20px */
+  }
+  
+  p {
+    font-size: 1rem; /* 16px */
+  }
+}
+
+/* Layout Spacing System */
+.section-spacing {
+  padding: 5rem 0; /* 80px */
+}
+
+.container-custom {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-custom {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-custom {
+    padding: 0 2rem;
+  }
 }
 
 /* Custom component classes */
 @layer components {
-  .btn-primary {
-    @apply bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
+  .btn-ocean-primary {
+    @apply bg-[var(--ocean-blue)] hover:bg-[var(--ocean-teal)] text-white font-semibold py-4 px-8 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
   }
   
-  .btn-secondary {
-    @apply bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 px-6 rounded-lg border border-gray-300 hover:border-gray-400 transition-all duration-200 shadow-sm hover:shadow-md;
+  .btn-ocean-secondary {
+    @apply bg-white hover:bg-[var(--ocean-mist)] text-[var(--ocean-blue)] font-semibold py-4 px-8 rounded-2xl border-2 border-[var(--ocean-blue)] hover:border-[var(--ocean-teal)] transition-all duration-300 shadow-md hover:shadow-lg;
   }
   
-  .btn-danger {
-    @apply bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl;
+  .card-ocean {
+    @apply bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border-0;
+  }
+  
+  .card-ocean:hover {
+    transform: translateY(-4px);
+  }
+  
+  .progress-ocean {
+    @apply bg-gray-200 rounded-full h-3 overflow-hidden;
+  }
+  
+  .progress-ocean-fill {
+    @apply h-full rounded-full bg-gradient-to-r from-[var(--ocean-blue)] to-[var(--ocean-teal)] transition-all duration-1000 ease-out;
+  }
+  
+  .input-ocean {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[var(--ocean-blue)] focus:border-transparent text-lg bg-white;
+  }
+  
+  .hero-ocean {
+    @apply bg-gradient-to-br from-[var(--ocean-deep)] via-[var(--ocean-blue)] to-[var(--ocean-teal)] text-white;
+  }
+  
+  .section-ocean-mist {
+    @apply bg-[var(--ocean-mist)];
+  }
+  
+  .text-ocean-primary {
+    @apply text-[var(--ocean-blue)];
+  }
+  
+  .text-ocean-secondary {
+    @apply text-[var(--ocean-teal)];
+  }
+  
+  .text-ocean-accent {
+    @apply text-[var(--ocean-sunrise)];
   }
 }
 
@@ -1901,8 +2397,117 @@ code {
   }
 }
 
+@keyframes wave-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes count-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-pulse-slow {
-  animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-wave-slide {
+  animation: wave-slide 3s ease-in-out infinite;
+}
+
+.animate-count-up {
+  animation: count-up 0.8s ease-out forwards;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--ocean-blue);
+  outline-offset: 2px;
+}
+
+/* Mobile touch targets */
+@media (max-width: 768px) {
+  button,
+  .btn-ocean-primary,
+  .btn-ocean-secondary {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .input-ocean {
+    min-height: 44px;
+  }
+}
+
+/* Loading states */
+.loading-skeleton {
+  @apply bg-gray-200 animate-pulse rounded;
+}
+
+.loading-skeleton::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: wave-slide 1.5s infinite;
+}
+
+/* Utility classes for ocean theme */
+.bg-ocean-gradient {
+  background: linear-gradient(135deg, var(--ocean-deep) 0%, var(--ocean-blue) 50%, var(--ocean-teal) 100%);
+}
+
+.bg-ocean-wave {
+  background: linear-gradient(45deg, var(--ocean-mist) 0%, var(--ocean-seafoam) 100%);
+}
+
+.text-shadow-ocean {
+  text-shadow: 2px 2px 4px rgba(15, 23, 42, 0.3);
+}
+
+/* Responsive image handling */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ocean-mist);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ocean-blue);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ocean-teal);
 }
 
 
