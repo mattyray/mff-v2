@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Heart, CreditCard, Shield, AlertCircle } from 'lucide-react';
+import { DonationAPI } from '../../services/api';
 import type { Campaign } from '../../types/index';
 
 interface DonationSectionProps {
@@ -13,31 +14,44 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
   const [message, setMessage] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const quickAmounts = [25, 50, 100, 250, 500, 1000];
 
   const handleQuickAmount = (value: number) => {
     setAmount(value.toString());
+    setError('');
   };
 
   const handleDonate = async () => {
-    if (!amount || parseFloat(amount) < 1) return;
+    if (!amount || parseFloat(amount) < 1) {
+      setError('Please enter a valid amount');
+      return;
+    }
     
     setLoading(true);
+    setError('');
+    
     try {
-      // TODO: Integrate with Stripe
-      console.log('Donation:', {
+      // Call your actual Stripe API
+      const response = await DonationAPI.createDonation({
         amount: parseFloat(amount),
-        donorName: isAnonymous ? '' : donorName,
-        donorEmail: isAnonymous ? '' : donorEmail,
+        donor_name: isAnonymous ? '' : donorName,
+        donor_email: isAnonymous ? '' : donorEmail,
         message,
-        isAnonymous
+        is_anonymous: isAnonymous
       });
       
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      alert('Donation processing will be implemented with Stripe!');
-    } catch (error) {
+      // Redirect to Stripe Checkout
+      if (response.checkout_url) {
+        window.location.href = response.checkout_url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+      
+    } catch (error: any) {
       console.error('Donation error:', error);
+      setError(error.message || 'Payment setup failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -62,6 +76,14 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
         <div className="max-w-2xl mx-auto">
           <div className="card-ocean">
             
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                <p className="text-red-700 text-sm">{error}</p>
+              </div>
+            )}
+            
             {/* Quick Amount Buttons */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-[var(--ocean-deep)] mb-3">
@@ -72,7 +94,8 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
                   <button
                     key={value}
                     onClick={() => handleQuickAmount(value)}
-                    className={`py-3 px-4 rounded-xl border-2 transition-all duration-300 ${
+                    disabled={loading}
+                    className={`py-3 px-4 rounded-xl border-2 transition-all duration-300 disabled:opacity-50 ${
                       amount === value.toString()
                         ? 'border-[var(--ocean-blue)] bg-[var(--ocean-blue)]/10 text-[var(--ocean-blue)]'
                         : 'border-gray-200 hover:border-[var(--ocean-blue)]/50'
@@ -96,7 +119,11 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
                 <input
                   type="number"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => {
+                    setAmount(e.target.value);
+                    setError('');
+                  }}
+                  disabled={loading}
                   placeholder="0.00"
                   className="input-ocean pl-8"
                 />
@@ -113,7 +140,7 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
                   type="text"
                   value={donorName}
                   onChange={(e) => setDonorName(e.target.value)}
-                  disabled={isAnonymous}
+                  disabled={isAnonymous || loading}
                   placeholder="Your name"
                   className={`input-ocean ${isAnonymous ? 'opacity-50' : ''}`}
                 />
@@ -127,7 +154,7 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
                   type="email"
                   value={donorEmail}
                   onChange={(e) => setDonorEmail(e.target.value)}
-                  disabled={isAnonymous}
+                  disabled={isAnonymous || loading}
                   placeholder="your@email.com"
                   className={`input-ocean ${isAnonymous ? 'opacity-50' : ''}`}
                 />
@@ -140,6 +167,7 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
+                  disabled={loading}
                   placeholder="Share a message of support..."
                   rows={3}
                   className="input-ocean resize-none"
@@ -151,6 +179,7 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
                   type="checkbox"
                   checked={isAnonymous}
                   onChange={(e) => setIsAnonymous(e.target.checked)}
+                  disabled={loading}
                   className="w-5 h-5 text-[var(--ocean-blue)] border-gray-300 rounded focus:ring-[var(--ocean-blue)]"
                 />
                 <span className="text-[var(--ocean-deep)] text-sm">
