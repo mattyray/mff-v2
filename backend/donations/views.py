@@ -1,13 +1,18 @@
 from rest_framework import generics, status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 import stripe
+import json
+import logging
 
 from .models import Campaign, Donation, CampaignUpdate
-from .serializers import CampaignSerializer, DonationSerializer, CampaignUpdateSerializer
+from .serializers import CampaignSerializer, DonationSerializer, CampaignUpdateSerializer, CreateDonationSerializer
 
+logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class CurrentCampaignView(generics.RetrieveAPIView):
@@ -36,59 +41,108 @@ class CampaignUpdatesView(generics.ListAPIView):
         return campaign.updates.all() if campaign else CampaignUpdate.objects.none()
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def create_donation(request):
-    amount = request.data.get('amount')
-    campaign = Campaign.objects.filter(is_active=True).first()
-    
-    if not amount or not campaign:
-        return Response({'error': 'Missing amount or no active campaign'}, status=400)
-    
-    # Create Stripe session
-    session = stripe.checkout.Session.create(
-        payment_method_types=['card'],
-        line_items=[{
-            'price_data': {
-                'currency': 'usd',
-                'product_data': {'name': f'Donation to {campaign.title}'},
-                'unit_amount': int(float(amount) * 100),
-            },
-            'quantity': 1,
-        }],
-        mode='payment',
-        success_url=f"{settings.FRONTEND_URL}/success",
-        cancel_url=f"{settings.FRONTEND_URL}/cancel",
-    )
-    
-    # Save donation
-    Donation.objects.create(
-        campaign=campaign,
-        amount=amount,
-        donor_name=request.data.get('donor_name', ''),
-        donor_email=request.data.get('donor_email', ''),
-        message=request.data.get('message', ''),
-        stripe_session_id=session.id,
-        payment_status='pending'
-    )
-    
-    return Response({'checkout_url': session.url})
+    try:
+        serializer = CreateDonationSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({'error': 'Invalid data', 'details': serializer.errors}, status=400)
+        
+        data = serializer.validated_data
+        campaign = Campaign.objects.filter(is_active=True).first()
+        if not campaign:
+            return Response({'error': 'No active campaign'}, status=404)
+        
+        # Create donation record
+        donation = Donation.objects.create(
+            campaign=campaign,
+            amount=data['amount'],
+            donor_name=data.get('donor_name', ''),
+            donor_email=data.get('donor_email', ''),
+            message=data.get('message', ''),
+            is_anonymous=data.get('is_anonymous', False),
+            stripe_session_id='',
+            payment_status='pending'
+        )
+        
+        # Create Stripe session with metadata
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {'name': f'Donation to {campaign.title}'},
+                    'unit_amount': int(float(data['amount']) * 100),
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=f"{settings.FRONTEND_URL}/success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{settings.FRONTEND_URL}/cancel",
+            metadata={'donation_id': str(donation.id)}
+        )
+        
+        # Update donation with session ID
+        donation.stripe_session_id = session.id
+        donation.save()
+        
+        return Response({'checkout_url': session.url})
+        
+    except Exception as e:
+        logger.error(f"Donation creation failed: {e}")
+        return Response({'error': 'Payment setup failed'}, status=500)
 
+@csrf_exempt
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def stripe_webhook(request):
-    """Handle payment completion"""
-    # TODO: Add webhook signature verification for production
-    event = stripe.Webhook.construct_event(
-        request.body, 
-        request.META.get('HTTP_STRIPE_SIGNATURE'),
-        settings.STRIPE_WEBHOOK_SECRET
-    )
+    payload = request.body
+    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
+    
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+        )
+    except Exception as e:
+        logger.error(f"Webhook signature verification failed: {e}")
+        return Response({'error': 'Invalid signature'}, status=400)
     
     if event['type'] == 'checkout.session.completed':
-        session_id = event['data']['object']['id']
-        try:
-            donation = Donation.objects.get(stripe_session_id=session_id)
-            donation.payment_status = 'completed'
-            donation.save()  # Auto-updates campaign total
-        except Donation.DoesNotExist:
-            pass
+        session = event['data']['object']
+        donation_id = session['metadata'].get('donation_id')
+        
+        if donation_id:
+            try:
+                donation = Donation.objects.get(id=donation_id)
+                donation.payment_status = 'completed'
+                donation.stripe_payment_intent_id = session.get('payment_intent', '')
+                donation.save()
+                
+                logger.info(f"Donation {donation_id} completed: ${donation.amount}")
+                
+            except Donation.DoesNotExist:
+                logger.error(f"Donation {donation_id} not found")
     
     return Response({'status': 'success'})
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def payment_success(request):
+    session_id = request.GET.get('session_id')
+    if session_id:
+        try:
+            session = stripe.checkout.Session.retrieve(session_id)
+            donation_id = session['metadata'].get('donation_id')
+            return Response({
+                'status': 'success',
+                'donation_id': donation_id,
+                'amount': session['amount_total'] / 100
+            })
+        except:
+            pass
+    return Response({'status': 'success'})
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def payment_cancel(request):
+    return Response({'status': 'cancelled', 'message': 'Payment was cancelled'})
