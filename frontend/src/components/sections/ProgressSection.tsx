@@ -130,32 +130,33 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
             </div>
           </div>
 
-          {/* Impact Statement */}
+          {/* Updated Impact Statement */}
           <div className="bg-[var(--ocean-mist)] rounded-xl p-6">
             <div className="flex items-start gap-4">
               <Target className="w-6 h-6 text-[var(--ocean-blue)] mt-1 flex-shrink-0" />
               <div>
                 <h4 className="text-[var(--ocean-deep)] mb-2">What This Funding Achieves</h4>
                 <p className="text-[var(--ocean-driftwood)] mb-4">
-                  This campaign will help me secure accessible housing that allows me to continue coding, 
-                  creating content, and inspiring others in the disability community.
+                  This campaign will help me secure accessible housing in Hampton Bays — the perfect location 
+                  next to my family, friends, and caregivers. The funding will enable me to live independently 
+                  with the accessibility features I need.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[var(--ocean-blue)] rounded-full"></div>
-                    <span className="text-sm text-[var(--ocean-driftwood)]">Accessible workspace setup</span>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Roll-in shower and bathroom modifications</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[var(--ocean-teal)] rounded-full"></div>
-                    <span className="text-sm text-[var(--ocean-driftwood)]">Continued content creation</span>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Caregiver-friendly living accommodations</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[var(--ocean-seafoam)] rounded-full"></div>
-                    <span className="text-sm text-[var(--ocean-driftwood)]">Community inspiration</span>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Strategic location near my support network</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[var(--ocean-sunrise)] rounded-full"></div>
-                    <span className="text-sm text-[var(--ocean-driftwood)]">Technology advocacy</span>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Complete accessibility setup for independence</span>
                   </div>
                 </div>
               </div>

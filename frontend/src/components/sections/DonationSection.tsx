@@ -126,4 +126,67 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
                 <input
                   type="email"
                   value={donorEmail}
-                  onChange={(e) => setDonorEmail(e.target.value)
+                  onChange={(e) => setDonorEmail(e.target.value)}
+                  disabled={isAnonymous}
+                  placeholder="your@email.com"
+                  className={`input-ocean ${isAnonymous ? 'opacity-50' : ''}`}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--ocean-deep)] mb-1">
+                  Message (optional)
+                </label>
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Share a message of support..."
+                  rows={3}
+                  className="input-ocean resize-none"
+                />
+              </div>
+
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isAnonymous}
+                  onChange={(e) => setIsAnonymous(e.target.checked)}
+                  className="w-5 h-5 text-[var(--ocean-blue)] border-gray-300 rounded focus:ring-[var(--ocean-blue)]"
+                />
+                <span className="text-[var(--ocean-deep)] text-sm">
+                  Make this donation anonymous
+                </span>
+              </label>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              onClick={handleDonate}
+              disabled={!amount || parseFloat(amount) < 1 || loading}
+              className={`w-full btn-ocean-primary text-lg ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {loading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  Processing...
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2">
+                  <CreditCard className="w-5 h-5" />
+                  Donate ${amount || '0'}
+                </div>
+              )}
+            </button>
+
+            <div className="flex items-center justify-center gap-2 mt-4 text-sm text-[var(--ocean-driftwood)]">
+              <Shield className="w-4 h-4" />
+              Secure payment processing by Stripe
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default DonationSection;

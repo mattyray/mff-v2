@@ -47,9 +47,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
 
   return (
     <section className="relative min-h-screen overflow-hidden hero-ocean">
-      {/* Animated Background Pattern */}
+      {/* Simple Background Pattern */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] animate-pulse-slow"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent animate-pulse-slow"></div>
       </div>
 
       {/* Main Content */}
@@ -71,11 +71,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
               <span className="block text-[var(--ocean-seafoam)]">Source Code</span>
             </h1>
 
-            {/* Subtitle */}
+            {/* Updated Subtitle */}
             <p className="text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed">
-              After a life-changing diving accident, I transformed from commercial fisherman to 
-              self-taught developer — coding with a stylus, building apps, and inspiring others 
-              through resilience and determination.
+              I'm working diligently towards a life as a successful disabled person outside the nursing home. 
+              My career is progressing every day, but I need your help raising money to renovate a bathroom 
+              for my new apartment. It's the last thing standing in my way — your donations will help add 
+              an element of security while I establish my new life.
             </p>
 
             {/* Story Hook */}

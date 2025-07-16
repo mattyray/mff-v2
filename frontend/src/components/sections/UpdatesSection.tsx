@@ -66,7 +66,7 @@ const UpdatesSection: React.FC = () => {
                 <p className="text-[var(--ocean-driftwood)] mb-4">{update.content}</p>
                 
                 {update.video_url && (
-                  
+                  <a
                     href={update.video_url}
                     target="_blank"
                     rel="noopener noreferrer"
