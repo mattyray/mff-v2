@@ -12,27 +12,51 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
   const [animatedAmount, setAnimatedAmount] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  // Intersection Observer for scroll-triggered animations
+  // 🔧 FIXED: Better Intersection Observer for mobile
   useEffect(() => {
+    // Check if we're on mobile
+    const isMobile = window.innerWidth <= 768;
+    
     const observer = new IntersectionObserver(
       ([entry]) => {
+        console.log('🔍 Progress section intersection:', entry.isIntersecting, entry.intersectionRatio);
+        
         if (entry.isIntersecting) {
           setIsVisible(true);
+          // Shorter delay on mobile for faster response
+          const delay = isMobile ? 100 : 200;
           setTimeout(() => {
             animateProgress();
             animateAmount();
-          }, 200);
+          }, delay);
         }
       },
-      { threshold: 0.3 }
+      { 
+        threshold: isMobile ? 0.05 : 0.3,    // Much lower threshold on mobile
+        rootMargin: isMobile ? '100px 0px' : '50px 0px'  // Trigger much earlier on mobile
+      }
     );
 
     if (sectionRef.current) {
       observer.observe(sectionRef.current);
+      console.log('🔍 Progress section observer attached');
     }
 
-    return () => observer.disconnect();
-  }, []);
+    // 🔧 FALLBACK: If no intersection after 2 seconds, trigger anyway
+    const fallbackTimer = setTimeout(() => {
+      if (!isVisible) {
+        console.log('🔧 Fallback: Triggering progress animations');
+        setIsVisible(true);
+        animateProgress();
+        animateAmount();
+      }
+    }, 2000);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(fallbackTimer);
+    };
+  }, [isVisible]);
 
   const animateProgress = () => {
     const duration = 2000;
@@ -130,7 +154,7 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
             </div>
           </div>
 
-          {/* Updated Impact Statement */}
+          {/* Impact Statement */}
           <div className="bg-[var(--ocean-mist)] rounded-xl p-6">
             <div className="flex items-start gap-4">
               <Target className="w-6 h-6 text-[var(--ocean-blue)] mt-1 flex-shrink-0" />
