@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Ocean Theme CSS Variables */
+:root {
+  --ocean-deep: #0F172A;
+  --ocean-blue: #1E40AF;
+  --ocean-teal: #0891B2;
+  --ocean-seafoam: #06B6D4;
+  --ocean-mist: #F0F9FF;
+  --ocean-sunrise: #F59E0B;
+  --ocean-coral: #EF4444;
+  --ocean-driftwood: #6B7280;
+}
+
 /* Reset and base styles */
 * {
   box-sizing: border-box;
@@ -15,30 +27,142 @@ html, body, #root {
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  color: var(--ocean-deep);
+  background-color: #ffffff;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* Typography Scale */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  color: var(--ocean-deep);
+}
+
+h1 {
+  font-size: 4rem; /* 64px */
+  font-weight: 800;
+}
+
+h2 {
+  font-size: 3rem; /* 48px */
+}
+
+h3 {
+  font-size: 2rem; /* 32px */
+}
+
+h4 {
+  font-size: 1.5rem; /* 24px */
+}
+
+p {
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  color: var(--ocean-driftwood);
+}
+
+/* Mobile Typography */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 3rem; /* 48px */
+  }
+  
+  h2 {
+    font-size: 2.25rem; /* 36px */
+  }
+  
+  h3 {
+    font-size: 1.5rem; /* 24px */
+  }
+  
+  h4 {
+    font-size: 1.25rem; /* 20px */
+  }
+  
+  p {
+    font-size: 1rem; /* 16px */
+  }
+}
+
+/* Layout Spacing System */
+.section-spacing {
+  padding: 5rem 0; /* 80px */
+}
+
+.container-custom {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-custom {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-custom {
+    padding: 0 2rem;
+  }
 }
 
 /* Custom component classes */
 @layer components {
-  .btn-primary {
-    @apply bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
+  .btn-ocean-primary {
+    @apply bg-[var(--ocean-blue)] hover:bg-[var(--ocean-teal)] text-white font-semibold py-4 px-8 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
   }
   
-  .btn-secondary {
-    @apply bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 px-6 rounded-lg border border-gray-300 hover:border-gray-400 transition-all duration-200 shadow-sm hover:shadow-md;
+  .btn-ocean-secondary {
+    @apply bg-white hover:bg-[var(--ocean-mist)] text-[var(--ocean-blue)] font-semibold py-4 px-8 rounded-2xl border-2 border-[var(--ocean-blue)] hover:border-[var(--ocean-teal)] transition-all duration-300 shadow-md hover:shadow-lg;
   }
   
-  .btn-danger {
-    @apply bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl;
+  .card-ocean {
+    @apply bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 border-0;
+  }
+  
+  .card-ocean:hover {
+    transform: translateY(-4px);
+  }
+  
+  .progress-ocean {
+    @apply bg-gray-200 rounded-full h-3 overflow-hidden;
+  }
+  
+  .progress-ocean-fill {
+    @apply h-full rounded-full bg-gradient-to-r from-[var(--ocean-blue)] to-[var(--ocean-teal)] transition-all duration-1000 ease-out;
+  }
+  
+  .input-ocean {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[var(--ocean-blue)] focus:border-transparent text-lg bg-white;
+  }
+  
+  .hero-ocean {
+    @apply bg-gradient-to-br from-[var(--ocean-deep)] via-[var(--ocean-blue)] to-[var(--ocean-teal)] text-white;
+  }
+  
+  .section-ocean-mist {
+    @apply bg-[var(--ocean-mist)];
+  }
+  
+  .text-ocean-primary {
+    @apply text-[var(--ocean-blue)];
+  }
+  
+  .text-ocean-secondary {
+    @apply text-[var(--ocean-teal)];
+  }
+  
+  .text-ocean-accent {
+    @apply text-[var(--ocean-sunrise)];
   }
 }
 
@@ -52,6 +176,115 @@ code {
   }
 }
 
+@keyframes wave-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes count-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-pulse-slow {
-  animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-wave-slide {
+  animation: wave-slide 3s ease-in-out infinite;
+}
+
+.animate-count-up {
+  animation: count-up 0.8s ease-out forwards;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--ocean-blue);
+  outline-offset: 2px;
+}
+
+/* Mobile touch targets */
+@media (max-width: 768px) {
+  button,
+  .btn-ocean-primary,
+  .btn-ocean-secondary {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .input-ocean {
+    min-height: 44px;
+  }
+}
+
+/* Loading states */
+.loading-skeleton {
+  @apply bg-gray-200 animate-pulse rounded;
+}
+
+.loading-skeleton::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: wave-slide 1.5s infinite;
+}
+
+/* Utility classes for ocean theme */
+.bg-ocean-gradient {
+  background: linear-gradient(135deg, var(--ocean-deep) 0%, var(--ocean-blue) 50%, var(--ocean-teal) 100%);
+}
+
+.bg-ocean-wave {
+  background: linear-gradient(45deg, var(--ocean-mist) 0%, var(--ocean-seafoam) 100%);
+}
+
+.text-shadow-ocean {
+  text-shadow: 2px 2px 4px rgba(15, 23, 42, 0.3);
+}
+
+/* Responsive image handling */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ocean-mist);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ocean-blue);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ocean-teal);
 }
