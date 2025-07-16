@@ -18,7 +18,6 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          // Start animations after a brief delay
           setTimeout(() => {
             animateProgress();
             animateAmount();
@@ -72,9 +71,6 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
   };
 
   const remainingAmount = campaign.goal_amount - campaign.current_amount;
-  const daysRemaining = campaign.end_date 
-    ? Math.ceil((new Date(campaign.end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
-    : null;
 
   return (
     <section id="progress" ref={sectionRef} className="section-spacing section-ocean-mist">
@@ -176,14 +172,10 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
               <Users className="w-6 h-6 text-[var(--ocean-blue)]" />
             </div>
             <div className="text-2xl font-bold text-[var(--ocean-deep)] mb-2">
-              {/* This would come from actual donation count */}
               47
             </div>
             <div className="text-[var(--ocean-driftwood)] text-sm">
               Supporters
-            </div>
-            <div className="text-xs text-[var(--ocean-driftwood)] mt-1">
-              Join the community
             </div>
           </div>
 
@@ -198,9 +190,6 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
             <div className="text-[var(--ocean-driftwood)] text-sm">
               Average Gift
             </div>
-            <div className="text-xs text-[var(--ocean-driftwood)] mt-1">
-              Every amount helps
-            </div>
           </div>
 
           {/* Time Remaining */}
@@ -209,45 +198,11 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
               <Calendar className="w-6 h-6 text-[var(--ocean-sunrise)]" />
             </div>
             <div className="text-2xl font-bold text-[var(--ocean-deep)] mb-2">
-              {daysRemaining || '∞'}
+              Ongoing
             </div>
             <div className="text-[var(--ocean-driftwood)] text-sm">
-              {daysRemaining ? 'Days Left' : 'Ongoing'}
+              No deadline
             </div>
-            <div className="text-xs text-[var(--ocean-driftwood)] mt-1">
-              No deadline pressure
-            </div>
-          </div>
-        </div>
-
-        {/* Milestone Indicators */}
-        <div className={`mt-16 transition-all duration-1000 delay-600 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          <div className="text-center mb-8">
-            <h3 className="text-[var(--ocean-deep)] mb-2">Campaign Milestones</h3>
-            <p className="text-[var(--ocean-driftwood)]">
-              Track the journey toward my goal
-            </p>
-          </div>
-          
-          <div className="flex justify-between items-center max-w-2xl mx-auto">
-            {[
-              { amount: 5000, label: "First Steps", reached: campaign.current_amount >= 5000 },
-              { amount: 12500, label: "Halfway There", reached: campaign.current_amount >= 12500 },
-              { amount: 20000, label: "Almost Ready", reached: campaign.current_amount >= 20000 },
-              { amount: 25000, label: "Goal Reached!", reached: campaign.current_amount >= 25000 }
-            ].map((milestone, index) => (
-              <div key={index} className="flex flex-col items-center">
-                <div className={`w-4 h-4 rounded-full border-2 transition-all duration-500 ${
-                  milestone.reached 
-                    ? 'bg-[var(--ocean-blue)] border-[var(--ocean-blue)]' 
-                    : 'bg-white border-gray-300'
-                }`} />
-                <div className="text-xs text-[var(--ocean-driftwood)] mt-2 text-center">
-                  <div className="font-medium">${milestone.amount/1000}K</div>
-                  <div className="hidden sm:block">{milestone.label}</div>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </div>

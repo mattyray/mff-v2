@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { DonationAPI } from '../services/api';
 import type { Campaign } from '../types/index';
 
-// Section components we'll build
 import HeroSection from './sections/HeroSection';
 import ProgressSection from './sections/ProgressSection';
 import DonationSection from './sections/DonationSection';
@@ -32,8 +31,8 @@ const CampaignPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading campaign...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--ocean-blue)] mx-auto mb-4"></div>
+          <p className="text-[var(--ocean-driftwood)]">Loading campaign...</p>
         </div>
       </div>
     );
@@ -43,7 +42,7 @@ const CampaignPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600">No active campaign found.</p>
+          <p className="text-[var(--ocean-driftwood)]">No active campaign found.</p>
         </div>
       </div>
     );
@@ -51,19 +50,10 @@ const CampaignPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero - Matt's story + campaign intro */}
       <HeroSection campaign={campaign} />
-      
-      {/* Progress - Visual progress + stats */}
       <ProgressSection campaign={campaign} />
-      
-      {/* Donation Form */}
       <DonationSection campaign={campaign} />
-      
-      {/* Video Updates Feed */}
-      <UpdatesSection campaign={campaign} />
-      
-      {/* Recent Supporters */}
+      <UpdatesSection />
       <SupportersSection />
     </div>
   );
