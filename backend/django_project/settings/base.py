@@ -14,6 +14,9 @@ import cloudinary.api
 # Initialize environment variables
 env = Env()
 
+FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:5173")
+
+
 # Cloudinary setup
 cloudinary_url = env('CLOUDINARY_URL', default='')
 if cloudinary_url:
@@ -262,8 +265,8 @@ REST_FRAMEWORK = {
 # CORS (only for non-Celery)
 if not IS_CELERY:
     CORS_ALLOWED_ORIGINS = [
-        "http://localhost:5174",  # ✅ Your actual frontend port
-        "http://127.0.0.1:5174",  # ✅ Same but with 127.0.0.1
+        "http://localhost:5173",  # ✅ Your actual frontend port
+        "http://127.0.0.1:5173",  # ✅ Same but with 127.0.0.1
         # Production Netlify domain will be added here later
     ]
     CORS_ALLOW_CREDENTIALS = True
