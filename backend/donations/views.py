@@ -44,6 +44,7 @@ class CampaignUpdatesView(generics.ListAPIView):
 @permission_classes([AllowAny])
 def create_donation(request):
     try:
+        # Validate input
         serializer = CreateDonationSerializer(data=request.data)
         if not serializer.is_valid():
             return Response({'error': 'Invalid data', 'details': serializer.errors}, status=400)
@@ -53,19 +54,7 @@ def create_donation(request):
         if not campaign:
             return Response({'error': 'No active campaign'}, status=404)
         
-        # Create donation record
-        donation = Donation.objects.create(
-            campaign=campaign,
-            amount=data['amount'],
-            donor_name=data.get('donor_name', ''),
-            donor_email=data.get('donor_email', ''),
-            message=data.get('message', ''),
-            is_anonymous=data.get('is_anonymous', False),
-            stripe_session_id='',
-            payment_status='pending'
-        )
-        
-        # Create Stripe session with metadata
+        # CREATE STRIPE SESSION FIRST (before database record)
         session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
@@ -79,12 +68,25 @@ def create_donation(request):
             mode='payment',
             success_url=f"{settings.FRONTEND_URL}/success?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{settings.FRONTEND_URL}/cancel",
-            metadata={'donation_id': str(donation.id)}
+            metadata={
+                'campaign_id': str(campaign.id),
+                'amount': str(data['amount']),
+                'donor_name': data.get('donor_name', ''),
+                'donor_email': data.get('donor_email', ''),
+            }
         )
         
-        # Update donation with session ID
-        donation.stripe_session_id = session.id
-        donation.save()
+        # NOW create donation record with actual session ID
+        donation = Donation.objects.create(
+            campaign=campaign,
+            amount=data['amount'],
+            donor_name=data.get('donor_name', ''),
+            donor_email=data.get('donor_email', ''),
+            message=data.get('message', ''),
+            is_anonymous=data.get('is_anonymous', False),
+            stripe_session_id=session.id,  # Real session ID, not empty string
+            payment_status='pending'
+        )
         
         return Response({'checkout_url': session.url})
         
