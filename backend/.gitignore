@@ -1,2 +1,19 @@
 staticfiles/
 .env
+# Add these lines to backend/.gitignore
+.env
+.env.local
+.env.development
+.env.production
+
+# Database
+*.db
+*.sqlite3
+
+# Media files (if using local storage)
+media/
+uploads/
+
+# Static files
+staticfiles/
+static_collected/
