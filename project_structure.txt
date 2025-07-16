@@ -54,7 +54,7 @@
 │   │   └── views.py
 │   ├── scripts
 │   │   ├── back_export.py
-│   │   └── donation_platform_snapshot_20250715_142502.txt
+│   │   └── donation_platform_snapshot.txt
 │   ├── templates
 │   │   ├── account
 │   │   │   ├── dashboard.html
