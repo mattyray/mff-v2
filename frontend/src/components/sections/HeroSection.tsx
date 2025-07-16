@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { ArrowDown, Play, Heart, Code2 } from 'lucide-react';
 import type { Campaign } from '../../types/index';
 
 interface HeroSectionProps {
@@ -6,89 +7,185 @@ interface HeroSectionProps {
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
+  const [currentAmount, setCurrentAmount] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Animate numbers on mount
+  useEffect(() => {
+    setIsVisible(true);
+    const timer = setTimeout(() => {
+      animateNumber(campaign.current_amount);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [campaign.current_amount]);
+
+  const animateNumber = (target: number) => {
+    const duration = 2000;
+    const steps = 60;
+    const increment = target / steps;
+    const stepDuration = duration / steps;
+    
+    let current = 0;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        setCurrentAmount(target);
+        clearInterval(timer);
+      } else {
+        setCurrentAmount(Math.floor(current));
+      }
+    }, stepDuration);
+  };
+
+  const handleDonateClick = () => {
+    document.getElementById('donate')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleLearnMoreClick = () => {
+    document.getElementById('updates')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
-    <section className="relative bg-gradient-to-br from-blue-50 to-white py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <section className="relative min-h-screen overflow-hidden hero-ocean">
+      {/* Animated Background Pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] animate-pulse-slow"></div>
+      </div>
+
+      {/* Main Content */}
+      <div className="relative z-10 container-custom">
+        <div className="flex flex-col lg:flex-row items-center justify-between min-h-screen py-20">
           
-          {/* Left: Matt's story */}
-          <div>
-            <div className="text-sm font-medium text-blue-600 mb-4">
-              SUPPORT MATT'S JOURNEY
-            </div>
+          {/* Left Content - Story */}
+          <div className={`lg:w-1/2 lg:pr-12 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-              {campaign.title}
-            </h1>
-            
-            <div className="prose prose-lg text-gray-600 mb-8">
-              <p className="text-xl mb-4">
-                From commercial fisherman to self-taught developer after a life-changing diving accident.
-              </p>
-              <p>
-                {campaign.description}
-              </p>
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
+              <Heart className="w-4 h-4 text-[var(--ocean-sunrise)]" />
+              <span className="text-white/90 text-sm font-medium">Supporting Matt's Journey</span>
             </div>
 
-            {/* Quick stats */}
-            <div className="grid grid-cols-3 gap-6 mb-8">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  ${campaign.current_amount.toLocaleString()}
+            {/* Main Headline */}
+            <h1 className="text-white mb-6 text-shadow-ocean">
+              From Sea to 
+              <span className="block text-[var(--ocean-seafoam)]">Source Code</span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed">
+              After a life-changing diving accident, I transformed from commercial fisherman to 
+              self-taught developer — coding with a stylus, building apps, and inspiring others 
+              through resilience and determination.
+            </p>
+
+            {/* Story Hook */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8">
+              <div className="flex items-start gap-4">
+                <Code2 className="w-6 h-6 text-[var(--ocean-seafoam)] mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="text-white font-semibold mb-2">The Challenge</h3>
+                  <p className="text-white/80 text-base">
+                    {campaign.description}
+                  </p>
                 </div>
-                <div className="text-sm text-gray-600">Raised</div>
               </div>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+              <button 
+                onClick={handleDonateClick}
+                className="btn-ocean-primary bg-white text-[var(--ocean-blue)] hover:bg-[var(--ocean-mist)] shadow-2xl"
+              >
+                <Heart className="w-5 h-5 mr-2" />
+                Support My Journey
+              </button>
+              
+              <button 
+                onClick={handleLearnMoreClick}
+                className="btn-ocean-secondary bg-transparent border-white text-white hover:bg-white/10"
+              >
+                <Play className="w-5 h-5 mr-2" />
+                Watch My Story
+              </button>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-3 gap-6">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
+                <div className={`text-3xl font-bold text-white mb-1 transition-all duration-1000 ${isVisible ? 'animate-count-up' : ''}`}>
+                  ${currentAmount.toLocaleString()}
+                </div>
+                <div className="text-white/70 text-sm">Raised</div>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-3xl font-bold text-white mb-1">
                   ${campaign.goal_amount.toLocaleString()}
                 </div>
-                <div className="text-sm text-gray-600">Goal</div>
+                <div className="text-white/70 text-sm">Goal</div>
               </div>
+              
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
+                <div className="text-3xl font-bold text-[var(--ocean-sunrise)] mb-1">
                   {Math.round(campaign.progress_percentage)}%
                 </div>
-                <div className="text-sm text-gray-600">Complete</div>
+                <div className="text-white/70 text-sm">Complete</div>
               </div>
             </div>
 
-            {/* CTA */}
-            <div className="flex gap-4">
-              <button 
-                onClick={() => document.getElementById('donate')?.scrollIntoView({ behavior: 'smooth' })}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
-              >
-                Support Matt
-              </button>
-              <button 
-                onClick={() => document.getElementById('updates')?.scrollIntoView({ behavior: 'smooth' })}
-                className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-3 rounded-lg font-semibold transition-colors"
-              >
-                View Updates
-              </button>
+          </div>
+
+          {/* Right Content - Visual */}
+          <div className={`lg:w-1/2 mt-12 lg:mt-0 transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            <div className="relative">
+              
+              {/* Main Image Container */}
+              <div className="relative bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
+                {campaign.featured_image ? (
+                  <img 
+                    src={campaign.featured_image} 
+                    alt="Matt Raynor - From fisherman to developer"
+                    className="w-full h-96 object-cover rounded-2xl"
+                  />
+                ) : (
+                  <div className="w-full h-96 bg-gradient-to-br from-white/20 to-white/5 rounded-2xl flex flex-col items-center justify-center text-white">
+                    <div className="text-6xl mb-4">⚓</div>
+                    <h3 className="text-2xl font-bold mb-2">Matt's Story</h3>
+                    <p className="text-white/80 text-center max-w-xs">
+                      From commercial fishing to coding — a journey of transformation
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Floating Elements */}
+              <div className="absolute -top-6 -right-6 bg-[var(--ocean-sunrise)] rounded-2xl p-4 animate-pulse-slow">
+                <Code2 className="w-8 h-8 text-white" />
+              </div>
+              
+              <div className="absolute -bottom-6 -left-6 bg-white/20 backdrop-blur-sm rounded-2xl p-4 border border-white/30">
+                <div className="text-white text-sm font-medium">Self-taught</div>
+                <div className="text-white/70 text-xs">Full-stack developer</div>
+              </div>
             </div>
           </div>
 
-          {/* Right: Hero image placeholder */}
-          <div className="relative">
-            <div className="aspect-square bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center">
-              {campaign.featured_image ? (
-                <img 
-                  src={campaign.featured_image} 
-                  alt="Matt Raynor"
-                  className="w-full h-full object-cover rounded-2xl"
-                />
-              ) : (
-                <div className="text-center text-blue-600">
-                  <div className="text-6xl mb-4">📸</div>
-                  <p className="text-lg font-medium">Matt's Photo</p>
-                  <p className="text-sm">Coming soon</p>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       </div>
+
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+        <button 
+          onClick={() => document.getElementById('progress')?.scrollIntoView({ behavior: 'smooth' })}
+          className="text-white/60 hover:text-white transition-colors"
+        >
+          <ArrowDown className="w-6 h-6" />
+        </button>
+      </div>
+
+      {/* Wave Transition */}
+      <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white to-transparent"></div>
     </section>
   );
 };
