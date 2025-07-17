@@ -9,7 +9,8 @@ class CampaignSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'description', 'goal_amount', 
             'current_amount', 'progress_percentage', 'is_active',
-            'start_date', 'end_date', 'featured_image'
+            'start_date', 'end_date', 'featured_image', 'featured_video_url',
+            'created_at', 'updated_at'
         ]
 
 class DonationSerializer(serializers.ModelSerializer):
