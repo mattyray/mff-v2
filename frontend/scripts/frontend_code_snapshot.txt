@@ -658,16 +658,79 @@ export default {
 # ==== src/App.tsx ====
 
 import React from 'react';
+import { CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
 import CampaignPage from './components/CampaignPage';
 import UserMenu from './components/UserMenu';
 import { useAuth } from './hooks/useAuth';
 
 function App() {
   const { checkAuthStatus } = useAuth();
+  
+  // Simple routing based on URL path
+  const path = window.location.pathname;
+  const searchParams = new URLSearchParams(window.location.search);
 
+  // Success page
+  if (path === '/success') {
+    return (
+      <div className="min-h-screen bg-[var(--ocean-mist)] flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-10 h-10 text-green-500" />
+          </div>
+          
+          <h1 className="text-2xl font-bold text-[var(--ocean-deep)] mb-4">
+            Thank You! 🎉
+          </h1>
+          
+          <p className="text-[var(--ocean-driftwood)] mb-6">
+            Your donation has been successfully processed. You're helping make a real difference in Matt's journey!
+          </p>
+          
+          <button
+            onClick={() => window.location.href = '/'}
+            className="btn-ocean-primary w-full"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back to Campaign
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Cancel page
+  if (path === '/cancel') {
+    return (
+      <div className="min-h-screen bg-[var(--ocean-mist)] flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+          <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <XCircle className="w-10 h-10 text-orange-500" />
+          </div>
+          
+          <h1 className="text-2xl font-bold text-[var(--ocean-deep)] mb-4">
+            Payment Cancelled
+          </h1>
+          
+          <p className="text-[var(--ocean-driftwood)] mb-6">
+            No worries! Your payment was cancelled and no charges were made.
+          </p>
+          
+          <button
+            onClick={() => window.location.href = '/'}
+            className="btn-ocean-primary w-full"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Default campaign page
   return (
     <div className="min-h-screen">
-      {/* Simple header */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
@@ -683,7 +746,6 @@ function App() {
         </div>
       </header>
 
-      {/* Main campaign page */}
       <main>
         <CampaignPage />
       </main>
@@ -1554,6 +1616,7 @@ export default UpdatesSection;
 
 import React, { useState } from 'react';
 import { Heart, CreditCard, Shield, AlertCircle } from 'lucide-react';
+import { DonationAPI } from '../../services/api';
 import type { Campaign } from '../../types/index';
 
 interface DonationSectionProps {
@@ -1567,31 +1630,44 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
   const [message, setMessage] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const quickAmounts = [25, 50, 100, 250, 500, 1000];
 
   const handleQuickAmount = (value: number) => {
     setAmount(value.toString());
+    setError('');
   };
 
   const handleDonate = async () => {
-    if (!amount || parseFloat(amount) < 1) return;
+    if (!amount || parseFloat(amount) < 1) {
+      setError('Please enter a valid amount');
+      return;
+    }
     
     setLoading(true);
+    setError('');
+    
     try {
-      // TODO: Integrate with Stripe
-      console.log('Donation:', {
+      // Call your actual Stripe API
+      const response = await DonationAPI.createDonation({
         amount: parseFloat(amount),
-        donorName: isAnonymous ? '' : donorName,
-        donorEmail: isAnonymous ? '' : donorEmail,
+        donor_name: isAnonymous ? '' : donorName,
+        donor_email: isAnonymous ? '' : donorEmail,
         message,
-        isAnonymous
+        is_anonymous: isAnonymous
       });
       
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      alert('Donation processing will be implemented with Stripe!');
-    } catch (error) {
+      // Redirect to Stripe Checkout
+      if (response.checkout_url) {
+        window.location.href = response.checkout_url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+      
+    } catch (error: any) {
       console.error('Donation error:', error);
+      setError(error.message || 'Payment setup failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -1616,6 +1692,14 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
         <div className="max-w-2xl mx-auto">
           <div className="card-ocean">
             
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                <p className="text-red-700 text-sm">{error}</p>
+              </div>
+            )}
+            
             {/* Quick Amount Buttons */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-[var(--ocean-deep)] mb-3">
@@ -1626,7 +1710,8 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
                   <button
                     key={value}
                     onClick={() => handleQuickAmount(value)}
-                    className={`py-3 px-4 rounded-xl border-2 transition-all duration-300 ${
+                    disabled={loading}
+                    className={`py-3 px-4 rounded-xl border-2 transition-all duration-300 disabled:opacity-50 ${
                       amount === value.toString()
                         ? 'border-[var(--ocean-blue)] bg-[var(--ocean-blue)]/10 text-[var(--ocean-blue)]'
                         : 'border-gray-200 hover:border-[var(--ocean-blue)]/50'
@@ -1650,7 +1735,11 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
                 <input
                   type="number"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => {
+                    setAmount(e.target.value);
+                    setError('');
+                  }}
+                  disabled={loading}
                   placeholder="0.00"
                   className="input-ocean pl-8"
                 />
@@ -1667,7 +1756,7 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
                   type="text"
                   value={donorName}
                   onChange={(e) => setDonorName(e.target.value)}
-                  disabled={isAnonymous}
+                  disabled={isAnonymous || loading}
                   placeholder="Your name"
                   className={`input-ocean ${isAnonymous ? 'opacity-50' : ''}`}
                 />
@@ -1681,7 +1770,7 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
                   type="email"
                   value={donorEmail}
                   onChange={(e) => setDonorEmail(e.target.value)}
-                  disabled={isAnonymous}
+                  disabled={isAnonymous || loading}
                   placeholder="your@email.com"
                   className={`input-ocean ${isAnonymous ? 'opacity-50' : ''}`}
                 />
@@ -1694,6 +1783,7 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
+                  disabled={loading}
                   placeholder="Share a message of support..."
                   rows={3}
                   className="input-ocean resize-none"
@@ -1705,6 +1795,7 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
                   type="checkbox"
                   checked={isAnonymous}
                   onChange={(e) => setIsAnonymous(e.target.checked)}
+                  disabled={loading}
                   className="w-5 h-5 text-[var(--ocean-blue)] border-gray-300 rounded focus:ring-[var(--ocean-blue)]"
                 />
                 <span className="text-[var(--ocean-deep)] text-sm">
@@ -1962,27 +2053,51 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
   const [animatedAmount, setAnimatedAmount] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  // Intersection Observer for scroll-triggered animations
+  // 🔧 FIXED: Better Intersection Observer for mobile
   useEffect(() => {
+    // Check if we're on mobile
+    const isMobile = window.innerWidth <= 768;
+    
     const observer = new IntersectionObserver(
       ([entry]) => {
+        console.log('🔍 Progress section intersection:', entry.isIntersecting, entry.intersectionRatio);
+        
         if (entry.isIntersecting) {
           setIsVisible(true);
+          // Shorter delay on mobile for faster response
+          const delay = isMobile ? 100 : 200;
           setTimeout(() => {
             animateProgress();
             animateAmount();
-          }, 200);
+          }, delay);
         }
       },
-      { threshold: 0.3 }
+      { 
+        threshold: isMobile ? 0.05 : 0.3,    // Much lower threshold on mobile
+        rootMargin: isMobile ? '100px 0px' : '50px 0px'  // Trigger much earlier on mobile
+      }
     );
 
     if (sectionRef.current) {
       observer.observe(sectionRef.current);
+      console.log('🔍 Progress section observer attached');
     }
 
-    return () => observer.disconnect();
-  }, []);
+    // 🔧 FALLBACK: If no intersection after 2 seconds, trigger anyway
+    const fallbackTimer = setTimeout(() => {
+      if (!isVisible) {
+        console.log('🔧 Fallback: Triggering progress animations');
+        setIsVisible(true);
+        animateProgress();
+        animateAmount();
+      }
+    }, 2000);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(fallbackTimer);
+    };
+  }, [isVisible]);
 
   const animateProgress = () => {
     const duration = 2000;
@@ -2080,7 +2195,7 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
             </div>
           </div>
 
-          {/* Updated Impact Statement */}
+          {/* Impact Statement */}
           <div className="bg-[var(--ocean-mist)] rounded-xl p-6">
             <div className="flex items-start gap-4">
               <Target className="w-6 h-6 text-[var(--ocean-blue)] mt-1 flex-shrink-0" />
