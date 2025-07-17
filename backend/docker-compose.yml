@@ -48,12 +48,14 @@ services:
       - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
       - SENDGRID_API_KEY=${SENDGRID_API_KEY}
-      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-donations@mattfreedomfundraiser.com}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-mnraynor90@gmail.com}
+      - GMAIL_USER=${GMAIL_USER}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - FRONTEND_URL=http://localhost:5173  # Force correct value
+      - FRONTEND_URL=http://localhost:5173
 
     volumes:
       - .:/app
@@ -66,9 +68,7 @@ services:
         condition: service_healthy
     command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
-  # React Frontend - PORT 8004
-
-    # Celery Worker
+  # Celery Worker
   celery_worker:
     build: 
       context: .
@@ -81,7 +81,9 @@ services:
       - CLOUDINARY_URL=${CLOUDINARY_URL}
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
       - SENDGRID_API_KEY=${SENDGRID_API_KEY}
-      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-donations@mattfreedomfundraiser.com}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-mnraynor90@gmail.com}
+      - GMAIL_USER=${GMAIL_USER}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - IS_CELERY_WORKER=true

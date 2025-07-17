@@ -18,6 +18,7 @@ class Campaign(models.Model):
     start_date = models.DateTimeField(default=timezone.now)
     end_date = models.DateTimeField(null=True, blank=True)
     featured_image = models.URLField(blank=True)
+    featured_video_url = models.URLField(blank=True)  # Add this
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -94,7 +95,7 @@ class Donation(models.Model):
         # Update campaign total if payment status changed to completed
         if (is_new and self.payment_status == 'completed') or \
            (old_status != 'completed' and self.payment_status == 'completed'):
-            self.campaign.current_amount += self.amount
+            self.campaign.current_amount += Decimal(str(self.amount))
             self.campaign.save()
         
         # Subtract if refunded
