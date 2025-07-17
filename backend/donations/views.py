@@ -117,19 +117,12 @@ def stripe_webhook(request):
         )
         print(f"✅ Webhook verified: {event['type']}")
         
-        # 🔍 DEBUG: Focus on checkout.session.completed
         if event['type'] == 'checkout.session.completed':
             session = event['data']['object']
-            print(f"🔍 Session ID: {session.get('id')}")
-            print(f"🔍 Session metadata: {session.get('metadata', {})}")
-            print(f"🔍 All session keys: {list(session.keys())}")
-            
             donation_id = session['metadata'].get('donation_id')
-            print(f"🔍 Looking for donation ID: {donation_id} (type: {type(donation_id)})")
             
             if donation_id:
                 try:
-                    # Try both string and int versions
                     donation = Donation.objects.get(id=int(donation_id))
                     print(f"✅ Found donation: ${donation.amount} - current status: {donation.payment_status}")
                     
@@ -140,28 +133,28 @@ def stripe_webhook(request):
                     
                     print(f"✅ Donation {donation_id} updated: {old_status} → completed")
                     
+                    # 🔥 NEW: Trigger thank you email
+                    if old_status != 'completed' and donation.payment_status == 'completed':
+                        # Import the email task
+                        from emails.tasks import send_thank_you_email
+                        
+                        # Queue the email task
+                        result = send_thank_you_email.delay(donation.id)
+                        print(f"📧 Queued thank you email for donation {donation.id} - Task ID: {result.id}")
+                    
                     # Check campaign total
                     campaign = donation.campaign
                     print(f"💰 Campaign total now: ${campaign.current_amount}")
                     
                 except Donation.DoesNotExist:
                     print(f"❌ Donation {donation_id} not found in database")
-                    # Show recent donations for debugging
-                    recent_donations = Donation.objects.order_by('-created_at')[:5]
-                    print("🔍 Recent donations:")
-                    for d in recent_donations:
-                        print(f"  ID: {d.id}, Amount: ${d.amount}, Session: {d.stripe_session_id}")
-                        
-                except ValueError as e:
-                    print(f"❌ Invalid donation_id format: {e}")
+                except Exception as e:
+                    print(f"❌ Error processing donation {donation_id}: {e}")
             else:
                 print(f"❌ No donation_id in session metadata")
-                print(f"🔍 Available metadata keys: {list(session.get('metadata', {}).keys())}")
         
     except Exception as e:
         print(f"❌ Webhook error: {e}")
-        import traceback
-        print(f"🔍 Full traceback: {traceback.format_exc()}")
         return Response({'error': 'Invalid signature'}, status=400)
     
     return Response({'status': 'success'})
