@@ -1,7 +1,7 @@
 # MATT FREEDOM FUNDRAISER V2 - CODE SNAPSHOT
 # Generated for donation platform development and debugging
-# Created: 2025-07-17 10:53:53
-# Total files: 41
+# Created: 2025-07-17 17:06:29
+# Total files: 43
 # Focus: Donation platform, emails, profiles, authentication
 
 
@@ -139,12 +139,14 @@ services:
       - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
       - SENDGRID_API_KEY=${SENDGRID_API_KEY}
-      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-donations@mattfreedomfundraiser.com}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-mnraynor90@gmail.com}
+      - GMAIL_USER=${GMAIL_USER}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - FRONTEND_URL=http://localhost:5173  # Force correct value
+      - FRONTEND_URL=http://localhost:5173
 
     volumes:
       - .:/app
@@ -157,9 +159,7 @@ services:
         condition: service_healthy
     command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
-  # React Frontend - PORT 8004
-
-    # Celery Worker
+  # Celery Worker
   celery_worker:
     build: 
       context: .
@@ -172,7 +172,9 @@ services:
       - CLOUDINARY_URL=${CLOUDINARY_URL}
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
       - SENDGRID_API_KEY=${SENDGRID_API_KEY}
-      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-donations@mattfreedomfundraiser.com}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-mnraynor90@gmail.com}
+      - GMAIL_USER=${GMAIL_USER}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - IS_CELERY_WORKER=true
@@ -326,6 +328,7 @@ class Campaign(models.Model):
     start_date = models.DateTimeField(default=timezone.now)
     end_date = models.DateTimeField(null=True, blank=True)
     featured_image = models.URLField(blank=True)
+    featured_video_url = models.URLField(blank=True)  # Add this
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -402,7 +405,7 @@ class Donation(models.Model):
         # Update campaign total if payment status changed to completed
         if (is_new and self.payment_status == 'completed') or \
            (old_status != 'completed' and self.payment_status == 'completed'):
-            self.campaign.current_amount += self.amount
+            self.campaign.current_amount += Decimal(str(self.amount))
             self.campaign.save()
         
         # Subtract if refunded
@@ -665,19 +668,12 @@ def stripe_webhook(request):
         )
         print(f"✅ Webhook verified: {event['type']}")
         
-        # 🔍 DEBUG: Focus on checkout.session.completed
         if event['type'] == 'checkout.session.completed':
             session = event['data']['object']
-            print(f"🔍 Session ID: {session.get('id')}")
-            print(f"🔍 Session metadata: {session.get('metadata', {})}")
-            print(f"🔍 All session keys: {list(session.keys())}")
-            
             donation_id = session['metadata'].get('donation_id')
-            print(f"🔍 Looking for donation ID: {donation_id} (type: {type(donation_id)})")
             
             if donation_id:
                 try:
-                    # Try both string and int versions
                     donation = Donation.objects.get(id=int(donation_id))
                     print(f"✅ Found donation: ${donation.amount} - current status: {donation.payment_status}")
                     
@@ -688,28 +684,28 @@ def stripe_webhook(request):
                     
                     print(f"✅ Donation {donation_id} updated: {old_status} → completed")
                     
+                    # 🔥 NEW: Trigger thank you email
+                    if old_status != 'completed' and donation.payment_status == 'completed':
+                        # Import the email task
+                        from emails.tasks import send_thank_you_email
+                        
+                        # Queue the email task
+                        result = send_thank_you_email.delay(donation.id)
+                        print(f"📧 Queued thank you email for donation {donation.id} - Task ID: {result.id}")
+                    
                     # Check campaign total
                     campaign = donation.campaign
                     print(f"💰 Campaign total now: ${campaign.current_amount}")
                     
                 except Donation.DoesNotExist:
                     print(f"❌ Donation {donation_id} not found in database")
-                    # Show recent donations for debugging
-                    recent_donations = Donation.objects.order_by('-created_at')[:5]
-                    print("🔍 Recent donations:")
-                    for d in recent_donations:
-                        print(f"  ID: {d.id}, Amount: ${d.amount}, Session: {d.stripe_session_id}")
-                        
-                except ValueError as e:
-                    print(f"❌ Invalid donation_id format: {e}")
+                except Exception as e:
+                    print(f"❌ Error processing donation {donation_id}: {e}")
             else:
                 print(f"❌ No donation_id in session metadata")
-                print(f"🔍 Available metadata keys: {list(session.get('metadata', {}).keys())}")
         
     except Exception as e:
         print(f"❌ Webhook error: {e}")
-        import traceback
-        print(f"🔍 Full traceback: {traceback.format_exc()}")
         return Response({'error': 'Invalid signature'}, status=400)
     
     return Response({'status': 'success'})
@@ -773,6 +769,205 @@ from django.shortcuts import render
 
 # Create your views here.
 
+```
+
+# ==== emails/tasks.py ====
+
+```python
+# backend/emails/tasks.py
+from celery import shared_task
+from django.conf import settings
+from django.utils import timezone
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+import logging
+from decimal import Decimal
+
+from .models import EmailTemplate, EmailLog
+from donations.models import Donation
+
+logger = logging.getLogger(__name__)
+
+@shared_task
+def send_thank_you_email(donation_id):
+    """
+    Send thank you email after successful donation
+    Works with console backend, SMTP, and SendGrid
+    """
+    try:
+        print(f"📧 Processing thank you email for donation {donation_id}")
+        
+        # Get the donation
+        donation = Donation.objects.get(id=donation_id)
+        
+        # Skip if anonymous or no email
+        if donation.is_anonymous or not donation.donor_email:
+            print(f"⏭️  Skipping email - anonymous: {donation.is_anonymous}, no email: {not donation.donor_email}")
+            return f"Skipped email for donation {donation_id} (anonymous or no email)"
+        
+        # Check if email already sent
+        existing_log = EmailLog.objects.filter(
+            donation=donation,
+            was_sent=True
+        ).first()
+        
+        if existing_log:
+            print(f"⏭️  Email already sent for donation {donation_id}")
+            return f"Email already sent for donation {donation_id}"
+        
+        # Get email template
+        template = EmailTemplate.objects.filter(
+            name='thank_you_email', 
+            is_active=True
+        ).first()
+        
+        if not template:
+            print(f"❌ No active thank you email template found")
+            
+            # Create a basic fallback email
+            subject = f"Thank you for your donation, {donation.donor_name or 'Friend'}!"
+            html_content = f"""
+            <h2>Thank you for your support!</h2>
+            <p>Dear {donation.donor_name or 'Friend'},</p>
+            <p>Thank you for your generous donation of ${donation.amount} to {donation.campaign.title}.</p>
+            <p>Your support means everything to me.</p>
+            <p>With gratitude,<br>Matt Raynor</p>
+            """
+        else:
+            # Use template
+            try:
+                # Prepare context variables
+                context = {
+                    'donor_name': donation.donor_name or 'Friend',
+                    'amount': float(donation.amount),
+                    'campaign_title': donation.campaign.title,
+                    'campaign_description': donation.campaign.description,
+                    'current_total': float(donation.campaign.current_amount),
+                    'goal_amount': float(donation.campaign.goal_amount),
+                    'progress_percentage': donation.campaign.progress_percentage,
+                    'donation_date': donation.created_at.strftime('%B %d, %Y'),
+                    'message': donation.message or ''
+                }
+                
+                # Format subject and content
+                subject = template.subject.format(**context)
+                html_content = template.html_content.format(**context)
+                
+            except Exception as template_error:
+                print(f"⚠️  Template formatting error: {template_error}")
+                # Fall back to basic email
+                subject = f"Thank you for your donation, {donation.donor_name or 'Friend'}!"
+                html_content = f"""
+                <h2>Thank you for your support!</h2>
+                <p>Dear {donation.donor_name or 'Friend'},</p>
+                <p>Thank you for your generous donation of ${donation.amount} to {donation.campaign.title}.</p>
+                <p>Your support means everything to me.</p>
+                <p>With gratitude,<br>Matt Raynor</p>
+                """
+        
+        # Create plain text version
+        plain_text_content = f"""
+        Thank you for your donation!
+        
+        Dear {donation.donor_name or 'Friend'},
+        
+        Thank you for your generous donation of ${donation.amount} to {donation.campaign.title}.
+        
+        Your support means everything to me.
+        
+        With gratitude,
+        Matt Raynor
+        """
+        
+        # Send email using Django's built-in email system
+        # This works with console backend, SMTP, and SendGrid
+        try:
+            print(f"📤 Sending email to {donation.donor_email}")
+            print(f"📧 Subject: {subject}")
+            print(f"📧 Backend: {settings.EMAIL_BACKEND}")
+            
+            send_mail(
+                subject=subject,
+                message=plain_text_content,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[donation.donor_email],
+                html_message=html_content,
+                fail_silently=False,
+            )
+            
+            # Log successful email
+            EmailLog.objects.create(
+                recipient_email=donation.donor_email,
+                subject=subject,
+                donation=donation,
+                was_sent=True,
+                sent_at=timezone.now()
+            )
+            
+            print(f"✅ Thank you email sent to {donation.donor_email}")
+            return f"Email sent to {donation.donor_email}"
+            
+        except Exception as email_error:
+            print(f"❌ Email sending failed: {email_error}")
+            
+            # Log failed email
+            EmailLog.objects.create(
+                recipient_email=donation.donor_email,
+                subject=subject,
+                donation=donation,
+                was_sent=False
+            )
+            
+            return f"Email failed: {str(email_error)}"
+        
+    except Donation.DoesNotExist:
+        error_msg = f"Donation {donation_id} not found"
+        print(f"❌ {error_msg}")
+        return error_msg
+        
+    except Exception as e:
+        error_msg = f"Email task failed for donation {donation_id}: {str(e)}"
+        print(f"❌ {error_msg}")
+        
+        # Try to log failed email attempt
+        try:
+            if 'donation' in locals():
+                EmailLog.objects.create(
+                    recipient_email=donation.donor_email,
+                    subject=f"Failed: Thank you email",
+                    donation=donation,
+                    was_sent=False
+                )
+        except:
+            pass  # Don't fail if logging fails
+            
+        return error_msg
+
+@shared_task
+def send_campaign_update_notification(campaign_update_id):
+    """
+    Send notification to all donors when a campaign update is posted
+    Future feature - not implemented yet
+    """
+    print(f"📧 Campaign update notification task for update {campaign_update_id} - not implemented yet")
+    return "Campaign update notifications not implemented"
+
+@shared_task
+def send_donation_receipt(donation_id):
+    """
+    Send formal receipt for tax purposes
+    Future feature - could generate PDF receipt
+    """
+    print(f"📧 Donation receipt task for donation {donation_id} - not implemented yet")
+    return "Donation receipts not implemented"
+
+@shared_task
+def test_email_task():
+    """
+    Test task to verify Celery is working
+    """
+    print("📧 Test email task executed successfully")
+    return "Test email task completed"
 ```
 
 # ==== emails/models.py ====
@@ -859,6 +1054,161 @@ from django.shortcuts import render
 
 # Create your views here.
 
+```
+
+# ==== emails/management/commands/create_email_templates.py ====
+
+```python
+from django.core.management.base import BaseCommand
+from emails.models import EmailTemplate
+
+class Command(BaseCommand):
+    help = 'Create default email templates'
+
+    def handle(self, *args, **options):
+        # Thank you email template
+        thank_you_template = """
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #0F172A;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }}
+        .header {{
+            background: linear-gradient(135deg, #0F172A 0%, #1E40AF 50%, #0891B2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+        }}
+        .content {{
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }}
+        .donation-details {{
+            background: #F0F9FF;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #1E40AF;
+        }}
+        .progress-bar {{
+            background: #E5E7EB;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }}
+        .progress-fill {{
+            background: linear-gradient(90deg, #1E40AF 0%, #0891B2 100%);
+            height: 100%;
+            border-radius: 10px;
+            width: {progress_percentage}%;
+        }}
+        .footer {{
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #E5E7EB;
+            color: #6B7280;
+        }}
+        .cta-button {{
+            display: inline-block;
+            background: #1E40AF;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 15px 0;
+        }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌊 Thank You, {donor_name}!</h1>
+        <p>Your support means everything to me</p>
+    </div>
+    
+    <div class="content">
+        <h2>Your Generous Donation</h2>
+        <p>Dear {donor_name},</p>
+        
+        <p>I am deeply grateful for your donation of <strong>${amount}</strong> to "{campaign_title}". Your contribution brings me one step closer to securing accessible housing and continuing my journey as a developer.</p>
+        
+        <div class="donation-details">
+            <h3>Donation Details</h3>
+            <p><strong>Amount:</strong> ${amount}</p>
+            <p><strong>Date:</strong> {donation_date}</p>
+            <p><strong>Campaign:</strong> {campaign_title}</p>
+        </div>
+        
+        <h3>Campaign Progress</h3>
+        <p>Thanks to supporters like you, we've raised <strong>${current_total}</strong> of our ${goal_amount} goal!</p>
+        
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+        <p style="text-align: center; margin-top: 10px;">
+            <strong>{progress_percentage:.1f}% Complete</strong>
+        </p>
+        
+        <h3>What This Means</h3>
+        <p>Your donation helps fund:</p>
+        <ul>
+            <li>🚿 Roll-in shower and bathroom modifications</li>
+            <li>🏠 Caregiver-friendly living accommodations</li>
+            <li>📍 Strategic location near my support network</li>
+            <li>♿ Complete accessibility setup for independence</li>
+        </ul>
+        
+        <p>As a quadriplegic developer who taught himself to code after a diving accident, I'm working to prove that disability doesn't limit potential - it just changes the approach. Your support helps me continue inspiring others while building a more accessible future.</p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="https://mattfreedomfundraiser.com" class="cta-button">
+                Follow My Journey
+            </a>
+        </div>
+        
+        <p>With heartfelt gratitude,<br>
+        <strong>Matt Raynor</strong><br>
+        <em>From Sea to Source Code</em> 🌊💻</p>
+    </div>
+    
+    <div class="footer">
+        <p>You're receiving this email because you made a donation to Matt's fundraising campaign.</p>
+        <p>Matt Freedom Fundraiser • Hampton Bays, NY</p>
+    </div>
+</body>
+</html>
+        """
+        
+        # Create or update the template
+        template, created = EmailTemplate.objects.update_or_create(
+            name='thank_you_email',
+            defaults={
+                'subject': 'Thank you for your support, {donor_name}! 🌊',
+                'html_content': thank_you_template.strip(),
+                'is_active': True
+            }
+        )
+        
+        if created:
+            self.stdout.write(
+                self.style.SUCCESS('✅ Created thank you email template')
+            )
+        else:
+            self.stdout.write(
+                self.style.SUCCESS('✅ Updated thank you email template')
+            )
 ```
 
 # ==== accounts/models.py ====
@@ -1438,18 +1788,27 @@ CORS_ALLOW_ALL_ORIGINS = True
 # Fixed CORS ports!
 # Fixed CORS ports!
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5174",  # ✅ Change from 8004 to 5174
-    "http://127.0.0.1:5174",  # ✅ Change from 8004 to 5174
+    "http://localhost:5174",  
+    "http://127.0.0.1:5174",  
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5174",  # ✅ Change this too
-    "http://127.0.0.1:5174",  # ✅ Change this too
+    "http://localhost:5174",  
+    "http://127.0.0.1:5174",  
 ]
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:5173")
+SENDGRID_API_KEY = ""  # Empty for now
 
+# Replace the console backend with Gmail SMTP
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = env("GMAIL_USER", default="")
+EMAIL_HOST_PASSWORD = env("GMAIL_APP_PASSWORD", default="")
+DEFAULT_FROM_EMAIL = env("GMAIL_USER", default="")
 ```
 
 # ==== django_project/settings/prod.py ====
