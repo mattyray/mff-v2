@@ -37,6 +37,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
     }, stepDuration);
   };
 
+  // Extract YouTube video ID from various URL formats
+  const extractVideoId = (url: string) => {
+    if (!url) return null;
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/);
+    return match ? match[1] : null;
+  };
+
   const handleDonateClick = () => {
     document.getElementById('donate')?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -137,19 +144,33 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
 
           </div>
 
-          {/* Right Content - Visual */}
+          {/* Right Content - Video/Visual */}
           <div className={`lg:w-1/2 mt-12 lg:mt-0 transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <div className="relative">
               
-              {/* Main Image Container */}
+              {/* Main Video/Image Container */}
               <div className="relative bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
-                {campaign.featured_image ? (
+                {campaign.featured_video_url && extractVideoId(campaign.featured_video_url) ? (
+                  // Video embed
+                  <div className="w-full h-96 rounded-2xl overflow-hidden bg-black">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${extractVideoId(campaign.featured_video_url)}?controls=1&modestbranding=1&rel=0`}
+                      className="w-full h-full"
+                      frameBorder="0"
+                      allowFullScreen
+                      title="Matt's Documentary - From Sea to Source Code"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    />
+                  </div>
+                ) : campaign.featured_image ? (
+                  // Image fallback
                   <img 
                     src={campaign.featured_image} 
                     alt="Matt Raynor - From fisherman to developer"
                     className="w-full h-96 object-cover rounded-2xl"
                   />
                 ) : (
+                  // Default fallback
                   <div className="w-full h-96 bg-gradient-to-br from-white/20 to-white/5 rounded-2xl flex flex-col items-center justify-center text-white">
                     <div className="text-6xl mb-4">⚓</div>
                     <h3 className="text-2xl font-bold mb-2">Matt's Story</h3>

@@ -38,11 +38,17 @@
 │   │   ├── urls.py
 │   │   └── views.py
 │   ├── emails
+│   │   ├── management
+│   │   │   ├── commands
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── create_email_templates.py
+│   │   │   └── __init__.py
 │   │   ├── __init__.py
 │   │   ├── admin.py
 │   │   ├── apps.py
 │   │   ├── models.py
 │   │   ├── serializers.py
+│   │   ├── tasks.py
 │   │   ├── tests.py
 │   │   └── views.py
 │   ├── profiles
@@ -138,4 +144,4 @@
 ├── project_structure.txt
 └── README.md
 
-26 directories, 113 files
+28 directories, 117 files
