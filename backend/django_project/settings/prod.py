@@ -1,4 +1,4 @@
-# django_project/settings/prod.py - IMPROVED WITH DATABASE ERROR HANDLING
+# django_project/settings/prod.py - FIXED CORS AND HOSTS
 from .base import *
 import os
 import sys
@@ -45,7 +45,7 @@ if DATABASE_URL:
         # 🔥 FIX: Handle empty database name (common Fly.io issue)
         if not parsed.get("NAME") or parsed.get("NAME") == "":
             # Try to extract database name from the app name
-            app_name = os.environ.get("FLY_APP_NAME", "ai-face-swap-app")
+            app_name = os.environ.get("FLY_APP_NAME", "mff-v2")
             # Remove the "-app" suffix if present for database name
             db_name = app_name.replace("-app", "")
             parsed["NAME"] = db_name
@@ -102,13 +102,14 @@ else:
     print("❌ No DATABASE_URL environment variable found", file=sys.stderr)
     raise ImproperlyConfigured("DATABASE_URL environment variable is required in production")
 
-# ---------------- HOSTS ----------------
-# Get app name from Fly.io environment
-FLY_APP_NAME = os.environ.get("FLY_APP_NAME", "ai-face-swap-app")
+# ---------------- HOSTS (FIXED) ----------------
+# Get app name from Fly.io environment - CORRECTED DEFAULT
+FLY_APP_NAME = os.environ.get("FLY_APP_NAME", "mff-v2")
 
+# Base allowed hosts
 ALLOWED_HOSTS = [
     f"{FLY_APP_NAME}.fly.dev",
-    "ai-face-swap-app.fly.dev",
+    "mff-v2.fly.dev",  # 🔥 FIXED: Use correct app name
     "localhost",
     "127.0.0.1",
 ]
@@ -118,16 +119,33 @@ custom_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "")
 if custom_hosts:
     ALLOWED_HOSTS.extend([host.strip() for host in custom_hosts.split(",") if host.strip()])
 
+# 🔥 FIXED: CSRF settings with correct URLs
 CSRF_TRUSTED_ORIGINS = [
     f"https://{FLY_APP_NAME}.fly.dev",
-    "https://ai-face-swap-app.fly.dev",
+    "https://mff-v2.fly.dev",
+    "https://mff-v2.netlify.app",  # 🔥 ADDED: Netlify URL
 ]
 
-# CORS for frontend
+# 🔥 FIXED: CORS settings with correct URLs
 CORS_ALLOWED_ORIGINS = [
-    f"https://{FLY_APP_NAME}.fly.dev",
-    "https://ai-face-swap-app.fly.dev",
+    f"https://{FLY_APP_NAME}.fly.dev", 
+    "https://mff-v2.fly.dev",
+    "https://mff-v2.netlify.app",  # 🔥 ADDED: Netlify URL
 ]
+
+# Add frontend URL from environment if provided
+frontend_url = os.environ.get("FRONTEND_URL", "")
+if frontend_url and frontend_url not in CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS.append(frontend_url)
+    CSRF_TRUSTED_ORIGINS.append(frontend_url)
+
+# 🔥 ADDED: Additional CORS settings for better compatibility
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False  # Keep this False for security
+
+print(f"🔧 CORS configured for: {CORS_ALLOWED_ORIGINS}", file=sys.stderr)
+print(f"🔧 CSRF trusted origins: {CSRF_TRUSTED_ORIGINS}", file=sys.stderr)
+print(f"🔧 Allowed hosts: {ALLOWED_HOSTS}", file=sys.stderr)
 
 # ---------------- LOGGING (IMPROVED) ----------------
 LOGGING = {
