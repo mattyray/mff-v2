@@ -1,4 +1,4 @@
-// Donation Platform Types - CORRECTED VERSION
+// Donation Platform Types - FIXED VERSION
 
 export interface Campaign {
   id: number;
@@ -11,6 +11,7 @@ export interface Campaign {
   start_date: string;
   end_date?: string;
   featured_image?: string;
+  featured_video_url?: string;  // ← ADDED THIS LINE
   created_at: string;
   updated_at: string;
 }

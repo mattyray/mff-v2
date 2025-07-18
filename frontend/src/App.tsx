@@ -1,4 +1,3 @@
-import React from 'react';
 import { CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
 import CampaignPage from './components/CampaignPage';
 import UserMenu from './components/UserMenu';
@@ -9,7 +8,6 @@ function App() {
   
   // Simple routing based on URL path
   const path = window.location.pathname;
-  const searchParams = new URLSearchParams(window.location.search);
 
   // Success page
   if (path === '/success') {
