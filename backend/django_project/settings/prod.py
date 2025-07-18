@@ -125,12 +125,23 @@ CSRF_TRUSTED_ORIGINS = [
     "https://mff-v2.fly.dev",
     "https://mff-v2.netlify.app",  # 🔥 ADDED: Netlify URL
 ]
+# In backend/django_project/settings/prod.py
+# Find this section and UPDATE it:
 
-# 🔥 FIXED: CORS settings with correct URLs
 CORS_ALLOWED_ORIGINS = [
     f"https://{FLY_APP_NAME}.fly.dev", 
     "https://mff-v2.fly.dev",
-    "https://mff-v2.netlify.app",  # 🔥 ADDED: Netlify URL
+    "https://mff-v2.netlify.app",
+    "https://mattsfreedomfundraiser.com",      # 🔥 ADD THIS
+    "https://www.mattsfreedomfundraiser.com",  # 🔥 ADD THIS
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    f"https://{FLY_APP_NAME}.fly.dev",
+    "https://mff-v2.fly.dev",
+    "https://mff-v2.netlify.app",
+    "https://mattsfreedomfundraiser.com",      # 🔥 ADD THIS
+    "https://www.mattsfreedomfundraiser.com",  # 🔥 ADD THIS
 ]
 
 # Add frontend URL from environment if provided
