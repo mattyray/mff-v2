@@ -1,6 +1,6 @@
 # MATT FREEDOM FUNDRAISER V2 - CODE SNAPSHOT
 # Generated for donation platform development and debugging
-# Created: 2025-07-17 17:06:29
+# Created: 2025-07-18 11:27:02
 # Total files: 43
 # Focus: Donation platform, emails, profiles, authentication
 
@@ -462,7 +462,8 @@ class CampaignSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'description', 'goal_amount', 
             'current_amount', 'progress_percentage', 'is_active',
-            'start_date', 'end_date', 'featured_image'
+            'start_date', 'end_date', 'featured_image', 'featured_video_url',
+            'created_at', 'updated_at'
         ]
 
 class DonationSerializer(serializers.ModelSerializer):
