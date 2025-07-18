@@ -1,47 +1,42 @@
-app = "ai-face-swap-app"
-primary_region = "ewr"
-console_command = "/code/manage.py shell"
+# fly.toml app configuration file generated for mff-v2 on 2025-07-18T12:34:25-04:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'mff-v2'
+primary_region = 'ewr'
+console_command = '/code/manage.py shell'
 
 [build]
 
+[deploy]
+  release_command = 'python manage.py migrate --noinput'
+
 [env]
-  PORT = "8000"
+  PORT = '8000'
+
+[processes]
+  app = 'gunicorn --bind :8000 --workers 2 django_project.wsgi'
+  celery = 'celery -A django_project worker --loglevel=INFO'
 
 [http_service]
   internal_port = 8000
   force_https = true
+  auto_stop_machines = 'off'
   auto_start_machines = true
-  auto_stop_machines = false        # ← CHANGED: Disable auto-stopping
-  min_machines_running = 2          # ← CHANGED: Keep 2 machines running
-  processes = ["app"]
+  min_machines_running = 1
+  processes = ['app']
 
   [http_service.concurrency]
-    type = "connections"
-    soft_limit = 20
+    type = 'connections'
     hard_limit = 25
+    soft_limit = 20
 
 [[vm]]
-  memory = "4gb"
-  cpu_kind = "shared"
-  cpus = 2          # ← Change this from 1 to 2
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
 
 [[statics]]
-  guest_path = "/code/static"
-  url_prefix = "/static/"
-
-# Postgres internal service (Flycast resolution) - LEAVE THIS AS-IS
-[[services]]
-  internal_port = 5432
-  protocol = "tcp"
-  auto_start_machines = true
-  auto_stop_machines = true
-  processes = ["app"]
-
-  [services.concurrency]
-    type = "connections"
-    soft_limit = 20
-    hard_limit = 25
-
-  [[services.ports]]
-    port = 5432
-    handlers = ["pg_tls"]
+  guest_path = '/code/static'
+  url_prefix = '/static/'
