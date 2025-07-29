@@ -1,6 +1,6 @@
 # MATT FREEDOM FUNDRAISER V2 - CODE SNAPSHOT
 # Generated for donation platform development and debugging
-# Created: 2025-07-18 11:27:02
+# Created: 2025-07-18 16:23:41
 # Total files: 43
 # Focus: Donation platform, emails, profiles, authentication
 
@@ -197,53 +197,49 @@ volumes:
 # ==== fly.toml ====
 
 ```
-app = "ai-face-swap-app"
-primary_region = "ewr"
-console_command = "/code/manage.py shell"
+# fly.toml app configuration file generated for mff-v2 on 2025-07-18T12:34:25-04:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'mff-v2'
+primary_region = 'ewr'
+console_command = '/code/manage.py shell'
 
 [build]
 
+[deploy]
+  release_command = 'python manage.py migrate --noinput'
+
 [env]
-  PORT = "8000"
+  PORT = '8000'
+
+[processes]
+  app = 'gunicorn --bind :8000 --workers 2 django_project.wsgi'
+  celery = 'celery -A django_project worker --loglevel=INFO'
 
 [http_service]
   internal_port = 8000
   force_https = true
+  auto_stop_machines = 'off'
   auto_start_machines = true
-  auto_stop_machines = false        # ← CHANGED: Disable auto-stopping
-  min_machines_running = 2          # ← CHANGED: Keep 2 machines running
-  processes = ["app"]
+  min_machines_running = 1
+  processes = ['app']
 
   [http_service.concurrency]
-    type = "connections"
-    soft_limit = 20
+    type = 'connections'
     hard_limit = 25
+    soft_limit = 20
 
 [[vm]]
-  memory = "4gb"
-  cpu_kind = "shared"
-  cpus = 2          # ← Change this from 1 to 2
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
 
 [[statics]]
-  guest_path = "/code/static"
-  url_prefix = "/static/"
+  guest_path = '/code/static'
+  url_prefix = '/static/'
 
-# Postgres internal service (Flycast resolution) - LEAVE THIS AS-IS
-[[services]]
-  internal_port = 5432
-  protocol = "tcp"
-  auto_start_machines = true
-  auto_stop_machines = true
-  processes = ["app"]
-
-  [services.concurrency]
-    type = "connections"
-    soft_limit = 20
-    hard_limit = 25
-
-  [[services.ports]]
-    port = 5432
-    handlers = ["pg_tls"]
 ```
 
 # ==== manage.py ====
@@ -1815,7 +1811,7 @@ DEFAULT_FROM_EMAIL = env("GMAIL_USER", default="")
 # ==== django_project/settings/prod.py ====
 
 ```python
-# django_project/settings/prod.py - IMPROVED WITH DATABASE ERROR HANDLING
+# django_project/settings/prod.py - FIXED CORS AND HOSTS
 from .base import *
 import os
 import sys
@@ -1862,7 +1858,7 @@ if DATABASE_URL:
         # 🔥 FIX: Handle empty database name (common Fly.io issue)
         if not parsed.get("NAME") or parsed.get("NAME") == "":
             # Try to extract database name from the app name
-            app_name = os.environ.get("FLY_APP_NAME", "ai-face-swap-app")
+            app_name = os.environ.get("FLY_APP_NAME", "mff-v2")
             # Remove the "-app" suffix if present for database name
             db_name = app_name.replace("-app", "")
             parsed["NAME"] = db_name
@@ -1919,13 +1915,14 @@ else:
     print("❌ No DATABASE_URL environment variable found", file=sys.stderr)
     raise ImproperlyConfigured("DATABASE_URL environment variable is required in production")
 
-# ---------------- HOSTS ----------------
-# Get app name from Fly.io environment
-FLY_APP_NAME = os.environ.get("FLY_APP_NAME", "ai-face-swap-app")
+# ---------------- HOSTS (FIXED) ----------------
+# Get app name from Fly.io environment - CORRECTED DEFAULT
+FLY_APP_NAME = os.environ.get("FLY_APP_NAME", "mff-v2")
 
+# Base allowed hosts
 ALLOWED_HOSTS = [
     f"{FLY_APP_NAME}.fly.dev",
-    "ai-face-swap-app.fly.dev",
+    "mff-v2.fly.dev",  # 🔥 FIXED: Use correct app name
     "localhost",
     "127.0.0.1",
 ]
@@ -1935,16 +1932,44 @@ custom_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "")
 if custom_hosts:
     ALLOWED_HOSTS.extend([host.strip() for host in custom_hosts.split(",") if host.strip()])
 
+# 🔥 FIXED: CSRF settings with correct URLs
 CSRF_TRUSTED_ORIGINS = [
     f"https://{FLY_APP_NAME}.fly.dev",
-    "https://ai-face-swap-app.fly.dev",
+    "https://mff-v2.fly.dev",
+    "https://mff-v2.netlify.app",  # 🔥 ADDED: Netlify URL
+]
+# In backend/django_project/settings/prod.py
+# Find this section and UPDATE it:
+
+CORS_ALLOWED_ORIGINS = [
+    f"https://{FLY_APP_NAME}.fly.dev", 
+    "https://mff-v2.fly.dev",
+    "https://mff-v2.netlify.app",
+    "https://mattsfreedomfundraiser.com",      # 🔥 ADD THIS
+    "https://www.mattsfreedomfundraiser.com",  # 🔥 ADD THIS
 ]
 
-# CORS for frontend
-CORS_ALLOWED_ORIGINS = [
+CSRF_TRUSTED_ORIGINS = [
     f"https://{FLY_APP_NAME}.fly.dev",
-    "https://ai-face-swap-app.fly.dev",
+    "https://mff-v2.fly.dev",
+    "https://mff-v2.netlify.app",
+    "https://mattsfreedomfundraiser.com",      # 🔥 ADD THIS
+    "https://www.mattsfreedomfundraiser.com",  # 🔥 ADD THIS
 ]
+
+# Add frontend URL from environment if provided
+frontend_url = os.environ.get("FRONTEND_URL", "")
+if frontend_url and frontend_url not in CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS.append(frontend_url)
+    CSRF_TRUSTED_ORIGINS.append(frontend_url)
+
+# 🔥 ADDED: Additional CORS settings for better compatibility
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False  # Keep this False for security
+
+print(f"🔧 CORS configured for: {CORS_ALLOWED_ORIGINS}", file=sys.stderr)
+print(f"🔧 CSRF trusted origins: {CSRF_TRUSTED_ORIGINS}", file=sys.stderr)
+print(f"🔧 Allowed hosts: {ALLOWED_HOSTS}", file=sys.stderr)
 
 # ---------------- LOGGING (IMPROVED) ----------------
 LOGGING = {
