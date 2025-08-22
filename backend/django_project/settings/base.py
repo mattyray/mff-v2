@@ -245,14 +245,14 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-# Email
-EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
-EMAIL_HOST = env("EMAIL_HOST", default="smtp.sendgrid.net")
+# 🔥 FIXED: Gmail Email Configuration
+EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = env("EMAIL_HOST", default="smtp.gmail.com")
 EMAIL_PORT = env.int("EMAIL_PORT", default=587)
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "apikey"
-EMAIL_HOST_PASSWORD = env("SENDGRID_API_KEY", default="")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="donations@mattfreedomfundraiser.com")
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")  # 🔥 FIXED: Read from environment
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")  # 🔥 FIXED: Read from environment
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="mnraynor90@gmail.com")
 
 # REST Framework
 REST_FRAMEWORK = {
