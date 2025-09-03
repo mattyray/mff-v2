@@ -10,6 +10,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
   const [currentAmount, setCurrentAmount] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
+  // Currency formatter to remove cents
+  const formatCurrency = (amount: number) => {
+    return amount.toLocaleString('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    });
+  };
+
   // Animate numbers on mount
   useEffect(() => {
     setIsVisible(true);
@@ -118,24 +128,24 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
               </button>
             </div>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className={`text-3xl font-bold text-white mb-1 transition-all duration-1000 ${isVisible ? 'animate-count-up' : ''}`}>
-                  ${currentAmount.toLocaleString()}
+            {/* Quick Stats - FIXED FOR MOBILE */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+              <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-4 sm:bg-transparent sm:p-0">
+                <div className={`text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 transition-all duration-1000 ${isVisible ? 'animate-count-up' : ''}`}>
+                  {formatCurrency(currentAmount)}
                 </div>
                 <div className="text-white/70 text-sm">Raised</div>
               </div>
               
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white mb-1">
-                  ${campaign.goal_amount.toLocaleString()}
+              <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-4 sm:bg-transparent sm:p-0">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1">
+                  {formatCurrency(campaign.goal_amount)}
                 </div>
                 <div className="text-white/70 text-sm">Goal</div>
               </div>
               
-              <div className="text-center">
-                <div className="text-3xl font-bold text-[var(--ocean-sunrise)] mb-1">
+              <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-4 sm:bg-transparent sm:p-0">
+                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--ocean-sunrise)] mb-1">
                   {Math.round(campaign.progress_percentage)}%
                 </div>
                 <div className="text-white/70 text-sm">Complete</div>
