@@ -90,10 +90,18 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
               <span className="block text-[var(--ocean-seafoam)]">Independence</span>
             </h1>
 
-            {/* Updated Subtitle */}
-            <p className="text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed">
-              After two years of perseverance and meticulous planning, I'm finally moving out of the nursing home on November 3rd to my hometown of Hampton Bays. The bathroom renovation has gone incredibly well thanks to everyone's support – we raised just about the perfect amount! Now comes the last step: care planning. While I have personal assistants lined up, the government is taking absolutely forever to process their registrations and approve salary coverage. After months of bureaucratic hell, I only have 2 out of the 4-5 caregivers I need fully registered. I created this fundraiser to pay people out of pocket while that registration process completes – and to help with any other caretaking costs that pop up along the way. I'm hoping this will be the last fundraiser for a while, and I can leave it up as an ongoing goal for any future care needs that arise. Bottom line: Your support helps me bridge this final gap and move toward independence in Hampton Bays.
-            </p>
+            {/* Updated Subtitle with preserved line breaks */}
+            <div className="text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed">
+              <p className="mb-4">
+                After two years of grinding and planning every detail, I'm finally moving out of the nursing home on November 3rd — back to my hometown, Hampton Bays. The bathroom renovation went perfectly, and we raised almost exactly what was needed.
+              </p>
+              <p className="mb-4">
+                Now it's down to the last piece: care coverage. I've got amazing aides lined up, but the state is crawling through their paperwork. Only two are fully registered so far, which leaves me covering shifts out of pocket.
+              </p>
+              <p>
+                This fundraiser bridges that gap — helping pay caregivers until the state catches up, and covering any surprise costs along the way. Your support gets me through this final stretch toward real independence in Hampton Bays.
+              </p>
+            </div>
 
             {/* Story Hook */}
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8">
@@ -102,7 +110,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
                 <div>
                   <h3 className="text-white font-semibold mb-2">We Are Almost There!</h3>
                   <p className="text-white/80 text-base">
-                    It's been a long journey, but I was approved for the subsidy. I found the apartment, secured employment, raised money to renovate the bathroom, and got it beautifully renovated. I had a ramp installed – everything's ready. The last step is to cover any care gaps that pop up while the government salary registration process completes for my caregivers.
+                    Help support me by raising money for ongoing care support while I get adjusted, start working, and secure long-term care support.
                   </p>
                 </div>
               </div>
