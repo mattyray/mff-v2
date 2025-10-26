@@ -92,9 +92,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
 
             {/* Updated Subtitle */}
             <p className="text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed">
-              After two years of preparation, I'm moving out of the nursing home on November 3rd to my hometown of Hampton Bays. 
-              The apartment is renovated, caregivers are in the pipeline, but I need bridge funding while government 
-              registration processes finish. Your support helps me take this final step toward independence.
+              After two years of perseverance and meticulous planning, I'm finally moving out of the nursing home on November 3rd to my hometown of Hampton Bays. The bathroom renovation has gone incredibly well thanks to everyone's support – we raised just about the perfect amount! Now comes the last step: care planning.
             </p>
 
             {/* Story Hook */}
@@ -102,11 +100,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
               <div className="flex items-start gap-4">
                 <Home className="w-6 h-6 text-[var(--ocean-seafoam)] mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="text-white font-semibold mb-2">Everything Is Ready</h3>
+                  <h3 className="text-white font-semibold mb-2">We Are Almost There!</h3>
                   <p className="text-white/80 text-base">
-                    Apartment renovated ✓ Caregivers identified ✓ 24-hour care approved ✓ 
-                    I just need $6,000 to cover care costs during the final bureaucratic delays. 
-                    This is the last mile of a two-year journey.
+                    It's been a long journey, but I was approved for the subsidy. I found the apartment, secured employment, raised money to renovate the bathroom, and got it beautifully renovated. I had a ramp installed – everything's ready. The last step is to cover any care gaps that pop up while the government salary registration process completes for my caregivers.
                   </p>
                 </div>
               </div>
@@ -188,7 +184,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
                     <div className="text-6xl mb-4">🏠</div>
                     <h3 className="text-2xl font-bold mb-2">The Last Mile</h3>
                     <p className="text-white/80 text-center max-w-xs">
-                      From nursing home to independence — the final step of a two-year journey
+                      From nursing home to independence – the final step of a two-year journey
                     </p>
                   </div>
                 )}
