@@ -1,24 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowDown, Play, Heart, Code2 } from 'lucide-react';
+import { ArrowDown, Play, Heart, Home } from 'lucide-react';
 import type { Campaign } from '../../types/index';
 
 interface HeroSectionProps {
-  campaign: Campaign;
+  campaign: Campaign | null;
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
   const [currentAmount, setCurrentAmount] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
-  // Currency formatter to remove cents
-  const formatCurrency = (amount: number) => {
-    return amount.toLocaleString('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    });
-  };
+  // Early return if no campaign data
+  if (!campaign) {
+    return (
+      <section className="relative min-h-screen overflow-hidden hero-ocean flex items-center justify-center">
+        <div className="text-white text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Loading campaign...</p>
+        </div>
+      </section>
+    );
+  }
 
   // Animate numbers on mount
   useEffect(() => {
@@ -78,32 +80,33 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
             
             {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-              <Heart className="w-4 h-4 text-[var(--ocean-sunrise)]" />
-              <span className="text-white/90 text-sm font-medium">Supporting Matt's Journey</span>
+              <Home className="w-4 h-4 text-[var(--ocean-sunrise)]" />
+              <span className="text-white/90 text-sm font-medium">The Last Mile</span>
             </div>
 
             {/* Main Headline */}
             <h1 className="text-white mb-6 text-shadow-ocean">
-              From Sea to 
-              <span className="block text-[var(--ocean-seafoam)]">Source Code</span>
+              The Final Step to
+              <span className="block text-[var(--ocean-seafoam)]">Independence</span>
             </h1>
 
             {/* Updated Subtitle */}
             <p className="text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed">
-              I'm working diligently towards a life as a successful disabled person outside the nursing home. 
-              My career is progressing every day, but I need your help raising money to renovate a bathroom 
-              for my new apartment. It's the last thing standing in my way — your donations will help add 
-              an element of security while I establish my new life.
+              After two years of preparation, I'm moving out of the nursing home on November 3rd to my hometown of Hampton Bays. 
+              The apartment is renovated, caregivers are in the pipeline, but I need bridge funding while government 
+              registration processes finish. Your support helps me take this final step toward independence.
             </p>
 
             {/* Story Hook */}
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8">
               <div className="flex items-start gap-4">
-                <Code2 className="w-6 h-6 text-[var(--ocean-seafoam)] mt-1 flex-shrink-0" />
+                <Home className="w-6 h-6 text-[var(--ocean-seafoam)] mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="text-white font-semibold mb-2">The Challenge</h3>
+                  <h3 className="text-white font-semibold mb-2">Everything Is Ready</h3>
                   <p className="text-white/80 text-base">
-                    {campaign.description}
+                    Apartment renovated ✓ Caregivers identified ✓ 24-hour care approved ✓ 
+                    I just need $6,000 to cover care costs during the final bureaucratic delays. 
+                    This is the last mile of a two-year journey.
                   </p>
                 </div>
               </div>
@@ -116,7 +119,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
                 className="btn-ocean-primary bg-white text-[var(--ocean-blue)] hover:bg-[var(--ocean-mist)] shadow-2xl"
               >
                 <Heart className="w-5 h-5 mr-2" />
-                Support My Journey
+                Support My Independence
               </button>
               
               <button 
@@ -124,31 +127,31 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
                 className="btn-ocean-secondary bg-transparent border-white text-white hover:bg-white/10"
               >
                 <Play className="w-5 h-5 mr-2" />
-                Watch My Story
+                Learn My Story
               </button>
             </div>
 
-            {/* Quick Stats - FIXED FOR MOBILE */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-              <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-4 sm:bg-transparent sm:p-0">
-                <div className={`text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 transition-all duration-1000 ${isVisible ? 'animate-count-up' : ''}`}>
-                  {formatCurrency(currentAmount)}
+            {/* Quick Stats */}
+            <div className="grid grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className={`text-3xl font-bold text-white mb-1 transition-all duration-1000 ${isVisible ? 'animate-count-up' : ''}`}>
+                  ${currentAmount.toLocaleString()}
                 </div>
                 <div className="text-white/70 text-sm">Raised</div>
               </div>
               
-              <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-4 sm:bg-transparent sm:p-0">
-                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1">
-                  {formatCurrency(campaign.goal_amount)}
+              <div className="text-center">
+                <div className="text-3xl font-bold text-white mb-1">
+                  ${campaign.goal_amount.toLocaleString()}
                 </div>
                 <div className="text-white/70 text-sm">Goal</div>
               </div>
               
-              <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-4 sm:bg-transparent sm:p-0">
-                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--ocean-sunrise)] mb-1">
-                  {Math.round(campaign.progress_percentage)}%
+              <div className="text-center">
+                <div className="text-3xl font-bold text-[var(--ocean-sunrise)] mb-1">
+                  Nov 3rd
                 </div>
-                <div className="text-white/70 text-sm">Complete</div>
+                <div className="text-white/70 text-sm">Move Out</div>
               </div>
             </div>
 
@@ -168,7 +171,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
                       className="w-full h-full"
                       frameBorder="0"
                       allowFullScreen
-                      title="Matt's Documentary - From Sea to Source Code"
+                      title="Matthew's Journey to Independence"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     />
                   </div>
@@ -176,16 +179,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
                   // Image fallback
                   <img 
                     src={campaign.featured_image} 
-                    alt="Matt Raynor - From fisherman to developer"
+                    alt="Matthew Raynor - The final step to independence"
                     className="w-full h-96 object-cover rounded-2xl"
                   />
                 ) : (
                   // Default fallback
                   <div className="w-full h-96 bg-gradient-to-br from-white/20 to-white/5 rounded-2xl flex flex-col items-center justify-center text-white">
-                    <div className="text-6xl mb-4">⚓</div>
-                    <h3 className="text-2xl font-bold mb-2">Matt's Story</h3>
+                    <div className="text-6xl mb-4">🏠</div>
+                    <h3 className="text-2xl font-bold mb-2">The Last Mile</h3>
                     <p className="text-white/80 text-center max-w-xs">
-                      From commercial fishing to coding — a journey of transformation
+                      From nursing home to independence — the final step of a two-year journey
                     </p>
                   </div>
                 )}
@@ -193,12 +196,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
 
               {/* Floating Elements */}
               <div className="absolute -top-6 -right-6 bg-[var(--ocean-sunrise)] rounded-2xl p-4 animate-pulse-slow">
-                <Code2 className="w-8 h-8 text-white" />
+                <Home className="w-8 h-8 text-white" />
               </div>
               
               <div className="absolute -bottom-6 -left-6 bg-white/20 backdrop-blur-sm rounded-2xl p-4 border border-white/30">
-                <div className="text-white text-sm font-medium">Self-taught</div>
-                <div className="text-white/70 text-xs">Full-stack developer</div>
+                <div className="text-white text-sm font-medium">November 3rd</div>
+                <div className="text-white/70 text-xs">Move-out day</div>
               </div>
             </div>
           </div>
