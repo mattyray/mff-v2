@@ -91,7 +91,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
             </h1>
 
             {/* Updated Subtitle with preserved line breaks */}
-            <div className="text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed">
+            <div className="text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed" style={{color: 'rgba(255, 255, 255, 0.95) !important'}}>
               <p className="mb-4">
                 After two years of grinding and planning every detail, I'm finally moving out of the nursing home on November 3rd — back to my hometown, Hampton Bays. The bathroom renovation went perfectly, and we raised almost exactly what was needed.
               </p>
