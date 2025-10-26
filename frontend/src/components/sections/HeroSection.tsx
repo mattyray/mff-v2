@@ -26,10 +26,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
   useEffect(() => {
     setIsVisible(true);
     const timer = setTimeout(() => {
-      animateNumber(campaign.current_amount);
+      animateNumber(campaign?.current_amount || 0);
     }, 500);
     return () => clearTimeout(timer);
-  }, [campaign.current_amount]);
+  }, [campaign?.current_amount]);
 
   const animateNumber = (target: number) => {
     const duration = 2000;
@@ -142,7 +142,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
               
               <div className="text-center">
                 <div className="text-3xl font-bold text-white mb-1">
-                  ${campaign.goal_amount.toLocaleString()}
+                  ${(campaign?.goal_amount || 0).toLocaleString()}
                 </div>
                 <div className="text-white/70 text-sm">Goal</div>
               </div>
@@ -163,7 +163,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
               
               {/* Main Video/Image Container */}
               <div className="relative bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
-                {campaign.featured_video_url && extractVideoId(campaign.featured_video_url) ? (
+                {campaign?.featured_video_url && extractVideoId(campaign.featured_video_url) ? (
                   // Video embed
                   <div className="w-full h-96 rounded-2xl overflow-hidden bg-black">
                     <iframe
@@ -175,7 +175,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     />
                   </div>
-                ) : campaign.featured_image ? (
+                ) : campaign?.featured_image ? (
                   // Image fallback
                   <img 
                     src={campaign.featured_image} 
