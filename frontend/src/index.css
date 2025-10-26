@@ -69,6 +69,15 @@ p {
   color: var(--ocean-driftwood);
 }
 
+/* Hero section text override */
+.hero-ocean p {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.hero-ocean .text-white\/90 {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
 /* Mobile Typography */
 @media (max-width: 768px) {
   h1 {
