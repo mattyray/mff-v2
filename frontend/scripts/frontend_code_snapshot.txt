@@ -1,6 +1,8 @@
 # FRONTEND CODE SNAPSHOT
-# Generated for AI Face Swap App
-# Total files: 35
+# Generated for React/TypeScript project
+# Total files: 30
+# Total lines: 2,762
+# Total characters: 86,239
 
 
 
@@ -11,8 +13,6 @@
 # ==== src/vite-env.d.ts ====
 
 /// <reference types="vite/client" />
-
-
 
 
 # ==== src/types/index.ts ====
@@ -92,8 +92,6 @@ export interface CreateDonationResponse {
   checkout_url: string;
   donation_id: number;
 }
-
-
 
 # ==== src/hooks/useAuth.ts ====
 
@@ -189,8 +187,6 @@ export const useAuth = (): UseAuthReturn => {
     clearError,
   };
 };
-
-
 
 # ==== src/services/api.ts ====
 
@@ -390,8 +386,6 @@ export class DonationAPI {
 
 export default api;
 
-
-
 # ==== ./tsconfig.node.json ====
 
 {
@@ -419,8 +413,6 @@ export default api;
   },
   "include": ["vite.config.ts"]
 }
-
-
 
 
 # ==== ./tailwind.config.js ====
@@ -454,8 +446,6 @@ export default {
   },
   plugins: [],
 }
-
-
 
 # ==== ./netlify.toml ====
 
@@ -491,8 +481,6 @@ export default {
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-
-
 # ==== ./tsconfig.app.json ====
 
 {
@@ -522,8 +510,6 @@ export default {
   },
   "include": ["src"]
 }
-
-
 
 # ==== ./package.json ====
 
@@ -566,8 +552,6 @@ export default {
 
 
 
-
-
 # ==== ./tsconfig.json ====
 
 {
@@ -577,8 +561,6 @@ export default {
     { "path": "./tsconfig.node.json" }
   ]
 }
-
-
 
 
 # ==== ./eslint.config.js ====
@@ -613,8 +595,6 @@ export default tseslint.config(
 )
 
 
-
-
 # ==== ./vite.config.ts ====
 
 import { defineConfig } from 'vite'
@@ -637,8 +617,6 @@ export default defineConfig({
   }
 })
 
-
-
 # ==== ./postcss.config.js ====
 
 export default {
@@ -647,8 +625,6 @@ export default {
     autoprefixer: {},
   },
 }
-
-
 
 
 # ==================== Main React Files ====================
@@ -753,8 +729,6 @@ function App() {
 
 export default App;
 
-
-
 # ==== src/main.tsx ====
 
 import { StrictMode } from 'react'
@@ -781,8 +755,6 @@ createRoot(rootElement).render(
 );
 
 console.log('✅ React app mounted successfully!');
-
-
 
 # ==================== React Components ====================
 
@@ -988,8 +960,6 @@ const UserMenu: React.FC<UserMenuProps> = ({ onShowRegistrationGate, onUserState
 
 export default UserMenu;
 
-
-
 # ==== src/components/CampaignPage.tsx ====
 
 import React, { useState, useEffect } from 'react';
@@ -1054,8 +1024,6 @@ const CampaignPage: React.FC = () => {
 };
 
 export default CampaignPage;
-
-
 
 # ==== src/components/SocialAuth.tsx ====
 
@@ -1338,8 +1306,6 @@ const SocialAuth: React.FC<SocialAuthProps> = ({
 
 export default SocialAuth;
 
-
-
 # ==== src/components/ErrorBoundary.tsx ====
 
 import { Component, type ErrorInfo, type ReactNode } from 'react';
@@ -1426,8 +1392,6 @@ class ErrorBoundary extends Component<Props, State> {
 
 export default ErrorBoundary;
 
-
-
 # ==== src/components/sections/SupportersSection.tsx ====
 
 import React, { useState, useEffect } from 'react';
@@ -1513,8 +1477,6 @@ const SupportersSection: React.FC = () => {
 };
 
 export default SupportersSection;
-
-
 
 # ==== src/components/sections/UpdatesSection.tsx ====
 
@@ -1608,12 +1570,10 @@ const UpdatesSection: React.FC = () => {
 
 export default UpdatesSection;
 
-
-
 # ==== src/components/sections/DonationSection.tsx ====
 
 import React, { useState } from 'react';
-import { Heart, CreditCard, Shield, AlertCircle } from 'lucide-react';
+import { Heart, CreditCard, Shield, AlertCircle, Home } from 'lucide-react';
 import { DonationAPI } from '../../services/api';
 import type { Campaign } from '../../types/index';
 
@@ -1647,7 +1607,6 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
     setError('');
     
     try {
-      // Call your actual Stripe API
       const response = await DonationAPI.createDonation({
         amount: parseFloat(amount),
         donor_name: isAnonymous ? '' : donorName,
@@ -1677,13 +1636,14 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
         
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 bg-[var(--ocean-blue)]/10 rounded-full px-4 py-2 mb-4">
-            <Heart className="w-4 h-4 text-[var(--ocean-blue)]" />
-            <span className="text-[var(--ocean-blue)] text-sm font-medium">Make a Difference</span>
+            <Home className="w-4 h-4 text-[var(--ocean-blue)]" />
+            <span className="text-[var(--ocean-blue)] text-sm font-medium">Bridge to Independence</span>
           </div>
           
-          <h2 className="mb-4">Support My Journey</h2>
+          <h2 className="mb-4">Help Me Take the Final Step</h2>
           <p className="text-xl text-[var(--ocean-driftwood)] max-w-2xl mx-auto">
-            Every contribution helps me continue building, creating, and inspiring others
+            After two years of preparation, I'm moving out November 3rd. Your support covers care costs during 
+            the final government processing delays, ensuring I can move forward with confidence.
           </p>
         </div>
 
@@ -1697,6 +1657,33 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
                 <p className="text-red-700 text-sm">{error}</p>
               </div>
             )}
+
+            {/* Impact Preview */}
+            <div className="mb-6 p-4 bg-[var(--ocean-mist)] rounded-xl">
+              <h4 className="text-[var(--ocean-deep)] font-semibold mb-2">Your Impact</h4>
+              <p className="text-[var(--ocean-driftwood)] text-sm mb-3">
+                Every contribution helps me bridge the gap between being ready to move out and having 
+                the care support fully in place. This is the final mile of a two-year journey.
+              </p>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>Apartment renovated ✓</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>Care approved ✓</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                  <span>Bridge funding needed</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span>Nov 3rd move-out</span>
+                </div>
+              </div>
+            </div>
             
             {/* Quick Amount Buttons */}
             <div className="mb-6">
@@ -1782,7 +1769,7 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   disabled={loading}
-                  placeholder="Share a message of support..."
+                  placeholder="Share words of encouragement for the final step..."
                   rows={3}
                   className="input-ocean resize-none"
                 />
@@ -1816,7 +1803,7 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
               ) : (
                 <div className="flex items-center justify-center gap-2">
                   <CreditCard className="w-5 h-5" />
-                  Donate ${amount || '0'}
+                  Support Independence - ${amount || '0'}
                 </div>
               )}
             </button>
@@ -1824,6 +1811,14 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
             <div className="flex items-center justify-center gap-2 mt-4 text-sm text-[var(--ocean-driftwood)]">
               <Shield className="w-4 h-4" />
               Secure payment processing by Stripe
+            </div>
+
+            {/* Additional Context */}
+            <div className="mt-6 p-4 bg-gray-50 rounded-xl">
+              <p className="text-sm text-[var(--ocean-driftwood)] text-center">
+                <strong>Any amount helps.</strong> I always end up needing to pay people extra for various things, 
+                and every dollar makes this transition more secure. Thank you for being part of my journey to independence.
+              </p>
             </div>
           </div>
         </div>
@@ -1834,12 +1829,10 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
 
 export default DonationSection;
 
-
-
 # ==== src/components/sections/HeroSection.tsx ====
 
 import React, { useState, useEffect } from 'react';
-import { ArrowDown, Play, Heart, Code2 } from 'lucide-react';
+import { ArrowDown, Play, Heart, Home } from 'lucide-react';
 import type { Campaign } from '../../types/index';
 
 interface HeroSectionProps {
@@ -1908,32 +1901,33 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
             
             {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-              <Heart className="w-4 h-4 text-[var(--ocean-sunrise)]" />
-              <span className="text-white/90 text-sm font-medium">Supporting Matt's Journey</span>
+              <Home className="w-4 h-4 text-[var(--ocean-sunrise)]" />
+              <span className="text-white/90 text-sm font-medium">The Last Mile</span>
             </div>
 
             {/* Main Headline */}
             <h1 className="text-white mb-6 text-shadow-ocean">
-              From Sea to 
-              <span className="block text-[var(--ocean-seafoam)]">Source Code</span>
+              The Final Step to
+              <span className="block text-[var(--ocean-seafoam)]">Independence</span>
             </h1>
 
             {/* Updated Subtitle */}
             <p className="text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed">
-              I'm working diligently towards a life as a successful disabled person outside the nursing home. 
-              My career is progressing every day, but I need your help raising money to renovate a bathroom 
-              for my new apartment. It's the last thing standing in my way — your donations will help add 
-              an element of security while I establish my new life.
+              After two years of preparation, I'm moving out of the nursing home on November 3rd to my hometown of Hampton Bays. 
+              The apartment is renovated, caregivers are in the pipeline, but I need bridge funding while government 
+              registration processes finish. Your support helps me take this final step toward independence.
             </p>
 
             {/* Story Hook */}
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8">
               <div className="flex items-start gap-4">
-                <Code2 className="w-6 h-6 text-[var(--ocean-seafoam)] mt-1 flex-shrink-0" />
+                <Home className="w-6 h-6 text-[var(--ocean-seafoam)] mt-1 flex-shrink-0" />
                 <div>
-                  <h3 className="text-white font-semibold mb-2">The Challenge</h3>
+                  <h3 className="text-white font-semibold mb-2">Everything Is Ready</h3>
                   <p className="text-white/80 text-base">
-                    {campaign.description}
+                    Apartment renovated ✓ Caregivers identified ✓ 24-hour care approved ✓ 
+                    I just need $6,000 to cover care costs during the final bureaucratic delays. 
+                    This is the last mile of a two-year journey.
                   </p>
                 </div>
               </div>
@@ -1946,7 +1940,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
                 className="btn-ocean-primary bg-white text-[var(--ocean-blue)] hover:bg-[var(--ocean-mist)] shadow-2xl"
               >
                 <Heart className="w-5 h-5 mr-2" />
-                Support My Journey
+                Support My Independence
               </button>
               
               <button 
@@ -1954,7 +1948,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
                 className="btn-ocean-secondary bg-transparent border-white text-white hover:bg-white/10"
               >
                 <Play className="w-5 h-5 mr-2" />
-                Watch My Story
+                Learn My Story
               </button>
             </div>
 
@@ -1976,9 +1970,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
               
               <div className="text-center">
                 <div className="text-3xl font-bold text-[var(--ocean-sunrise)] mb-1">
-                  {Math.round(campaign.progress_percentage)}%
+                  Nov 3rd
                 </div>
-                <div className="text-white/70 text-sm">Complete</div>
+                <div className="text-white/70 text-sm">Move Out</div>
               </div>
             </div>
 
@@ -1998,7 +1992,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
                       className="w-full h-full"
                       frameBorder="0"
                       allowFullScreen
-                      title="Matt's Documentary - From Sea to Source Code"
+                      title="Matthew's Journey to Independence"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     />
                   </div>
@@ -2006,16 +2000,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
                   // Image fallback
                   <img 
                     src={campaign.featured_image} 
-                    alt="Matt Raynor - From fisherman to developer"
+                    alt="Matthew Raynor - The final step to independence"
                     className="w-full h-96 object-cover rounded-2xl"
                   />
                 ) : (
                   // Default fallback
                   <div className="w-full h-96 bg-gradient-to-br from-white/20 to-white/5 rounded-2xl flex flex-col items-center justify-center text-white">
-                    <div className="text-6xl mb-4">⚓</div>
-                    <h3 className="text-2xl font-bold mb-2">Matt's Story</h3>
+                    <div className="text-6xl mb-4">🏠</div>
+                    <h3 className="text-2xl font-bold mb-2">The Last Mile</h3>
                     <p className="text-white/80 text-center max-w-xs">
-                      From commercial fishing to coding — a journey of transformation
+                      From nursing home to independence — the final step of a two-year journey
                     </p>
                   </div>
                 )}
@@ -2023,12 +2017,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
 
               {/* Floating Elements */}
               <div className="absolute -top-6 -right-6 bg-[var(--ocean-sunrise)] rounded-2xl p-4 animate-pulse-slow">
-                <Code2 className="w-8 h-8 text-white" />
+                <Home className="w-8 h-8 text-white" />
               </div>
               
               <div className="absolute -bottom-6 -left-6 bg-white/20 backdrop-blur-sm rounded-2xl p-4 border border-white/30">
-                <div className="text-white text-sm font-medium">Self-taught</div>
-                <div className="text-white/70 text-xs">Full-stack developer</div>
+                <div className="text-white text-sm font-medium">November 3rd</div>
+                <div className="text-white/70 text-xs">Move-out day</div>
               </div>
             </div>
           </div>
@@ -2054,8 +2048,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
 
 export default HeroSection;
 
-
-
 # ==== src/components/sections/ProgressSection.tsx ====
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -2072,9 +2064,8 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
   const [animatedAmount, setAnimatedAmount] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  // 🔧 FIXED: Better Intersection Observer for mobile
+  // Intersection Observer for mobile
   useEffect(() => {
-    // Check if we're on mobile
     const isMobile = window.innerWidth <= 768;
     
     const observer = new IntersectionObserver(
@@ -2083,7 +2074,6 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
         
         if (entry.isIntersecting) {
           setIsVisible(true);
-          // Shorter delay on mobile for faster response
           const delay = isMobile ? 100 : 200;
           setTimeout(() => {
             animateProgress();
@@ -2092,8 +2082,8 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
         }
       },
       { 
-        threshold: isMobile ? 0.05 : 0.3,    // Much lower threshold on mobile
-        rootMargin: isMobile ? '100px 0px' : '50px 0px'  // Trigger much earlier on mobile
+        threshold: isMobile ? 0.05 : 0.3,
+        rootMargin: isMobile ? '100px 0px' : '50px 0px'
       }
     );
 
@@ -2102,7 +2092,7 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
       console.log('🔍 Progress section observer attached');
     }
 
-    // 🔧 FALLBACK: If no intersection after 2 seconds, trigger anyway
+    // Fallback timer
     const fallbackTimer = setTimeout(() => {
       if (!isVisible) {
         console.log('🔧 Fallback: Triggering progress animations');
@@ -2164,12 +2154,13 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
         <div className={`text-center mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="inline-flex items-center gap-2 bg-[var(--ocean-blue)]/10 rounded-full px-4 py-2 mb-4">
             <TrendingUp className="w-4 h-4 text-[var(--ocean-blue)]" />
-            <span className="text-[var(--ocean-blue)] text-sm font-medium">Campaign Progress</span>
+            <span className="text-[var(--ocean-blue)] text-sm font-medium">Independence Progress</span>
           </div>
           
-          <h2 className="mb-4">Every Step Counts</h2>
+          <h2 className="mb-4">The Last Mile</h2>
           <p className="text-xl text-[var(--ocean-driftwood)] max-w-2xl mx-auto">
-            Your support brings me closer to securing accessible housing and continuing to inspire others through technology
+            After two years of preparation, I'm 60% through the care process and ready to move out. 
+            Your support bridges the final gap while government bureaucracy catches up.
           </p>
         </div>
 
@@ -2179,9 +2170,9 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
           {/* Progress Header */}
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8">
             <div>
-              <h3 className="text-[var(--ocean-deep)] mb-2">Current Progress</h3>
+              <h3 className="text-[var(--ocean-deep)] mb-2">Bridge Funding Progress</h3>
               <p className="text-[var(--ocean-driftwood)]">
-                Help me reach the next milestone in my journey
+                Security blanket for 2-3 months of care during the transition
               </p>
             </div>
             
@@ -2221,26 +2212,26 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
               <div>
                 <h4 className="text-[var(--ocean-deep)] mb-2">What This Funding Achieves</h4>
                 <p className="text-[var(--ocean-driftwood)] mb-4">
-                  This campaign will help me secure accessible housing in Hampton Bays — the perfect location 
-                  next to my family, friends, and caregivers. The funding will enable me to live independently 
-                  with the accessibility features I need.
+                  This bridge funding ensures I can move out on November 3rd with confidence, knowing I'll have 
+                  the care support I need while the government finishes processing caregiver registrations. 
+                  It's the final piece that makes independence possible.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[var(--ocean-blue)] rounded-full"></div>
-                    <span className="text-sm text-[var(--ocean-driftwood)]">Roll-in shower and bathroom modifications</span>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">2-3 months of care coverage</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[var(--ocean-teal)] rounded-full"></div>
-                    <span className="text-sm text-[var(--ocean-driftwood)]">Caregiver-friendly living accommodations</span>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Security during government processing</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[var(--ocean-seafoam)] rounded-full"></div>
-                    <span className="text-sm text-[var(--ocean-driftwood)]">Strategic location near my support network</span>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Use of renovated accessible shower</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[var(--ocean-sunrise)] rounded-full"></div>
-                    <span className="text-sm text-[var(--ocean-driftwood)]">Complete accessibility setup for independence</span>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Freedom to enjoy Hampton Bays</span>
                   </div>
                 </div>
               </div>
@@ -2251,42 +2242,42 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
         {/* Stats Grid */}
         <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 transition-all duration-1000 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           
-          {/* Donation Count */}
+          {/* Preparation Time */}
           <div className="card-ocean text-center">
             <div className="w-12 h-12 bg-[var(--ocean-blue)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Users className="w-6 h-6 text-[var(--ocean-blue)]" />
+              <Calendar className="w-6 h-6 text-[var(--ocean-blue)]" />
             </div>
             <div className="text-2xl font-bold text-[var(--ocean-deep)] mb-2">
-              47
+              2 Years
             </div>
             <div className="text-[var(--ocean-driftwood)] text-sm">
-              Supporters
+              Preparation Time
             </div>
           </div>
 
-          {/* Average Donation */}
+          {/* Care Process */}
           <div className="card-ocean text-center">
             <div className="w-12 h-12 bg-[var(--ocean-teal)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <TrendingUp className="w-6 h-6 text-[var(--ocean-teal)]" />
+              <Users className="w-6 h-6 text-[var(--ocean-teal)]" />
             </div>
             <div className="text-2xl font-bold text-[var(--ocean-deep)] mb-2">
-              ${Math.round(campaign.current_amount / 47)}
+              60%
             </div>
             <div className="text-[var(--ocean-driftwood)] text-sm">
-              Average Gift
+              Care Process Complete
             </div>
           </div>
 
-          {/* Time Remaining */}
+          {/* Move Out Date */}
           <div className="card-ocean text-center">
             <div className="w-12 h-12 bg-[var(--ocean-sunrise)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Calendar className="w-6 h-6 text-[var(--ocean-sunrise)]" />
+              <Target className="w-6 h-6 text-[var(--ocean-sunrise)]" />
             </div>
             <div className="text-2xl font-bold text-[var(--ocean-deep)] mb-2">
-              Ongoing
+              Nov 3rd
             </div>
             <div className="text-[var(--ocean-driftwood)] text-sm">
-              No deadline
+              Move-Out Date
             </div>
           </div>
         </div>
@@ -2297,9 +2288,7 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
 
 export default ProgressSection;
 
-
-
-# ==================== Assets & Styles ====================
+# ==================== Styles ====================
 
 
 
@@ -2347,8 +2336,6 @@ export default ProgressSection;
 .read-the-docs {
   color: #888;
 }
-
-
 
 
 # ==== src/index.css ====
@@ -2644,17 +2631,123 @@ img {
   background: var(--ocean-teal);
 }
 
-
-
-# ==== src/assets/react.svg ====
-
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="35.93" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 228"><path fill="#00D8FF" d="M210.483 73.824a171.49 171.49 0 0 0-8.24-2.597c.465-1.9.893-3.777 1.273-5.621c6.238-30.281 2.16-54.676-11.769-62.708c-13.355-7.7-35.196.329-57.254 19.526a171.23 171.23 0 0 0-6.375 5.848a155.866 155.866 0 0 0-4.241-3.917C100.759 3.829 77.587-4.822 63.673 3.233C50.33 10.957 46.379 33.89 51.995 62.588a170.974 170.974 0 0 0 1.892 8.48c-3.28.932-6.445 1.924-9.474 2.98C17.309 83.498 0 98.307 0 113.668c0 15.865 18.582 31.778 46.812 41.427a145.52 145.52 0 0 0 6.921 2.165a167.467 167.467 0 0 0-2.01 9.138c-5.354 28.2-1.173 50.591 12.134 58.266c13.744 7.926 36.812-.22 59.273-19.855a145.567 145.567 0 0 0 5.342-4.923a168.064 168.064 0 0 0 6.92 6.314c21.758 18.722 43.246 26.282 56.54 18.586c13.731-7.949 18.194-32.003 12.4-61.268a145.016 145.016 0 0 0-1.535-6.842c1.62-.48 3.21-.974 4.76-1.488c29.348-9.723 48.443-25.443 48.443-41.52c0-15.417-17.868-30.326-45.517-39.844Zm-6.365 70.984c-1.4.463-2.836.91-4.3 1.345c-3.24-10.257-7.612-21.163-12.963-32.432c5.106-11 9.31-21.767 12.459-31.957c2.619.758 5.16 1.557 7.61 2.4c23.69 8.156 38.14 20.213 38.14 29.504c0 9.896-15.606 22.743-40.946 31.14Zm-10.514 20.834c2.562 12.94 2.927 24.64 1.23 33.787c-1.524 8.219-4.59 13.698-8.382 15.893c-8.067 4.67-25.32-1.4-43.927-17.412a156.726 156.726 0 0 1-6.437-5.87c7.214-7.889 14.423-17.06 21.459-27.246c12.376-1.098 24.068-2.894 34.671-5.345a134.17 134.17 0 0 1 1.386 6.193ZM87.276 214.515c-7.882 2.783-14.16 2.863-17.955.675c-8.075-4.657-11.432-22.636-6.853-46.752a156.923 156.923 0 0 1 1.869-8.499c10.486 2.32 22.093 3.988 34.498 4.994c7.084 9.967 14.501 19.128 21.976 27.15a134.668 134.668 0 0 1-4.877 4.492c-9.933 8.682-19.886 14.842-28.658 17.94ZM50.35 144.747c-12.483-4.267-22.792-9.812-29.858-15.863c-6.35-5.437-9.555-10.836-9.555-15.216c0-9.322 13.897-21.212 37.076-29.293c2.813-.98 5.757-1.905 8.812-2.773c3.204 10.42 7.406 21.315 12.477 32.332c-5.137 11.18-9.399 22.249-12.634 32.792a134.718 134.718 0 0 1-6.318-1.979Zm12.378-84.26c-4.811-24.587-1.616-43.134 6.425-47.789c8.564-4.958 27.502 2.111 47.463 19.835a144.318 144.318 0 0 1 3.841 3.545c-7.438 7.987-14.787 17.08-21.808 26.988c-12.04 1.116-23.565 2.908-34.161 5.309a160.342 160.342 0 0 1-1.76-7.887Zm110.427 27.268a347.8 347.8 0 0 0-7.785-12.803c8.168 1.033 15.994 2.404 23.343 4.08c-2.206 7.072-4.956 14.465-8.193 22.045a381.151 381.151 0 0 0-7.365-13.322Zm-45.032-43.861c5.044 5.465 10.096 11.566 15.065 18.186a322.04 322.04 0 0 0-30.257-.006c4.974-6.559 10.069-12.652 15.192-18.18ZM82.802 87.83a323.167 323.167 0 0 0-7.227 13.238c-3.184-7.553-5.909-14.98-8.134-22.152c7.304-1.634 15.093-2.97 23.209-3.984a321.524 321.524 0 0 0-7.848 12.897Zm8.081 65.352c-8.385-.936-16.291-2.203-23.593-3.793c2.26-7.3 5.045-14.885 8.298-22.6a321.187 321.187 0 0 0 7.257 13.246c2.594 4.48 5.28 8.868 8.038 13.147Zm37.542 31.03c-5.184-5.592-10.354-11.779-15.403-18.433c4.902.192 9.899.29 14.978.29c5.218 0 10.376-.117 15.453-.343c-4.985 6.774-10.018 12.97-15.028 18.486Zm52.198-57.817c3.422 7.8 6.306 15.345 8.596 22.52c-7.422 1.694-15.436 3.058-23.88 4.071a382.417 382.417 0 0 0 7.859-13.026a347.403 347.403 0 0 0 7.425-13.565Zm-16.898 8.101a358.557 358.557 0 0 1-12.281 19.815a329.4 329.4 0 0 1-23.444.823c-7.967 0-15.716-.248-23.178-.732a310.202 310.202 0 0 1-12.513-19.846h.001a307.41 307.41 0 0 1-10.923-20.627a310.278 310.278 0 0 1 10.89-20.637l-.001.001a307.318 307.318 0 0 1 12.413-19.761c7.613-.576 15.42-.876 23.31-.876H128c7.926 0 15.743.303 23.354.883a329.357 329.357 0 0 1 12.335 19.695a358.489 358.489 0 0 1 11.036 20.54a329.472 329.472 0 0 1-11 20.722Zm22.56-122.124c8.572 4.944 11.906 24.881 6.52 51.026c-.344 1.668-.73 3.367-1.15 5.09c-10.622-2.452-22.155-4.275-34.23-5.408c-7.034-10.017-14.323-19.124-21.64-27.008a160.789 160.789 0 0 1 5.888-5.4c18.9-16.447 36.564-22.941 44.612-18.3ZM128 90.808c12.625 0 22.86 10.235 22.86 22.86s-10.235 22.86-22.86 22.86s-22.86-10.235-22.86-22.86s10.235-22.86 22.86-22.86Z"></path></svg>
+# ==================== Other Files ====================
 
 
 
-# ==== public/favicon-16x16.png ====
+# ==== ./index.html ====
 
-PNG
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    
+    <!-- Basic SEO -->
+    <meta name="description" content="Help Matt secure accessible housing and continue his journey as a quadriplegic developer. From commercial fisherman to self-taught programmer - your support makes the difference." />
+    <meta name="keywords" content="fundraiser, disability, accessibility, developer, quadriplegic, inspiring story, donation, accessible housing" />
+    <meta name="author" content="Matt Raynor" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Matt Freedom Fundraiser - From Sea to Source Code</title>
+    
+    <!-- Open Graph Meta Tags (Facebook, LinkedIn) -->
+    <meta property="og:site_name" content="Matt Freedom Fundraiser" />
+    <meta property="og:title" content="Matt Freedom Fundraiser - From Sea to Source Code" />
+    <meta property="og:description" content="Help Matt secure accessible housing and continue his journey as a quadriplegic developer. From commercial fisherman to self-taught programmer - your support makes the difference." />
+    <meta property="og:image" content="https://mattsfreedomfundraiser.com/og-image-v2.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Matt Raynor fundraising campaign - accessible housing for disabled developer" />
+    <meta property="og:url" content="https://mattsfreedomfundraiser.com" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@mattfreedomfund" />
+    <meta name="twitter:creator" content="@mattfreedomfund" />
+    <meta name="twitter:title" content="Matt Freedom Fundraiser - From Sea to Source Code" />
+    <meta name="twitter:description" content="Help Matt secure accessible housing and continue his journey as a quadriplegic developer. Your support makes the difference." />
+    <meta property="twitter:image" content="https://mattsfreedomfundraiser.com/og-image-v2.jpg" />
+    <meta name="twitter:image:alt" content="Matt Raynor fundraising campaign - accessible housing for disabled developer" />
+    
+    <!-- Additional Meta -->
+    <meta name="theme-color" content="#1E40AF" />
+    <link rel="canonical" href="https://mattsfreedomfundraiser.com" />
+    
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
+# ==== ./project_structure.txt ====
+
+.
+├── public
+│   ├── android-chrome-192x192.png
+│   ├── android-chrome-512x512.png
+│   ├── apple-touch-icon.png
+│   ├── favicon-16x16.png
+│   ├── favicon-32x32.png
+│   ├── favicon.ico
+│   └── site.webmanifest
+├── scripts
+│   ├── front_export.py
+│   └── frontend_code_snapshot.txt
+├── src
+│   ├── assets
+│   │   └── react.svg
+│   ├── components
+│   │   ├── sections
+│   │   │   ├── DonationSection.tsx
+│   │   │   ├── HeroSection.tsx
+│   │   │   ├── ProgressSection.tsx
+│   │   │   ├── SupportersSection.tsx
+│   │   │   └── UpdatesSection.tsx
+│   │   ├── CampaignPage.tsx
+│   │   ├── ErrorBoundary.tsx
+│   │   ├── SocialAuth.tsx
+│   │   └── UserMenu.tsx
+│   ├── hooks
+│   │   └── useAuth.ts
+│   ├── services
+│   │   └── api.ts
+│   ├── types
+│   │   └── index.ts
+│   ├── App.css
+│   ├── App.tsx
+│   ├── index.css
+│   ├── main.tsx
+│   └── vite-env.d.ts
+├── .env.local
+├── .env.production
+├── .gitignore
+├── eslint.config.js
+├── index.html
+├── netlify.toml
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── project_structure.txt
+├── project-structure.txt
+├── README.md
+├── tailwind.config.js
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+└── vite.config.ts
+
+10 directories, 44 files
 
 
 # ==== ./README.md ====
@@ -2715,3 +2808,102 @@ export default tseslint.config({
 ```
 
 
+# ==== ./.gitignore ====
+
+# Environment Variables (CRITICAL - contains API keys)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Production build
+/dist
+/build
+
+# Development
+.vite/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# ESLint cache
+.eslintcache
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/

@@ -1,7 +1,7 @@
 # MATT FREEDOM FUNDRAISER V2 - CODE SNAPSHOT
 # Generated for donation platform development and debugging
-# Created: 2025-08-22 12:40:05
-# Total files: 43
+# Created: 2025-10-26 15:44:20
+# Total files: 45
 # Focus: Donation platform, emails, profiles, authentication
 
 
@@ -729,6 +729,62 @@ def payment_cancel(request):
     return Response({'status': 'cancelled', 'message': 'Payment was cancelled'})
 ```
 
+# ==== donations/management/commands/update_campaign_transition.py ====
+
+```python
+# backend/donations/management/commands/update_campaign_transition.py
+from django.core.management.base import BaseCommand
+from donations.models import Campaign
+from decimal import Decimal
+
+class Command(BaseCommand):
+    help = 'Update campaign for Matthew\'s independence transition fundraiser'
+
+    def handle(self, *args, **options):
+        # Update the main campaign
+        campaign, created = Campaign.objects.update_or_create(
+            id=1,  # Your main campaign ID
+            defaults={
+                'title': 'The Last Mile: Supporting My Independence Journey',
+                'description': '''After two years of meticulous planning, I'm finally moving out on November 3rd to my hometown of Hampton Bays – and I need your help with the last piece of the puzzle.
+
+The apartment is renovated and looks absolutely amazing. I'm about 60% done with the care process – I've been approved for 24-hour care and already have two people registered as caregivers. I'm working on a third, and I have two interviews this week with people who can do overnights. I've built a career as a software engineer, creating everything from luxury delivery platforms to AI applications. I've found spiritual grounding through Buddhism and Taoism, and I'll be 2 years sober on November 1st with the support of my AA community.
+
+The challenge: The caregiver registration process takes forever. One of my current caregivers took three months to get registered – I don't know why it took so long. The next one was quicker, but it's still a significantly long process. I'm 4-5 weeks into registering additional people, and while everything is in the oven, I can't control the government timeline.
+
+I'm raising $6,000 to cover 2-3 months of care costs while we finish the registration process. This creates a security blanket so I can move forward with confidence, knowing I'll have the support I need during the transition. Any amount helps – I always end up needing to pay people extra for various things, and every dollar makes a difference.
+
+I want to be able to use the shower I raised money for. I want to hang out with my friends. I want to drive my wheelchair around Hampton Bays, be out in the sun underneath the sky, and hear birds instead of being locked up in a nursing home. With your support, I'll be able to do all of that more comfortably.
+
+The Hampton Bays community and my recovery family have been incredible throughout this journey. This is the last mile of a two-year journey toward independence. Everything is in the oven – I just need help bridging the gap while the bureaucracy catches up.''',
+                'goal_amount': Decimal('6000.00'),
+                'current_amount': Decimal('0.00'),  # Reset for new campaign
+                'is_active': True,
+                'featured_video_url': '',  # Add new video URL if you have one
+                'featured_image': '',  # Add new image URL if you have one
+            }
+        )
+        
+        if created:
+            self.stdout.write(
+                self.style.SUCCESS(f'✅ Created new campaign: {campaign.title}')
+            )
+        else:
+            self.stdout.write(
+                self.style.SUCCESS(f'✅ Updated campaign: {campaign.title}')
+            )
+            
+        self.stdout.write(
+            self.style.SUCCESS(f'💰 Goal: ${campaign.goal_amount}')
+        )
+        self.stdout.write(
+            self.style.SUCCESS(f'📍 Current: ${campaign.current_amount}')
+        )
+        self.stdout.write(
+            self.style.SUCCESS(f'📅 Focus: Independence transition - November 3rd move-out')
+        )
+```
+
 # ==== profiles/models.py ====
 
 ```python
@@ -1051,6 +1107,166 @@ from django.shortcuts import render
 
 # Create your views here.
 
+```
+
+# ==== emails/management/commands/update_email_template_transition.py ====
+
+```python
+# backend/emails/management/commands/update_email_template_transition.py
+from django.core.management.base import BaseCommand
+from emails.models import EmailTemplate
+
+class Command(BaseCommand):
+    help = 'Update email template for the independence transition campaign'
+
+    def handle(self, *args, **options):
+        # Updated thank you email template for independence transition
+        thank_you_template = """
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #0F172A;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }}
+        .header {{
+            background: linear-gradient(135deg, #0F172A 0%, #1E40AF 50%, #0891B2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+        }}
+        .content {{
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }}
+        .donation-details {{
+            background: #F0F9FF;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #1E40AF;
+        }}
+        .progress-bar {{
+            background: #E5E7EB;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }}
+        .progress-fill {{
+            background: linear-gradient(90deg, #1E40AF 0%, #0891B2 100%);
+            height: 100%;
+            border-radius: 10px;
+            width: {progress_percentage}%;
+        }}
+        .footer {{
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #E5E7EB;
+            color: #6B7280;
+        }}
+        .cta-button {{
+            display: inline-block;
+            background: #1E40AF;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 15px 0;
+        }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏠 Thank You, {donor_name}!</h1>
+        <p>You're helping me take the final step to independence</p>
+    </div>
+    
+    <div class="content">
+        <h2>The Last Mile</h2>
+        <p>Dear {donor_name},</p>
+        
+        <p>I am deeply grateful for your donation of <strong>${amount}</strong> to my independence transition campaign. After two years of preparation, I'm moving out of the nursing home on November 3rd to my hometown of Hampton Bays, and your contribution helps ensure I can do this with confidence.</p>
+        
+        <div class="donation-details">
+            <h3>Donation Details</h3>
+            <p><strong>Amount:</strong> ${amount}</p>
+            <p><strong>Date:</strong> {donation_date}</p>
+            <p><strong>Campaign:</strong> The Last Mile - Independence Transition</p>
+        </div>
+        
+        <h3>Campaign Progress</h3>
+        <p>Thanks to supporters like you, we've raised <strong>${current_total}</strong> of our ${goal_amount} goal!</p>
+        
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+        <p style="text-align: center; margin-top: 10px;">
+            <strong>{progress_percentage:.1f}% Complete</strong>
+        </p>
+        
+        <h3>What Your Support Means</h3>
+        <p>Your donation creates a security blanket during this critical transition:</p>
+        <ul>
+            <li>🏠 Bridge funding while government processes finish</li>
+            <li>🚿 Freedom to use the accessible shower I raised money for</li>
+            <li>👥 Ability to hang out with friends in Hampton Bays</li>
+            <li>☀️ Getting out in the sun and hearing birds instead of being locked up</li>
+        </ul>
+        
+        <p>As a C5-C6 tetraplegic who taught himself to code and built a career as a software engineer, I've proven that with the right support, anything is possible. I'm 60% through the care process, have two caregivers registered, and am interviewing more this week. Everything is in the oven - your support helps me finish what I started.</p>
+        
+        <p>I'll be 2 years sober on November 1st, just days before my move-out. This journey has been about more than just physical independence - it's been about spiritual growth through Buddhism and Taoism, building a career, and proving that disability doesn't limit potential.</p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="https://mattsfreedomfundraiser.com" class="cta-button">
+                Follow My Journey
+            </a>
+        </div>
+        
+        <p>Thank you for being part of this final mile. November 3rd can't come soon enough!</p>
+        
+        <p>With endless gratitude,<br>
+        <strong>Matthew Raynor</strong><br>
+        <em>The Last Mile to Independence</em> 🏠💪</p>
+    </div>
+    
+    <div class="footer">
+        <p>You're receiving this email because you supported Matthew's independence transition campaign.</p>
+        <p>Matthew Raynor - From Southampton nursing home to Hampton Bays independence</p>
+    </div>
+</body>
+</html>
+        """
+        
+        # Create or update the template
+        template, created = EmailTemplate.objects.update_or_create(
+            name='thank_you_email',
+            defaults={
+                'subject': 'Thank you for supporting my independence, {donor_name}! 🏠',
+                'html_content': thank_you_template.strip(),
+                'is_active': True
+            }
+        )
+        
+        if created:
+            self.stdout.write(
+                self.style.SUCCESS('✅ Created independence transition email template')
+            )
+        else:
+            self.stdout.write(
+                self.style.SUCCESS('✅ Updated independence transition email template')
+            )
 ```
 
 # ==== emails/management/commands/create_email_templates.py ====
@@ -2258,14 +2474,14 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-# Email
-EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
-EMAIL_HOST = env("EMAIL_HOST", default="smtp.sendgrid.net")
+# 🔥 FIXED: Gmail Email Configuration
+EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = env("EMAIL_HOST", default="smtp.gmail.com")
 EMAIL_PORT = env.int("EMAIL_PORT", default=587)
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "apikey"
-EMAIL_HOST_PASSWORD = env("SENDGRID_API_KEY", default="")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="donations@mattfreedomfundraiser.com")
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")  # 🔥 FIXED: Read from environment
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")  # 🔥 FIXED: Read from environment
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="mnraynor90@gmail.com")
 
 # REST Framework
 REST_FRAMEWORK = {
@@ -2313,7 +2529,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # For WeasyPrint (PDF generation)
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
-    libgdk-pixbuf2.0-0 \
+    libgdk-pixbuf-2.0-0 \
     libffi-dev \
     shared-mime-info \
     # Cleanup
@@ -2381,7 +2597,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # For WeasyPrint (PDF generation)
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
-    libgdk-pixbuf2.0-0 \
+    libgdk-pixbuf-2.0-0 \
     libffi-dev \
     shared-mime-info \
     # Cleanup

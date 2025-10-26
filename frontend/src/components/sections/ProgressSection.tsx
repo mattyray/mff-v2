@@ -12,9 +12,8 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
   const [animatedAmount, setAnimatedAmount] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  // 🔧 FIXED: Better Intersection Observer for mobile
+  // Intersection Observer for mobile
   useEffect(() => {
-    // Check if we're on mobile
     const isMobile = window.innerWidth <= 768;
     
     const observer = new IntersectionObserver(
@@ -23,7 +22,6 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
         
         if (entry.isIntersecting) {
           setIsVisible(true);
-          // Shorter delay on mobile for faster response
           const delay = isMobile ? 100 : 200;
           setTimeout(() => {
             animateProgress();
@@ -32,8 +30,8 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
         }
       },
       { 
-        threshold: isMobile ? 0.05 : 0.3,    // Much lower threshold on mobile
-        rootMargin: isMobile ? '100px 0px' : '50px 0px'  // Trigger much earlier on mobile
+        threshold: isMobile ? 0.05 : 0.3,
+        rootMargin: isMobile ? '100px 0px' : '50px 0px'
       }
     );
 
@@ -42,7 +40,7 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
       console.log('🔍 Progress section observer attached');
     }
 
-    // 🔧 FALLBACK: If no intersection after 2 seconds, trigger anyway
+    // Fallback timer
     const fallbackTimer = setTimeout(() => {
       if (!isVisible) {
         console.log('🔧 Fallback: Triggering progress animations');
@@ -104,12 +102,13 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
         <div className={`text-center mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="inline-flex items-center gap-2 bg-[var(--ocean-blue)]/10 rounded-full px-4 py-2 mb-4">
             <TrendingUp className="w-4 h-4 text-[var(--ocean-blue)]" />
-            <span className="text-[var(--ocean-blue)] text-sm font-medium">Campaign Progress</span>
+            <span className="text-[var(--ocean-blue)] text-sm font-medium">Independence Progress</span>
           </div>
           
-          <h2 className="mb-4">Every Step Counts</h2>
+          <h2 className="mb-4">The Last Mile</h2>
           <p className="text-xl text-[var(--ocean-driftwood)] max-w-2xl mx-auto">
-            Your support brings me closer to securing accessible housing and continuing to inspire others through technology
+            After two years of preparation, I'm 60% through the care process and ready to move out. 
+            Your support bridges the final gap while government bureaucracy catches up.
           </p>
         </div>
 
@@ -119,9 +118,9 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
           {/* Progress Header */}
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8">
             <div>
-              <h3 className="text-[var(--ocean-deep)] mb-2">Current Progress</h3>
+              <h3 className="text-[var(--ocean-deep)] mb-2">Bridge Funding Progress</h3>
               <p className="text-[var(--ocean-driftwood)]">
-                Help me reach the next milestone in my journey
+                Security blanket for 2-3 months of care during the transition
               </p>
             </div>
             
@@ -161,26 +160,26 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
               <div>
                 <h4 className="text-[var(--ocean-deep)] mb-2">What This Funding Achieves</h4>
                 <p className="text-[var(--ocean-driftwood)] mb-4">
-                  This campaign will help me secure accessible housing in Hampton Bays — the perfect location 
-                  next to my family, friends, and caregivers. The funding will enable me to live independently 
-                  with the accessibility features I need.
+                  This bridge funding ensures I can move out on November 3rd with confidence, knowing I'll have 
+                  the care support I need while the government finishes processing caregiver registrations. 
+                  It's the final piece that makes independence possible.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[var(--ocean-blue)] rounded-full"></div>
-                    <span className="text-sm text-[var(--ocean-driftwood)]">Roll-in shower and bathroom modifications</span>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">2-3 months of care coverage</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[var(--ocean-teal)] rounded-full"></div>
-                    <span className="text-sm text-[var(--ocean-driftwood)]">Caregiver-friendly living accommodations</span>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Security during government processing</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[var(--ocean-seafoam)] rounded-full"></div>
-                    <span className="text-sm text-[var(--ocean-driftwood)]">Strategic location near my support network</span>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Use of renovated accessible shower</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[var(--ocean-sunrise)] rounded-full"></div>
-                    <span className="text-sm text-[var(--ocean-driftwood)]">Complete accessibility setup for independence</span>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Freedom to enjoy Hampton Bays</span>
                   </div>
                 </div>
               </div>
@@ -191,42 +190,42 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
         {/* Stats Grid */}
         <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 transition-all duration-1000 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           
-          {/* Donation Count */}
+          {/* Preparation Time */}
           <div className="card-ocean text-center">
             <div className="w-12 h-12 bg-[var(--ocean-blue)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Users className="w-6 h-6 text-[var(--ocean-blue)]" />
+              <Calendar className="w-6 h-6 text-[var(--ocean-blue)]" />
             </div>
             <div className="text-2xl font-bold text-[var(--ocean-deep)] mb-2">
-              47
+              2 Years
             </div>
             <div className="text-[var(--ocean-driftwood)] text-sm">
-              Supporters
+              Preparation Time
             </div>
           </div>
 
-          {/* Average Donation */}
+          {/* Care Process */}
           <div className="card-ocean text-center">
             <div className="w-12 h-12 bg-[var(--ocean-teal)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <TrendingUp className="w-6 h-6 text-[var(--ocean-teal)]" />
+              <Users className="w-6 h-6 text-[var(--ocean-teal)]" />
             </div>
             <div className="text-2xl font-bold text-[var(--ocean-deep)] mb-2">
-              ${Math.round(campaign.current_amount / 47)}
+              60%
             </div>
             <div className="text-[var(--ocean-driftwood)] text-sm">
-              Average Gift
+              Care Process Complete
             </div>
           </div>
 
-          {/* Time Remaining */}
+          {/* Move Out Date */}
           <div className="card-ocean text-center">
             <div className="w-12 h-12 bg-[var(--ocean-sunrise)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Calendar className="w-6 h-6 text-[var(--ocean-sunrise)]" />
+              <Target className="w-6 h-6 text-[var(--ocean-sunrise)]" />
             </div>
             <div className="text-2xl font-bold text-[var(--ocean-deep)] mb-2">
-              Ongoing
+              Nov 3rd
             </div>
             <div className="text-[var(--ocean-driftwood)] text-sm">
-              No deadline
+              Move-Out Date
             </div>
           </div>
         </div>
