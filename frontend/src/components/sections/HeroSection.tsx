@@ -92,7 +92,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
 
             {/* Updated Subtitle */}
             <p className="text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed">
-              After two years of perseverance and meticulous planning, I'm finally moving out of the nursing home on November 3rd to my hometown of Hampton Bays. The bathroom renovation has gone incredibly well thanks to everyone's support – we raised just about the perfect amount! Now comes the last step: care planning.
+              After two years of perseverance and meticulous planning, I'm finally moving out of the nursing home on November 3rd to my hometown of Hampton Bays. The bathroom renovation has gone incredibly well thanks to everyone's support – we raised just about the perfect amount! Now comes the last step: care planning. While I have personal assistants lined up, the government is taking absolutely forever to process their registrations and approve salary coverage. After months of bureaucratic hell, I only have 2 out of the 4-5 caregivers I need fully registered. I created this fundraiser to pay people out of pocket while that registration process completes – and to help with any other caretaking costs that pop up along the way. I'm hoping this will be the last fundraiser for a while, and I can leave it up as an ongoing goal for any future care needs that arise. Bottom line: Your support helps me bridge this final gap and move toward independence in Hampton Bays.
             </p>
 
             {/* Story Hook */}
