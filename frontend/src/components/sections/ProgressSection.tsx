@@ -3,7 +3,7 @@ import { Target, TrendingUp, Users, Calendar } from 'lucide-react';
 import type { Campaign } from '../../types/index';
 
 interface ProgressSectionProps {
-  campaign: Campaign;
+  campaign: Campaign | null;
 }
 
 const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
@@ -12,13 +12,23 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
   const [animatedAmount, setAnimatedAmount] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
 
+  if (!campaign) {
+    return (
+      <section className="section-spacing section-ocean-mist">
+        <div className="container-custom text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--ocean-blue)] mx-auto"></div>
+        </div>
+      </section>
+    );
+  }
+
   // Intersection Observer for mobile
   useEffect(() => {
     const isMobile = window.innerWidth <= 768;
     
     const observer = new IntersectionObserver(
       ([entry]) => {
-        console.log('🔍 Progress section intersection:', entry.isIntersecting, entry.intersectionRatio);
+        console.log('📍 Progress section intersection:', entry.isIntersecting, entry.intersectionRatio);
         
         if (entry.isIntersecting) {
           setIsVisible(true);
@@ -37,7 +47,7 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
 
     if (sectionRef.current) {
       observer.observe(sectionRef.current);
-      console.log('🔍 Progress section observer attached');
+      console.log('📍 Progress section observer attached');
     }
 
     // Fallback timer
@@ -59,14 +69,14 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
   const animateProgress = () => {
     const duration = 2000;
     const steps = 60;
-    const increment = campaign.progress_percentage / steps;
+    const increment = (campaign?.progress_percentage || 0) / steps;
     const stepDuration = duration / steps;
     
     let current = 0;
     const timer = setInterval(() => {
       current += increment;
-      if (current >= campaign.progress_percentage) {
-        setAnimatedProgress(campaign.progress_percentage);
+      if (current >= (campaign?.progress_percentage || 0)) {
+        setAnimatedProgress(campaign?.progress_percentage || 0);
         clearInterval(timer);
       } else {
         setAnimatedProgress(current);
@@ -77,14 +87,14 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
   const animateAmount = () => {
     const duration = 2000;
     const steps = 60;
-    const increment = campaign.current_amount / steps;
+    const increment = (campaign?.current_amount || 0) / steps;
     const stepDuration = duration / steps;
     
     let current = 0;
     const timer = setInterval(() => {
       current += increment;
-      if (current >= campaign.current_amount) {
-        setAnimatedAmount(campaign.current_amount);
+      if (current >= (campaign?.current_amount || 0)) {
+        setAnimatedAmount(campaign?.current_amount || 0);
         clearInterval(timer);
       } else {
         setAnimatedAmount(Math.floor(current));
@@ -92,7 +102,7 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
     }, stepDuration);
   };
 
-  const remainingAmount = campaign.goal_amount - campaign.current_amount;
+  const remainingAmount = (campaign?.goal_amount || 0) - (campaign?.current_amount || 0);
 
   return (
     <section id="progress" ref={sectionRef} className="section-spacing section-ocean-mist">
@@ -129,7 +139,7 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
                 ${animatedAmount.toLocaleString()}
               </div>
               <div className="text-[var(--ocean-driftwood)] text-sm">
-                of ${campaign.goal_amount.toLocaleString()} goal
+                of ${(campaign?.goal_amount || 0).toLocaleString()} goal
               </div>
             </div>
           </div>

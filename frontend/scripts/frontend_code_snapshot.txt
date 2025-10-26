@@ -1,8 +1,8 @@
 # FRONTEND CODE SNAPSHOT
 # Generated for React/TypeScript project
 # Total files: 30
-# Total lines: 2,762
-# Total characters: 86,239
+# Total lines: 2,794
+# Total characters: 87,368
 
 
 
@@ -1578,7 +1578,7 @@ import { DonationAPI } from '../../services/api';
 import type { Campaign } from '../../types/index';
 
 interface DonationSectionProps {
-  campaign: Campaign;
+  campaign: Campaign | null;
 }
 
 const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
@@ -1591,6 +1591,16 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
   const [error, setError] = useState('');
 
   const quickAmounts = [25, 50, 100, 250, 500, 1000];
+
+  if (!campaign) {
+    return (
+      <section className="section-spacing bg-white">
+        <div className="container-custom text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--ocean-blue)] mx-auto"></div>
+        </div>
+      </section>
+    );
+  }
 
   const handleQuickAmount = (value: number) => {
     setAmount(value.toString());
@@ -1836,21 +1846,33 @@ import { ArrowDown, Play, Heart, Home } from 'lucide-react';
 import type { Campaign } from '../../types/index';
 
 interface HeroSectionProps {
-  campaign: Campaign;
+  campaign: Campaign | null;
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
   const [currentAmount, setCurrentAmount] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
+  // Early return if no campaign data
+  if (!campaign) {
+    return (
+      <section className="relative min-h-screen overflow-hidden hero-ocean flex items-center justify-center">
+        <div className="text-white text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Loading campaign...</p>
+        </div>
+      </section>
+    );
+  }
+
   // Animate numbers on mount
   useEffect(() => {
     setIsVisible(true);
     const timer = setTimeout(() => {
-      animateNumber(campaign.current_amount);
+      animateNumber(campaign?.current_amount || 0);
     }, 500);
     return () => clearTimeout(timer);
-  }, [campaign.current_amount]);
+  }, [campaign?.current_amount]);
 
   const animateNumber = (target: number) => {
     const duration = 2000;
@@ -1963,7 +1985,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
               
               <div className="text-center">
                 <div className="text-3xl font-bold text-white mb-1">
-                  ${campaign.goal_amount.toLocaleString()}
+                  ${(campaign?.goal_amount || 0).toLocaleString()}
                 </div>
                 <div className="text-white/70 text-sm">Goal</div>
               </div>
@@ -1984,7 +2006,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
               
               {/* Main Video/Image Container */}
               <div className="relative bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
-                {campaign.featured_video_url && extractVideoId(campaign.featured_video_url) ? (
+                {campaign?.featured_video_url && extractVideoId(campaign.featured_video_url) ? (
                   // Video embed
                   <div className="w-full h-96 rounded-2xl overflow-hidden bg-black">
                     <iframe
@@ -1996,7 +2018,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     />
                   </div>
-                ) : campaign.featured_image ? (
+                ) : campaign?.featured_image ? (
                   // Image fallback
                   <img 
                     src={campaign.featured_image} 
@@ -2055,7 +2077,7 @@ import { Target, TrendingUp, Users, Calendar } from 'lucide-react';
 import type { Campaign } from '../../types/index';
 
 interface ProgressSectionProps {
-  campaign: Campaign;
+  campaign: Campaign | null;
 }
 
 const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
@@ -2064,13 +2086,23 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
   const [animatedAmount, setAnimatedAmount] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
 
+  if (!campaign) {
+    return (
+      <section className="section-spacing section-ocean-mist">
+        <div className="container-custom text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--ocean-blue)] mx-auto"></div>
+        </div>
+      </section>
+    );
+  }
+
   // Intersection Observer for mobile
   useEffect(() => {
     const isMobile = window.innerWidth <= 768;
     
     const observer = new IntersectionObserver(
       ([entry]) => {
-        console.log('🔍 Progress section intersection:', entry.isIntersecting, entry.intersectionRatio);
+        console.log('📍 Progress section intersection:', entry.isIntersecting, entry.intersectionRatio);
         
         if (entry.isIntersecting) {
           setIsVisible(true);
@@ -2089,7 +2121,7 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
 
     if (sectionRef.current) {
       observer.observe(sectionRef.current);
-      console.log('🔍 Progress section observer attached');
+      console.log('📍 Progress section observer attached');
     }
 
     // Fallback timer
@@ -2111,14 +2143,14 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
   const animateProgress = () => {
     const duration = 2000;
     const steps = 60;
-    const increment = campaign.progress_percentage / steps;
+    const increment = (campaign?.progress_percentage || 0) / steps;
     const stepDuration = duration / steps;
     
     let current = 0;
     const timer = setInterval(() => {
       current += increment;
-      if (current >= campaign.progress_percentage) {
-        setAnimatedProgress(campaign.progress_percentage);
+      if (current >= (campaign?.progress_percentage || 0)) {
+        setAnimatedProgress(campaign?.progress_percentage || 0);
         clearInterval(timer);
       } else {
         setAnimatedProgress(current);
@@ -2129,14 +2161,14 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
   const animateAmount = () => {
     const duration = 2000;
     const steps = 60;
-    const increment = campaign.current_amount / steps;
+    const increment = (campaign?.current_amount || 0) / steps;
     const stepDuration = duration / steps;
     
     let current = 0;
     const timer = setInterval(() => {
       current += increment;
-      if (current >= campaign.current_amount) {
-        setAnimatedAmount(campaign.current_amount);
+      if (current >= (campaign?.current_amount || 0)) {
+        setAnimatedAmount(campaign?.current_amount || 0);
         clearInterval(timer);
       } else {
         setAnimatedAmount(Math.floor(current));
@@ -2144,7 +2176,7 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
     }, stepDuration);
   };
 
-  const remainingAmount = campaign.goal_amount - campaign.current_amount;
+  const remainingAmount = (campaign?.goal_amount || 0) - (campaign?.current_amount || 0);
 
   return (
     <section id="progress" ref={sectionRef} className="section-spacing section-ocean-mist">
@@ -2181,7 +2213,7 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
                 ${animatedAmount.toLocaleString()}
               </div>
               <div className="text-[var(--ocean-driftwood)] text-sm">
-                of ${campaign.goal_amount.toLocaleString()} goal
+                of ${(campaign?.goal_amount || 0).toLocaleString()} goal
               </div>
             </div>
           </div>

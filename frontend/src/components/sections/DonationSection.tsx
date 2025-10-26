@@ -4,7 +4,7 @@ import { DonationAPI } from '../../services/api';
 import type { Campaign } from '../../types/index';
 
 interface DonationSectionProps {
-  campaign: Campaign;
+  campaign: Campaign | null;
 }
 
 const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
@@ -17,6 +17,16 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
   const [error, setError] = useState('');
 
   const quickAmounts = [25, 50, 100, 250, 500, 1000];
+
+  if (!campaign) {
+    return (
+      <section className="section-spacing bg-white">
+        <div className="container-custom text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--ocean-blue)] mx-auto"></div>
+        </div>
+      </section>
+    );
+  }
 
   const handleQuickAmount = (value: number) => {
     setAmount(value.toString());
