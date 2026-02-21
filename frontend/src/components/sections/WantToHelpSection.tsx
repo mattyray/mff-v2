@@ -44,7 +44,7 @@ const WantToHelpSection: React.FC = () => {
                 <ExternalLink className="w-5 h-5" />
               </a>
               <a
-                href="mailto:contact@mattsfreedomfundraiser.com"
+                href="mailto:mnraynor90@gmail.com"
                 className="btn-ocean-secondary inline-flex items-center justify-center gap-2"
               >
                 Get in Touch

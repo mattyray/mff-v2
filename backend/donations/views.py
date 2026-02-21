@@ -147,9 +147,10 @@ def stripe_webhook(request):
 
             logger.info(f"Donation {donation_id} marked completed")
 
-            # Queue thank-you email
-            from emails.tasks import send_thank_you_email
+            # Queue thank-you email and owner notification
+            from emails.tasks import send_thank_you_email, send_donation_notification
             send_thank_you_email.delay(donation.id)
+            send_donation_notification.delay(donation.id)
 
         except Donation.DoesNotExist:
             logger.error(f"Donation {donation_id} not found")

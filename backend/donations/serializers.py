@@ -1,3 +1,4 @@
+from decimal import Decimal
 from rest_framework import serializers
 from .models import Campaign, Donation, CampaignUpdate
 
@@ -32,7 +33,10 @@ class CampaignUpdateSerializer(serializers.ModelSerializer):
         ]
 
 class CreateDonationSerializer(serializers.Serializer):
-    amount = serializers.DecimalField(max_digits=8, decimal_places=2, min_value=1, max_value=25000)
+    amount = serializers.DecimalField(
+        max_digits=8, decimal_places=2,
+        min_value=Decimal('1'), max_value=Decimal('25000')
+    )
     donor_name = serializers.CharField(max_length=100, required=False, allow_blank=True)
     donor_email = serializers.EmailField(required=False, allow_blank=True)
     message = serializers.CharField(max_length=500, required=False, allow_blank=True)

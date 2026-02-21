@@ -246,6 +246,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="mnraynor90@gmail.com")
+OWNER_EMAIL = env("OWNER_EMAIL", default="mnraynor90@gmail.com")
 
 # REST Framework
 REST_FRAMEWORK = {

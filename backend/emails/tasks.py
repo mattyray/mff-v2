@@ -140,6 +140,57 @@ def send_thank_you_email(donation_id):
 
 
 @shared_task
+def send_donation_notification(donation_id):
+    """Notify Matt when a new donation comes in"""
+    try:
+        donation = Donation.objects.select_related('campaign').get(id=donation_id)
+
+        donor = escape(donation.donor_name) if donation.donor_name and not donation.is_anonymous else 'Anonymous'
+        campaign_title = escape(donation.campaign.title)
+        message_line = f"<p><strong>Message:</strong> {escape(donation.message)}</p>" if donation.message else ""
+
+        subject = f"New ${donation.amount} donation to {donation.campaign.title}"
+        html_content = f"""
+        <h2>New Donation Received!</h2>
+        <p><strong>Amount:</strong> ${donation.amount}</p>
+        <p><strong>From:</strong> {donor}</p>
+        <p><strong>Campaign:</strong> {campaign_title}</p>
+        {message_line}
+        <p><strong>Campaign Total:</strong> ${donation.campaign.current_amount} of ${donation.campaign.goal_amount}</p>
+        <hr>
+        <p style="color: #888; font-size: 12px;">This is an automated notification from Matt's Freedom Fundraiser.</p>
+        """
+
+        plain_text = (
+            f"New Donation Received!\n\n"
+            f"Amount: ${donation.amount}\n"
+            f"From: {donation.donor_name if donation.donor_name and not donation.is_anonymous else 'Anonymous'}\n"
+            f"Campaign: {donation.campaign.title}\n"
+            f"{'Message: ' + donation.message if donation.message else ''}\n\n"
+            f"Campaign Total: ${donation.campaign.current_amount} of ${donation.campaign.goal_amount}"
+        )
+
+        send_mail(
+            subject=subject,
+            message=plain_text,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[settings.OWNER_EMAIL],
+            html_message=html_content,
+            fail_silently=False,
+        )
+
+        logger.info(f"Donation notification sent for donation {donation_id}")
+        return f"Notification sent for donation {donation_id}"
+
+    except Donation.DoesNotExist:
+        logger.error(f"Donation {donation_id} not found for notification")
+        return f"Donation {donation_id} not found"
+    except Exception as e:
+        logger.error(f"Donation notification failed for {donation_id}: {e}")
+        return f"Notification failed: {str(e)}"
+
+
+@shared_task
 def send_campaign_update_notification(campaign_update_id):
     """Send notification to all donors when a campaign update is posted (future feature)"""
     logger.info(f"Campaign update notification for update {campaign_update_id} - not implemented")
