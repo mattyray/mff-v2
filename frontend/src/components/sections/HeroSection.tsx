@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowDown, Play, Heart, Home } from 'lucide-react';
+import { ArrowDown, Heart, Calendar, MapPin, Clock } from 'lucide-react';
 import type { Campaign } from '../../types/index';
 
 interface HeroSectionProps {
@@ -36,7 +36,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
     const steps = 60;
     const increment = target / steps;
     const stepDuration = duration / steps;
-    
+
     let current = 0;
     const timer = setInterval(() => {
       current += increment;
@@ -49,24 +49,17 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
     }, stepDuration);
   };
 
-  // Extract YouTube video ID from various URL formats
-  const extractVideoId = (url: string) => {
-    if (!url) return null;
-    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/);
-    return match ? match[1] : null;
-  };
-
   const handleDonateClick = () => {
     document.getElementById('donate')?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleLearnMoreClick = () => {
-    document.getElementById('updates')?.scrollIntoView({ behavior: 'smooth' });
+  const handleEventDetailsClick = () => {
+    document.getElementById('event-details')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
     <section className="relative min-h-screen overflow-hidden hero-ocean">
-      {/* Simple Background Pattern */}
+      {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent animate-pulse-slow"></div>
       </div>
@@ -74,64 +67,79 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
       {/* Main Content */}
       <div className="relative z-10 container-custom">
         <div className="flex flex-col lg:flex-row items-center justify-between min-h-screen py-20">
-          
-          {/* Left Content - Story */}
+
+          {/* Left Content */}
           <div className={`lg:w-1/2 lg:pr-12 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            
+
             {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-              <Home className="w-4 h-4 text-[var(--ocean-sunrise)]" />
-              <span className="text-white/90 text-sm font-medium">The Last Mile</span>
+              <Calendar className="w-4 h-4 text-[var(--ocean-sunrise)]" />
+              <span className="text-white/90 text-sm font-medium">Save the Date — April 11, 2026</span>
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-white mb-6 text-shadow-ocean">
-              The Final Step to
-              <span className="block text-[var(--ocean-seafoam)]">Independence</span>
+            <h1 className="text-white mb-2 text-shadow-ocean">
+              Matt's Freedom
+              <span className="block text-[var(--ocean-seafoam)]">Fundraiser</span>
             </h1>
 
-            {/* Updated Subtitle with preserved line breaks */}
-            <div className="text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed" style={{color: 'rgba(255, 255, 255, 0.95) !important'}}>
+            <h3 className="text-white/90 font-semibold mb-6">1st Annual Silent Auction</h3>
+
+            {/* Description */}
+            <div className="text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed" style={{color: 'rgba(255, 255, 255, 0.95)'}}>
               <p className="mb-4">
-                After two years of grinding and planning every detail, I'm finally moving out of the nursing home on November 3rd — back to my hometown, Hampton Bays. The bathroom renovation went perfectly, and we raised almost exactly what was needed.
-              </p>
-              <p className="mb-4">
-                Now it's down to the last piece: care coverage. I've got amazing aides lined up, but the state is crawling through their paperwork. Only two are fully registered so far, which leaves me covering shifts out of pocket.
+                A community fundraiser to support Matt Raynor, a Hampton Bays commercial fisherman
+                who became tetraplegic after a spinal cord injury. Live music, a silent auction,
+                50/50 raffle, food, drinks, kids activities, and a night of community.
               </p>
               <p>
-                This fundraiser bridges that gap — helping pay caregivers until the state catches up, and covering any surprise costs along the way. Your support gets me through this final stretch toward real independence in Hampton Bays.
+                Every dollar raised goes directly to Matt's recovery fund — helping cover the daily
+                costs of living with a spinal cord injury that most people never think about.
               </p>
             </div>
 
-            {/* Story Hook */}
+            {/* Event Quick Facts */}
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8">
-              <div className="flex items-start gap-4">
-                <Home className="w-6 h-6 text-[var(--ocean-seafoam)] mt-1 flex-shrink-0" />
-                <div>
-                  <h3 className="text-white font-semibold mb-2">We Are Almost There!</h3>
-                  <p className="text-white/80 text-base">
-                    Help support me by raising money for ongoing care support while I get adjusted, start working, and secure long-term care support.
-                  </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="flex items-center gap-3">
+                  <Calendar className="w-5 h-5 text-[var(--ocean-seafoam)] flex-shrink-0" />
+                  <div>
+                    <div className="text-white font-semibold text-sm">Saturday</div>
+                    <div className="text-white/70 text-sm">April 11, 2026</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Clock className="w-5 h-5 text-[var(--ocean-seafoam)] flex-shrink-0" />
+                  <div>
+                    <div className="text-white font-semibold text-sm">5:00 – 8:00 PM</div>
+                    <div className="text-white/70 text-sm">Doors Open at 5</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <MapPin className="w-5 h-5 text-[var(--ocean-seafoam)] flex-shrink-0" />
+                  <div>
+                    <div className="text-white font-semibold text-sm">Sundays on the Bay</div>
+                    <div className="text-white/70 text-sm">Hampton Bays, NY</div>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
-              <button 
+              <button
                 onClick={handleDonateClick}
                 className="btn-ocean-primary bg-white text-[var(--ocean-blue)] hover:bg-[var(--ocean-mist)] shadow-2xl"
               >
                 <Heart className="w-5 h-5 mr-2" />
-                Support My Independence
+                Donate Now
               </button>
-              
-              <button 
-                onClick={handleLearnMoreClick}
+
+              <button
+                onClick={handleEventDetailsClick}
                 className="btn-ocean-secondary bg-transparent border-white text-white hover:bg-white/10"
               >
-                <Play className="w-5 h-5 mr-2" />
-                Learn My Story
+                Event Details
               </button>
             </div>
 
@@ -143,69 +151,51 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
                 </div>
                 <div className="text-white/70 text-sm">Raised</div>
               </div>
-              
+
               <div className="text-center">
                 <div className="text-3xl font-bold text-white mb-1">
                   ${(campaign?.goal_amount || 0).toLocaleString()}
                 </div>
                 <div className="text-white/70 text-sm">Goal</div>
               </div>
-              
+
               <div className="text-center">
                 <div className="text-3xl font-bold text-[var(--ocean-sunrise)] mb-1">
-                  Nov 3rd
+                  Apr 11
                 </div>
-                <div className="text-white/70 text-sm">Move Out</div>
+                <div className="text-white/70 text-sm">Event Day</div>
               </div>
             </div>
 
           </div>
 
-          {/* Right Content - Video/Visual */}
+          {/* Right Content — Hero Image */}
           <div className={`lg:w-1/2 mt-12 lg:mt-0 transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <div className="relative">
-              
-              {/* Main Video/Image Container */}
               <div className="relative bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
-                {campaign?.featured_video_url && extractVideoId(campaign.featured_video_url) ? (
-                  // Video embed
-                  <div className="w-full h-96 rounded-2xl overflow-hidden bg-black">
-                    <iframe
-                      src={`https://www.youtube.com/embed/${extractVideoId(campaign.featured_video_url)}?controls=1&modestbranding=1&rel=0`}
-                      className="w-full h-full"
-                      frameBorder="0"
-                      allowFullScreen
-                      title="Matthew's Journey to Independence"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    />
-                  </div>
-                ) : campaign?.featured_image ? (
-                  // Image fallback
-                  <img 
-                    src={campaign.featured_image} 
-                    alt="Matthew Raynor - The final step to independence"
-                    className="w-full h-96 object-cover rounded-2xl"
+                {campaign?.featured_image ? (
+                  <img
+                    src={campaign.featured_image}
+                    alt="Matt's Freedom Fundraiser — 1st Annual Silent Auction"
+                    className="w-full h-auto rounded-2xl object-cover"
                   />
                 ) : (
-                  // Default fallback
-                  <div className="w-full h-96 bg-gradient-to-br from-white/20 to-white/5 rounded-2xl flex flex-col items-center justify-center text-white">
-                    <div className="text-6xl mb-4">🏠</div>
-                    <h3 className="text-2xl font-bold mb-2">The Last Mile</h3>
-                    <p className="text-white/80 text-center max-w-xs">
-                      From nursing home to independence – the final step of a two-year journey
-                    </p>
-                  </div>
+                  <img
+                    src="/images/hero-selfie.jpg"
+                    alt="Matt Raynor — Save the Date"
+                    className="w-full h-auto rounded-2xl object-cover"
+                  />
                 )}
               </div>
 
               {/* Floating Elements */}
               <div className="absolute -top-6 -right-6 bg-[var(--ocean-sunrise)] rounded-2xl p-4 animate-pulse-slow">
-                <Home className="w-8 h-8 text-white" />
+                <Calendar className="w-8 h-8 text-white" />
               </div>
-              
+
               <div className="absolute -bottom-6 -left-6 bg-white/20 backdrop-blur-sm rounded-2xl p-4 border border-white/30">
-                <div className="text-white text-sm font-medium">November 3rd</div>
-                <div className="text-white/70 text-xs">Move-out day</div>
+                <div className="text-white text-sm font-medium">April 11, 2026</div>
+                <div className="text-white/70 text-xs">Save the Date</div>
               </div>
             </div>
           </div>
@@ -215,8 +205,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
 
       {/* Scroll Indicator */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <button 
-          onClick={() => document.getElementById('progress')?.scrollIntoView({ behavior: 'smooth' })}
+        <button
+          onClick={() => document.getElementById('event-details')?.scrollIntoView({ behavior: 'smooth' })}
           className="text-white/60 hover:text-white transition-colors"
         >
           <ArrowDown className="w-6 h-6" />

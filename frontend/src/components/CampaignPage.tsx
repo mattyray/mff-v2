@@ -3,8 +3,10 @@ import { DonationAPI } from '../services/api';
 import type { Campaign } from '../types/index';
 
 import HeroSection from './sections/HeroSection';
+import EventDetailsSection from './sections/EventDetailsSection';
 import ProgressSection from './sections/ProgressSection';
 import DonationSection from './sections/DonationSection';
+import WantToHelpSection from './sections/WantToHelpSection';
 import UpdatesSection from './sections/UpdatesSection';
 import SupportersSection from './sections/SupportersSection';
 
@@ -51,8 +53,10 @@ const CampaignPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
       <HeroSection campaign={campaign} />
+      <EventDetailsSection />
       <ProgressSection campaign={campaign} />
       <DonationSection campaign={campaign} />
+      <WantToHelpSection />
       <UpdatesSection />
       <SupportersSection />
     </div>

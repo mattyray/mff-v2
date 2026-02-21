@@ -112,13 +112,13 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
         <div className={`text-center mb-16 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="inline-flex items-center gap-2 bg-[var(--ocean-blue)]/10 rounded-full px-4 py-2 mb-4">
             <TrendingUp className="w-4 h-4 text-[var(--ocean-blue)]" />
-            <span className="text-[var(--ocean-blue)] text-sm font-medium">Independence Progress</span>
+            <span className="text-[var(--ocean-blue)] text-sm font-medium">Fundraising Progress</span>
           </div>
-          
-          <h2 className="mb-4">The Last Mile</h2>
+
+          <h2 className="mb-4">Every Dollar Counts</h2>
           <p className="text-xl text-[var(--ocean-driftwood)] max-w-2xl mx-auto">
-            After two years of preparation, I'm 60% through the care process and ready to move out. 
-            Your support bridges the final gap while government bureaucracy catches up.
+            Every donation goes directly to Matt's recovery fund — covering the daily costs of living
+            with a spinal cord injury that most people never think about.
           </p>
         </div>
 
@@ -128,9 +128,9 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
           {/* Progress Header */}
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8">
             <div>
-              <h3 className="text-[var(--ocean-deep)] mb-2">Bridge Funding Progress</h3>
+              <h3 className="text-[var(--ocean-deep)] mb-2">Campaign Progress</h3>
               <p className="text-[var(--ocean-driftwood)]">
-                Security blanket for 2-3 months of care during the transition
+                Help us reach our goal for the 1st Annual Silent Auction
               </p>
             </div>
             
@@ -168,28 +168,27 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
             <div className="flex items-start gap-4">
               <Target className="w-6 h-6 text-[var(--ocean-blue)] mt-1 flex-shrink-0" />
               <div>
-                <h4 className="text-[var(--ocean-deep)] mb-2">What This Funding Achieves</h4>
+                <h4 className="text-[var(--ocean-deep)] mb-2">Where Your Money Goes</h4>
                 <p className="text-[var(--ocean-driftwood)] mb-4">
-                  This bridge funding ensures I can move out on November 3rd with confidence, knowing I'll have 
-                  the care support I need while the government finishes processing caregiver registrations. 
-                  It's the final piece that makes independence possible.
+                  Every dollar raised goes directly to Matt's recovery fund — helping cover the daily costs
+                  of living with a spinal cord injury that most people never think about.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[var(--ocean-blue)] rounded-full"></div>
-                    <span className="text-sm text-[var(--ocean-driftwood)]">2-3 months of care coverage</span>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Daily care & caregiver support</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[var(--ocean-teal)] rounded-full"></div>
-                    <span className="text-sm text-[var(--ocean-driftwood)]">Security during government processing</span>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Medical equipment & supplies</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[var(--ocean-seafoam)] rounded-full"></div>
-                    <span className="text-sm text-[var(--ocean-driftwood)]">Use of renovated accessible shower</span>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Accessible housing costs</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[var(--ocean-sunrise)] rounded-full"></div>
-                    <span className="text-sm text-[var(--ocean-driftwood)]">Freedom to enjoy Hampton Bays</span>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Independence & quality of life</span>
                   </div>
                 </div>
               </div>
@@ -200,42 +199,42 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
         {/* Stats Grid */}
         <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 transition-all duration-1000 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           
-          {/* Preparation Time */}
+          {/* Event Date */}
           <div className="card-ocean text-center">
             <div className="w-12 h-12 bg-[var(--ocean-blue)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <Calendar className="w-6 h-6 text-[var(--ocean-blue)]" />
             </div>
             <div className="text-2xl font-bold text-[var(--ocean-deep)] mb-2">
-              2 Years
+              April 11
             </div>
             <div className="text-[var(--ocean-driftwood)] text-sm">
-              Preparation Time
+              Event Day
             </div>
           </div>
 
-          {/* Care Process */}
+          {/* Goal */}
           <div className="card-ocean text-center">
             <div className="w-12 h-12 bg-[var(--ocean-teal)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Users className="w-6 h-6 text-[var(--ocean-teal)]" />
+              <Target className="w-6 h-6 text-[var(--ocean-teal)]" />
             </div>
             <div className="text-2xl font-bold text-[var(--ocean-deep)] mb-2">
-              60%
+              $10,000
             </div>
             <div className="text-[var(--ocean-driftwood)] text-sm">
-              Care Process Complete
+              Fundraising Goal
             </div>
           </div>
 
-          {/* Move Out Date */}
+          {/* Community */}
           <div className="card-ocean text-center">
             <div className="w-12 h-12 bg-[var(--ocean-sunrise)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Target className="w-6 h-6 text-[var(--ocean-sunrise)]" />
+              <Users className="w-6 h-6 text-[var(--ocean-sunrise)]" />
             </div>
             <div className="text-2xl font-bold text-[var(--ocean-deep)] mb-2">
-              Nov 3rd
+              Hampton Bays
             </div>
             <div className="text-[var(--ocean-driftwood)] text-sm">
-              Move-Out Date
+              Community Strong
             </div>
           </div>
         </div>

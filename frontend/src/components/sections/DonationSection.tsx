@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, CreditCard, Shield, AlertCircle, Home } from 'lucide-react';
+import { Heart, CreditCard, Shield, AlertCircle } from 'lucide-react';
 import { DonationAPI } from '../../services/api';
 import type { Campaign } from '../../types/index';
 
@@ -72,14 +72,14 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
         
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 bg-[var(--ocean-blue)]/10 rounded-full px-4 py-2 mb-4">
-            <Home className="w-4 h-4 text-[var(--ocean-blue)]" />
-            <span className="text-[var(--ocean-blue)] text-sm font-medium">Bridge to Independence</span>
+            <Heart className="w-4 h-4 text-[var(--ocean-blue)]" />
+            <span className="text-[var(--ocean-blue)] text-sm font-medium">Support Matt</span>
           </div>
-          
-          <h2 className="mb-4">Help Me Take the Final Step</h2>
+
+          <h2 className="mb-4">Make a Donation</h2>
           <p className="text-xl text-[var(--ocean-driftwood)] max-w-2xl mx-auto">
-            After two years of preparation, I'm moving out November 3rd. Your support covers care costs during 
-            the final government processing delays, ensuring I can move forward with confidence.
+            Can't make it to the event? You can still support Matt by donating online.
+            Every dollar goes directly to his recovery fund.
           </p>
         </div>
 
@@ -98,25 +98,25 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
             <div className="mb-6 p-4 bg-[var(--ocean-mist)] rounded-xl">
               <h4 className="text-[var(--ocean-deep)] font-semibold mb-2">Your Impact</h4>
               <p className="text-[var(--ocean-driftwood)] text-sm mb-3">
-                Every contribution helps me bridge the gap between being ready to move out and having 
-                the care support fully in place. This is the final mile of a two-year journey.
+                Matt became tetraplegic after a spinal cord injury. Your donation helps cover the daily
+                costs of recovery and independence that most people never think about.
               </p>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>Apartment renovated ✓</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>Care approved ✓</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                  <span>Bridge funding needed</span>
-                </div>
-                <div className="flex items-center gap-1">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span>Nov 3rd move-out</span>
+                  <span>Daily care support</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
+                  <span>Medical equipment</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>Accessible housing</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                  <span>Quality of life</span>
                 </div>
               </div>
             </div>
@@ -205,7 +205,7 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   disabled={loading}
-                  placeholder="Share words of encouragement for the final step..."
+                  placeholder="Share a message of support for Matt..."
                   rows={3}
                   className="input-ocean resize-none"
                 />
@@ -239,7 +239,7 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
               ) : (
                 <div className="flex items-center justify-center gap-2">
                   <CreditCard className="w-5 h-5" />
-                  Support Independence - ${amount || '0'}
+                  Donate ${amount || '0'}
                 </div>
               )}
             </button>
@@ -252,8 +252,8 @@ const DonationSection: React.FC<DonationSectionProps> = ({ campaign }) => {
             {/* Additional Context */}
             <div className="mt-6 p-4 bg-gray-50 rounded-xl">
               <p className="text-sm text-[var(--ocean-driftwood)] text-center">
-                <strong>Any amount helps.</strong> I always end up needing to pay people extra for various things, 
-                and every dollar makes this transition more secure. Thank you for being part of my journey to independence.
+                <strong>Any amount helps.</strong> Every dollar goes directly to Matt's recovery fund.
+                Thank you for your generosity and support.
               </p>
             </div>
           </div>
