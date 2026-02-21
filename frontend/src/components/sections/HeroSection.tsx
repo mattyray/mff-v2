@@ -181,7 +181,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
                   />
                 ) : (
                   <img
-                    src="/images/hero-selfie.jpg"
+                    src="/images/hero-selfie.jpeg"
                     alt="Matt Raynor — Save the Date"
                     className="w-full h-auto rounded-2xl object-cover"
                   />
