@@ -4,6 +4,15 @@
 
 Full-stack fundraising platform for collecting donations with Stripe payments, real-time campaign tracking, and automated donor communications.
 
+## Current Campaign: 1st Annual Silent Auction
+
+- **Event:** Saturday, April 11, 2026 — 5:00–8:00 PM
+- **Venue:** Sundays on the Bay, 369 Dune Road, Hampton Bays, NY 11946
+- **Goal:** $10,000
+- **Activities:** Live music, silent auction, 50/50 raffle, food & drinks
+- **Facebook Event:** https://www.facebook.com/events/877647888439782/
+- **Special Thanks:** Oakland Family & Sundays on the Bay
+
 ## Tech Stack
 
 - **Backend:** Django 5.1.6 + DRF 3.15.2, Python 3.12, PostgreSQL 16, Celery + Redis, Stripe, SendGrid
@@ -29,8 +38,8 @@ mff-v2/
 │   └── requirements-dev.txt    # Dev tools (black, flake8, mypy, pytest)
 ├── frontend/                   # React SPA (port 5173 dev)
 │   ├── src/
-│   │   ├── components/         # CampaignPage, UserMenu, ErrorBoundary
-│   │   │   └── sections/       # Hero, Progress, Donation, Updates, Supporters
+│   │   ├── components/         # CampaignPage, ErrorBoundary
+│   │   │   └── sections/       # Hero, EventDetails, Progress, Donation, WantToHelp, Updates, Supporters
 │   │   ├── services/api.ts     # Axios client with interceptors
 │   │   ├── hooks/useAuth.ts    # Auth hook
 │   │   ├── types/index.ts      # TypeScript types
@@ -136,3 +145,20 @@ PostgreSQL with these core models:
 - `donations.CampaignUpdate` — title, content, linked to campaign
 - `emails.EmailTemplate` — reusable email templates
 - `emails.EmailLog` — audit trail for sent emails
+
+## Deployment
+
+- **Frontend:** Netlify (auto-deploys from `main` branch, build: `npm ci && npm run build`)
+- **Backend:** Fly.io (manual deploy: `cd backend && fly deploy`)
+- **Management commands:** `fly ssh console -C "python manage.py <command>"`
+- **New campaign:** `fly ssh console -C "python manage.py create_auction_campaign"`
+
+## Frontend Page Layout (top to bottom)
+
+1. **HeroSection** — Event headline, description, date/time/venue, hero image, donate CTA
+2. **EventDetailsSection** — When/Where cards + What to Expect activity grid
+3. **ProgressSection** — Animated progress bar, fundraising stats
+4. **DonationSection** — Stripe donation form (quick amounts + custom)
+5. **WantToHelpSection** — Donate auction items / sponsor, Facebook event link, Special Thanks
+6. **UpdatesSection** — Campaign updates feed (from API)
+7. **SupportersSection** — Recent donors (from API)
