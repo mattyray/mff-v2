@@ -125,6 +125,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
               </div>
             </div>
 
+            {/* Special Thanks */}
+            <p className="text-white/70 text-sm mb-6">
+              <span className="text-white/90 font-semibold">Special Thanks</span> to Alex Herzog for helping organize and plan this event, and to the Oakland Family and Sundays on the Bay for making it all happen.
+            </p>
+
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <button

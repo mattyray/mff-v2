@@ -54,7 +54,7 @@ const WantToHelpSection: React.FC = () => {
             {/* Special Thanks */}
             <div className="mt-10 pt-8 border-t border-gray-200">
               <p className="text-[var(--ocean-driftwood)] text-base">
-                <span className="font-semibold text-[var(--ocean-deep)]">Special Thanks</span> to the Oakland Family and Sundays on the Bay for making this possible.
+                <span className="font-semibold text-[var(--ocean-deep)]">Special Thanks</span> to Alex Herzog for helping organize and plan this event, and to the Oakland Family and Sundays on the Bay for making it all happen.
               </p>
             </div>
 
