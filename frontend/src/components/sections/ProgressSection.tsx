@@ -176,7 +176,7 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[var(--ocean-blue)] rounded-full"></div>
-                    <span className="text-sm text-[var(--ocean-driftwood)]">Daily care & caregiver support</span>
+                    <span className="text-sm text-[var(--ocean-driftwood)]">Living expenses & daily needs</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-[var(--ocean-teal)] rounded-full"></div>

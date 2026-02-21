@@ -1,11 +1,8 @@
 import { CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
 import CampaignPage from './components/CampaignPage';
-import UserMenu from './components/UserMenu';
-import { useAuth } from './hooks/useAuth';
 
 function App() {
-  const { checkAuthStatus } = useAuth();
-  
+
   // Simple routing based on URL path
   const path = window.location.pathname;
 
@@ -76,11 +73,6 @@ function App() {
             <div>
               <h1 className="text-xl font-bold text-gray-900">Matt Freedom Fundraiser</h1>
             </div>
-            
-            <UserMenu 
-              onShowRegistrationGate={() => console.log('Show registration')}
-              onUserStateChange={checkAuthStatus}
-            />
           </div>
         </div>
       </header>
