@@ -28,8 +28,6 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
     
     const observer = new IntersectionObserver(
       ([entry]) => {
-        console.log('📍 Progress section intersection:', entry.isIntersecting, entry.intersectionRatio);
-        
         if (entry.isIntersecting) {
           setIsVisible(true);
           const delay = isMobile ? 100 : 200;
@@ -47,13 +45,11 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
 
     if (sectionRef.current) {
       observer.observe(sectionRef.current);
-      console.log('📍 Progress section observer attached');
     }
 
     // Fallback timer
     const fallbackTimer = setTimeout(() => {
       if (!isVisible) {
-        console.log('🔧 Fallback: Triggering progress animations');
         setIsVisible(true);
         animateProgress();
         animateAmount();

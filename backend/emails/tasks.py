@@ -1,115 +1,91 @@
-# backend/emails/tasks.py
 from celery import shared_task
 from django.conf import settings
 from django.utils import timezone
+from django.utils.html import escape
 from django.core.mail import send_mail
-from django.template.loader import render_to_string
 import logging
-from decimal import Decimal
 
 from .models import EmailTemplate, EmailLog
 from donations.models import Donation
 
 logger = logging.getLogger(__name__)
 
+
 @shared_task
 def send_thank_you_email(donation_id):
-    """
-    Send thank you email after successful donation
-    Works with console backend, SMTP, and SendGrid
-    """
+    """Send thank you email after successful donation"""
     try:
-        print(f"📧 Processing thank you email for donation {donation_id}")
-        
-        # Get the donation
         donation = Donation.objects.get(id=donation_id)
-        
+
         # Skip if anonymous or no email
         if donation.is_anonymous or not donation.donor_email:
-            print(f"⏭️  Skipping email - anonymous: {donation.is_anonymous}, no email: {not donation.donor_email}")
             return f"Skipped email for donation {donation_id} (anonymous or no email)"
-        
+
         # Check if email already sent
-        existing_log = EmailLog.objects.filter(
-            donation=donation,
-            was_sent=True
-        ).first()
-        
-        if existing_log:
-            print(f"⏭️  Email already sent for donation {donation_id}")
+        if EmailLog.objects.filter(donation=donation, was_sent=True).exists():
             return f"Email already sent for donation {donation_id}"
-        
+
         # Get email template
         template = EmailTemplate.objects.filter(
-            name='thank_you_email', 
+            name='thank_you_email',
             is_active=True
         ).first()
-        
+
+        # Escape user-provided values for HTML safety
+        safe_donor_name = escape(donation.donor_name or 'Friend')
+        safe_message = escape(donation.message or '')
+
         if not template:
-            print(f"❌ No active thank you email template found")
-            
-            # Create a basic fallback email
-            subject = f"Thank you for your donation, {donation.donor_name or 'Friend'}!"
+            subject = f"Thank you for your donation, {safe_donor_name}!"
             html_content = f"""
             <h2>Thank you for your support!</h2>
-            <p>Dear {donation.donor_name or 'Friend'},</p>
-            <p>Thank you for your generous donation of ${donation.amount} to {donation.campaign.title}.</p>
+            <p>Dear {safe_donor_name},</p>
+            <p>Thank you for your generous donation of ${donation.amount} to {escape(donation.campaign.title)}.</p>
             <p>Your support means everything to me.</p>
             <p>With gratitude,<br>Matt Raynor</p>
             """
         else:
-            # Use template
             try:
-                # Prepare context variables
                 context = {
-                    'donor_name': donation.donor_name or 'Friend',
+                    'donor_name': safe_donor_name,
                     'amount': float(donation.amount),
-                    'campaign_title': donation.campaign.title,
-                    'campaign_description': donation.campaign.description,
+                    'campaign_title': escape(donation.campaign.title),
+                    'campaign_description': escape(donation.campaign.description),
                     'current_total': float(donation.campaign.current_amount),
                     'goal_amount': float(donation.campaign.goal_amount),
                     'progress_percentage': donation.campaign.progress_percentage,
                     'donation_date': donation.created_at.strftime('%B %d, %Y'),
-                    'message': donation.message or ''
+                    'message': safe_message,
                 }
-                
-                # Format subject and content
+
                 subject = template.subject.format(**context)
                 html_content = template.html_content.format(**context)
-                
+
             except Exception as template_error:
-                print(f"⚠️  Template formatting error: {template_error}")
-                # Fall back to basic email
-                subject = f"Thank you for your donation, {donation.donor_name or 'Friend'}!"
+                logger.warning(f"Template formatting error: {template_error}")
+                subject = f"Thank you for your donation, {safe_donor_name}!"
                 html_content = f"""
                 <h2>Thank you for your support!</h2>
-                <p>Dear {donation.donor_name or 'Friend'},</p>
-                <p>Thank you for your generous donation of ${donation.amount} to {donation.campaign.title}.</p>
+                <p>Dear {safe_donor_name},</p>
+                <p>Thank you for your generous donation of ${donation.amount} to {escape(donation.campaign.title)}.</p>
                 <p>Your support means everything to me.</p>
                 <p>With gratitude,<br>Matt Raynor</p>
                 """
-        
-        # Create plain text version
+
         plain_text_content = f"""
         Thank you for your donation!
-        
+
         Dear {donation.donor_name or 'Friend'},
-        
+
         Thank you for your generous donation of ${donation.amount} to {donation.campaign.title}.
-        
+
         Your support means everything to me.
-        
+
         With gratitude,
         Matt Raynor
         """
-        
-        # Send email using Django's built-in email system
-        # This works with console backend, SMTP, and SendGrid
+
         try:
-            print(f"📤 Sending email to {donation.donor_email}")
-            print(f"📧 Subject: {subject}")
-            print(f"📧 Backend: {settings.EMAIL_BACKEND}")
-            
             send_mail(
                 subject=subject,
                 message=plain_text_content,
@@ -118,8 +94,7 @@ def send_thank_you_email(donation_id):
                 html_message=html_content,
                 fail_silently=False,
             )
-            
-            # Log successful email
+
             EmailLog.objects.create(
                 recipient_email=donation.donor_email,
                 subject=subject,
@@ -127,68 +102,52 @@ def send_thank_you_email(donation_id):
                 was_sent=True,
                 sent_at=timezone.now()
             )
-            
-            print(f"✅ Thank you email sent to {donation.donor_email}")
+
+            logger.info(f"Thank you email sent for donation {donation_id}")
             return f"Email sent to {donation.donor_email}"
-            
+
         except Exception as email_error:
-            print(f"❌ Email sending failed: {email_error}")
-            
-            # Log failed email
+            logger.error(f"Email sending failed for donation {donation_id}: {email_error}")
+
             EmailLog.objects.create(
                 recipient_email=donation.donor_email,
                 subject=subject,
                 donation=donation,
                 was_sent=False
             )
-            
+
             return f"Email failed: {str(email_error)}"
-        
+
     except Donation.DoesNotExist:
-        error_msg = f"Donation {donation_id} not found"
-        print(f"❌ {error_msg}")
-        return error_msg
-        
+        logger.error(f"Donation {donation_id} not found")
+        return f"Donation {donation_id} not found"
+
     except Exception as e:
-        error_msg = f"Email task failed for donation {donation_id}: {str(e)}"
-        print(f"❌ {error_msg}")
-        
-        # Try to log failed email attempt
+        logger.error(f"Email task failed for donation {donation_id}: {e}")
+
         try:
             if 'donation' in locals():
                 EmailLog.objects.create(
                     recipient_email=donation.donor_email,
-                    subject=f"Failed: Thank you email",
+                    subject="Failed: Thank you email",
                     donation=donation,
                     was_sent=False
                 )
-        except:
-            pass  # Don't fail if logging fails
-            
-        return error_msg
+        except Exception:
+            pass
+
+        return f"Email task failed: {str(e)}"
+
 
 @shared_task
 def send_campaign_update_notification(campaign_update_id):
-    """
-    Send notification to all donors when a campaign update is posted
-    Future feature - not implemented yet
-    """
-    print(f"📧 Campaign update notification task for update {campaign_update_id} - not implemented yet")
+    """Send notification to all donors when a campaign update is posted (future feature)"""
+    logger.info(f"Campaign update notification for update {campaign_update_id} - not implemented")
     return "Campaign update notifications not implemented"
+
 
 @shared_task
 def send_donation_receipt(donation_id):
-    """
-    Send formal receipt for tax purposes
-    Future feature - could generate PDF receipt
-    """
-    print(f"📧 Donation receipt task for donation {donation_id} - not implemented yet")
+    """Send formal receipt for tax purposes (future feature)"""
+    logger.info(f"Donation receipt for donation {donation_id} - not implemented")
     return "Donation receipts not implemented"
-
-@shared_task
-def test_email_task():
-    """
-    Test task to verify Celery is working
-    """
-    print("📧 Test email task executed successfully")
-    return "Test email task completed"

@@ -1,10 +1,9 @@
 from environ import Env
 from pathlib import Path
+from django.core.exceptions import ImproperlyConfigured
 import stripe
 import os
-from django.core.management.utils import get_random_secret_key
-
-print("🎯 Matt Freedom Fundraiser v2 - Settings Loaded")
+import sys
 
 # Cloudinary Configuration
 import cloudinary
@@ -15,7 +14,6 @@ import cloudinary.api
 env = Env()
 
 FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:5173")
-
 
 # Cloudinary setup
 cloudinary_url = env('CLOUDINARY_URL', default='')
@@ -29,7 +27,6 @@ if cloudinary_url:
             'API_KEY': api_key,
             'API_SECRET': api_secret,
         }
-        print(f"✅ Cloudinary configured for cloud: {cloud_name}")
     else:
         CLOUDINARY_STORAGE = {
             'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME', default='placeholder'),
@@ -60,7 +57,9 @@ stripe.api_key = STRIPE_SECRET_KEY
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Security
-SECRET_KEY = env("DJANGO_SECRET_KEY", default=get_random_secret_key())
+SECRET_KEY = env("DJANGO_SECRET_KEY", default=None)
+if not SECRET_KEY:
+    raise ImproperlyConfigured("DJANGO_SECRET_KEY environment variable is required")
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
 
 # Hosts
@@ -69,18 +68,16 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[
 ])
 
 # Celery Worker Detection
-import sys
 IS_CELERY = (
     os.environ.get('IS_CELERY_WORKER') == 'true' or
-    'celery' in sys.argv[0] or 
+    'celery' in sys.argv[0] or
     'worker' in sys.argv or
     'beat' in sys.argv
 )
 
 # CSRF Exemptions for donation platform
 CSRF_EXEMPT_URLS = [
-    r'^/api/accounts/auth/google/$',
-    r'^/api/stripe/webhook/$',
+    r'^/api/donations/stripe/webhook/$',
 ]
 
 class DisableCSRFMiddleware:
@@ -96,8 +93,6 @@ class DisableCSRFMiddleware:
 
 # Application Configuration
 if IS_CELERY:
-    print("🔧 Celery worker - minimal configuration")
-    
     INSTALLED_APPS = [
         'django.contrib.auth',
         'django.contrib.contenttypes',
@@ -106,19 +101,19 @@ if IS_CELERY:
         'django.contrib.staticfiles',
         'cloudinary_storage',
         'cloudinary',
-        
+
         # Donation platform apps
         'accounts.apps.AccountsConfig',
         'donations.apps.DonationsConfig',
         'emails.apps.EmailsConfig',
-        
+
         # Celery
         'django_celery_beat',
         'django_celery_results',
         'rest_framework',
         'rest_framework.authtoken',
     ]
-    
+
     MIDDLEWARE = [
         'django.middleware.security.SecurityMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
@@ -127,12 +122,10 @@ if IS_CELERY:
         'django.contrib.auth.middleware.AuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
     ]
-    
+
     ROOT_URLCONF = 'django_project.celery_urls'
-    
+
 else:
-    print("🌐 Full Django web server configuration")
-    
     INSTALLED_APPS = [
         'django.contrib.admin',
         'django.contrib.auth',
@@ -142,14 +135,14 @@ else:
         'django.contrib.staticfiles',
         'cloudinary_storage',
         'cloudinary',
-        
+
         'accounts.apps.AccountsConfig',
 
         # Donation platform apps
         'donations.apps.DonationsConfig',
         'emails.apps.EmailsConfig',
 
-        # Auth (optional - remove if not using Google auth)
+        # Allauth (kept for existing DB tables)
         'django.contrib.sites',
         'allauth',
         'allauth.account',
@@ -161,7 +154,7 @@ else:
         'rest_framework',
         'rest_framework.authtoken',
         'django_celery_beat',
-        'django_celery_results', 
+        'django_celery_results',
     ]
 
     MIDDLEWARE = [
@@ -177,7 +170,7 @@ else:
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
     ]
-    
+
     ROOT_URLCONF = 'django_project.urls'
 
 # Templates
@@ -211,7 +204,7 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-# Google OAuth (optional)
+# Allauth settings (kept for existing DB tables)
 SITE_ID = env.int("DJANGO_SITE_ID", default=1)
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
@@ -245,13 +238,13 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-# 🔥 FIXED: Gmail Email Configuration
+# Email Configuration
 EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
 EMAIL_HOST = env("EMAIL_HOST", default="smtp.gmail.com")
 EMAIL_PORT = env.int("EMAIL_PORT", default=587)
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")  # 🔥 FIXED: Read from environment
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")  # 🔥 FIXED: Read from environment
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="mnraynor90@gmail.com")
 
 # REST Framework
@@ -260,16 +253,24 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',
+        'user': '1000/hour',
+    },
 }
 
 # CORS (only for non-Celery)
 if not IS_CELERY:
     CORS_ALLOWED_ORIGINS = [
-        "http://localhost:5173",  # ✅ Your actual frontend port
-        "http://127.0.0.1:5173",  # ✅ Same but with 127.0.0.1
-        # Production Netlify domain will be added here later
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
     ]
     CORS_ALLOW_CREDENTIALS = True
+
 # Celery
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://redis:6379/0')
 CELERY_RESULT_BACKEND = 'django-db'
@@ -277,5 +278,3 @@ CELERY_TIMEZONE = TIME_ZONE
 
 # Default field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-print(f"✅ Settings loaded - Celery: {IS_CELERY}")

@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import F
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from decimal import Decimal
@@ -85,23 +86,26 @@ class Donation(models.Model):
         """Update campaign total when donation is completed"""
         is_new = self.pk is None
         old_status = None
-        
+
         if not is_new:
-            old_donation = Donation.objects.get(pk=self.pk)
-            old_status = old_donation.payment_status
-        
+            old_status = Donation.objects.filter(pk=self.pk).values_list(
+                'payment_status', flat=True
+            ).first()
+
         super().save(*args, **kwargs)
-        
-        # Update campaign total if payment status changed to completed
+
+        # Atomic update: campaign total when payment status changed to completed
         if (is_new and self.payment_status == 'completed') or \
-           (old_status != 'completed' and self.payment_status == 'completed'):
-            self.campaign.current_amount += Decimal(str(self.amount))
-            self.campaign.save()
-        
-        # Subtract if refunded
+           (old_status and old_status != 'completed' and self.payment_status == 'completed'):
+            Campaign.objects.filter(pk=self.campaign_id).update(
+                current_amount=F('current_amount') + self.amount
+            )
+
+        # Atomic subtract if refunded
         elif old_status == 'completed' and self.payment_status == 'refunded':
-            self.campaign.current_amount -= self.amount
-            self.campaign.save()
+            Campaign.objects.filter(pk=self.campaign_id).update(
+                current_amount=F('current_amount') - self.amount
+            )
 
 class CampaignUpdate(models.Model):
     """
