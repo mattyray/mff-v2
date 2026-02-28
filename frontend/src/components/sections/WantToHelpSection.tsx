@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Gift, ExternalLink } from 'lucide-react';
+import { Gift, ExternalLink, Mail } from 'lucide-react';
 
-const FACEBOOK_EVENT_URL = 'https://www.facebook.com/events/877647888439782/';
+const FACEBOOK_EVENT_URL = 'https://www.facebook.com/share/17yWU2jELE/';
+const INSTAGRAM_URL = 'https://www.instagram.com/mattsfreedomfundraiser/';
 
 const WantToHelpSection: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -33,26 +34,44 @@ const WantToHelpSection: React.FC = () => {
               Donate an item for the silent auction or sponsor the event. Every contribution makes a difference.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <a
                 href={FACEBOOK_EVENT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-ocean-primary inline-flex items-center justify-center gap-2"
               >
-                Facebook Event Page
+                Facebook Event
+                <ExternalLink className="w-5 h-5" />
+              </a>
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-ocean-secondary inline-flex items-center justify-center gap-2"
+              >
+                Follow on Instagram
                 <ExternalLink className="w-5 h-5" />
               </a>
               <a
                 href="mailto:mnraynor90@gmail.com"
                 className="btn-ocean-secondary inline-flex items-center justify-center gap-2"
               >
-                Get in Touch
+                <Mail className="w-5 h-5" />
+                Email Us
               </a>
             </div>
 
+            {/* Cash Payment Note */}
+            <div className="p-4 bg-[var(--ocean-mist)] rounded-xl mb-8">
+              <p className="text-[var(--ocean-driftwood)] text-sm">
+                <span className="font-semibold text-[var(--ocean-deep)]">Prefer to pay with cash?</span>{' '}
+                Reach out on Instagram, Facebook, or email mnraynor90@gmail.com to arrange a cash ticket or donation.
+              </p>
+            </div>
+
             {/* Special Thanks */}
-            <div className="mt-10 pt-8 border-t border-gray-200">
+            <div className="pt-8 border-t border-gray-200">
               <p className="text-[var(--ocean-driftwood)] text-base">
                 <span className="font-semibold text-[var(--ocean-deep)]">Special Thanks</span> to Alex Herzog for helping organize and plan this event, and to the Oakland Family and Sundays on the Bay for making it all happen.
               </p>

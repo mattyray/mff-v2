@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowDown, Heart, Calendar, MapPin, Clock } from 'lucide-react';
+import { ArrowDown, Ticket, Heart, Calendar, MapPin, Clock } from 'lucide-react';
 import type { Campaign } from '../../types/index';
 
 interface HeroSectionProps {
@@ -7,10 +7,8 @@ interface HeroSectionProps {
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
-  const [currentAmount, setCurrentAmount] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
-  // Early return if no campaign data
   if (!campaign) {
     return (
       <section className="relative min-h-screen overflow-hidden hero-ocean flex items-center justify-center">
@@ -22,39 +20,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
     );
   }
 
-  // Animate numbers on mount
   useEffect(() => {
     setIsVisible(true);
-    const timer = setTimeout(() => {
-      animateNumber(campaign?.current_amount || 0);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [campaign?.current_amount]);
+  }, []);
 
-  const animateNumber = (target: number) => {
-    const duration = 2000;
-    const steps = 60;
-    const increment = target / steps;
-    const stepDuration = duration / steps;
-
-    let current = 0;
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= target) {
-        setCurrentAmount(target);
-        clearInterval(timer);
-      } else {
-        setCurrentAmount(Math.floor(current));
-      }
-    }, stepDuration);
+  const handleTicketsClick = () => {
+    document.getElementById('tickets')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleDonateClick = () => {
     document.getElementById('donate')?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const handleEventDetailsClick = () => {
-    document.getElementById('event-details')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
@@ -83,14 +58,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
               <span className="block text-[var(--ocean-seafoam)]">Fundraiser</span>
             </h1>
 
-            <h3 className="text-white/90 font-semibold mb-6">1st Annual Silent Auction</h3>
+            <h3 className="text-white/90 font-semibold mb-6">1st Annual Silent Auction — Tickets $50</h3>
 
             {/* Description */}
             <div className="text-xl lg:text-2xl text-white/90 mb-8 leading-relaxed" style={{color: 'rgba(255, 255, 255, 0.95)'}}>
               <p className="mb-4">
                 A community fundraiser to support Matt Raynor, a Hampton Bays commercial fisherman
                 who became tetraplegic after a spinal cord injury. Live music, a silent auction,
-                50/50 raffle, food, drinks, kids activities, and a night of community.
+                50/50 raffle, food, drinks, and a night of community.
               </p>
               <p>
                 Every dollar raised goes directly to Matt's recovery fund — helping cover the daily
@@ -125,51 +100,23 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
               </div>
             </div>
 
-            {/* Special Thanks */}
-            <p className="text-white/70 text-sm mb-6">
-              <span className="text-white/90 font-semibold">Special Thanks</span> to Alex Herzog for helping organize and plan this event, and to the Oakland Family and Sundays on the Bay for making it all happen.
-            </p>
-
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <button
-                onClick={handleDonateClick}
+                onClick={handleTicketsClick}
                 className="btn-ocean-primary bg-white text-[var(--ocean-blue)] hover:bg-[var(--ocean-mist)] shadow-2xl"
               >
-                <Heart className="w-5 h-5 mr-2" />
-                Donate Now
+                <Ticket className="w-5 h-5 mr-2" />
+                Get Your Tickets
               </button>
 
               <button
-                onClick={handleEventDetailsClick}
+                onClick={handleDonateClick}
                 className="btn-ocean-secondary bg-transparent border-white text-white hover:bg-white/10"
               >
-                Event Details
+                <Heart className="w-5 h-5 mr-2" />
+                Make a Donation
               </button>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className={`text-3xl font-bold text-white mb-1 transition-all duration-1000 ${isVisible ? 'animate-count-up' : ''}`}>
-                  ${currentAmount.toLocaleString()}
-                </div>
-                <div className="text-white/70 text-sm">Raised</div>
-              </div>
-
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white mb-1">
-                  ${(campaign?.goal_amount || 0).toLocaleString()}
-                </div>
-                <div className="text-white/70 text-sm">Goal</div>
-              </div>
-
-              <div className="text-center">
-                <div className="text-3xl font-bold text-[var(--ocean-sunrise)] mb-1">
-                  Apr 11
-                </div>
-                <div className="text-white/70 text-sm">Event Day</div>
-              </div>
             </div>
 
           </div>
@@ -191,16 +138,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
                     className="w-full h-auto rounded-2xl object-cover"
                   />
                 )}
-              </div>
-
-              {/* Floating Elements */}
-              <div className="absolute -top-6 -right-6 bg-[var(--ocean-sunrise)] rounded-2xl p-4 animate-pulse-slow">
-                <Calendar className="w-8 h-8 text-white" />
-              </div>
-
-              <div className="absolute -bottom-6 -left-6 bg-white/20 backdrop-blur-sm rounded-2xl p-4 border border-white/30">
-                <div className="text-white text-sm font-medium">April 11, 2026</div>
-                <div className="text-white/70 text-xs">Save the Date</div>
               </div>
             </div>
           </div>

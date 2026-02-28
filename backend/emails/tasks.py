@@ -35,12 +35,17 @@ def send_thank_you_email(donation_id):
         safe_donor_name = escape(donation.donor_name or 'Friend')
         safe_message = escape(donation.message or '')
 
+        has_tickets = donation.ticket_quantity > 0
+        ticket_line = f"<p><strong>Tickets:</strong> {donation.ticket_quantity} x $50.00</p>" if has_tickets else ""
+
         if not template:
-            subject = f"Thank you for your donation, {safe_donor_name}!"
+            subject = f"Thank you for your {'purchase' if has_tickets else 'donation'}, {safe_donor_name}!"
             html_content = f"""
             <h2>Thank you for your support!</h2>
             <p>Dear {safe_donor_name},</p>
-            <p>Thank you for your generous donation of ${donation.amount} to {escape(donation.campaign.title)}.</p>
+            {ticket_line}
+            <p>{'Total' if has_tickets else 'Thank you for your generous donation of'}: ${donation.amount} to {escape(donation.campaign.title)}.</p>
+            {"<p>We'll see you at the event!</p>" if has_tickets else ""}
             <p>Your support means everything to me.</p>
             <p>With gratitude,<br>Matt Raynor</p>
             """
@@ -49,6 +54,7 @@ def send_thank_you_email(donation_id):
                 context = {
                     'donor_name': safe_donor_name,
                     'amount': float(donation.amount),
+                    'ticket_quantity': donation.ticket_quantity,
                     'campaign_title': escape(donation.campaign.title),
                     'campaign_description': escape(donation.campaign.description),
                     'current_total': float(donation.campaign.current_amount),
@@ -63,11 +69,13 @@ def send_thank_you_email(donation_id):
 
             except Exception as template_error:
                 logger.warning(f"Template formatting error: {template_error}")
-                subject = f"Thank you for your donation, {safe_donor_name}!"
+                subject = f"Thank you for your {'purchase' if has_tickets else 'donation'}, {safe_donor_name}!"
                 html_content = f"""
                 <h2>Thank you for your support!</h2>
                 <p>Dear {safe_donor_name},</p>
-                <p>Thank you for your generous donation of ${donation.amount} to {escape(donation.campaign.title)}.</p>
+                {ticket_line}
+                <p>{'Total' if has_tickets else 'Thank you for your generous donation of'}: ${donation.amount} to {escape(donation.campaign.title)}.</p>
+                {"<p>We'll see you at the event!</p>" if has_tickets else ""}
                 <p>Your support means everything to me.</p>
                 <p>With gratitude,<br>Matt Raynor</p>
                 """
@@ -148,11 +156,15 @@ def send_donation_notification(donation_id):
         donor = escape(donation.donor_name) if donation.donor_name and not donation.is_anonymous else 'Anonymous'
         campaign_title = escape(donation.campaign.title)
         message_line = f"<p><strong>Message:</strong> {escape(donation.message)}</p>" if donation.message else ""
+        has_tickets = donation.ticket_quantity > 0
+        ticket_line = f"<p><strong>Tickets:</strong> {donation.ticket_quantity}</p>" if has_tickets else ""
+        action = "ticket purchase" if has_tickets else "donation"
 
-        subject = f"New ${donation.amount} donation to {donation.campaign.title}"
+        subject = f"New ${donation.amount} {action} — {donation.campaign.title}"
         html_content = f"""
-        <h2>New Donation Received!</h2>
+        <h2>New {'Ticket Purchase' if has_tickets else 'Donation'}!</h2>
         <p><strong>Amount:</strong> ${donation.amount}</p>
+        {ticket_line}
         <p><strong>From:</strong> {donor}</p>
         <p><strong>Campaign:</strong> {campaign_title}</p>
         {message_line}
@@ -161,9 +173,11 @@ def send_donation_notification(donation_id):
         <p style="color: #888; font-size: 12px;">This is an automated notification from Matt's Freedom Fundraiser.</p>
         """
 
+        tickets_text = f"Tickets: {donation.ticket_quantity}\n" if has_tickets else ""
         plain_text = (
-            f"New Donation Received!\n\n"
+            f"New {'Ticket Purchase' if has_tickets else 'Donation'}!\n\n"
             f"Amount: ${donation.amount}\n"
+            f"{tickets_text}"
             f"From: {donation.donor_name if donation.donor_name and not donation.is_anonymous else 'Anonymous'}\n"
             f"Campaign: {donation.campaign.title}\n"
             f"{'Message: ' + donation.message if donation.message else ''}\n\n"

@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.response import Response
@@ -13,6 +15,9 @@ from .serializers import CampaignSerializer, DonationSerializer, CampaignUpdateS
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+TICKET_PRICE_CENTS = 5000  # $50.00
+TICKET_PRICE = Decimal('50.00')
 
 
 class DonationCreateThrottle(AnonRateThrottle):
@@ -61,9 +66,15 @@ def create_donation(request):
         if not campaign:
             return Response({'error': 'No active campaign'}, status=404)
 
+        ticket_quantity = data.get('ticket_quantity', 0)
+        donation_amount = data.get('donation_amount', Decimal('0'))
+        ticket_total = Decimal(ticket_quantity) * TICKET_PRICE
+        total_amount = ticket_total + donation_amount
+
         donation = Donation.objects.create(
             campaign=campaign,
-            amount=data['amount'],
+            amount=total_amount,
+            ticket_quantity=ticket_quantity,
             donor_name=data.get('donor_name', ''),
             donor_email=data.get('donor_email', ''),
             message=data.get('message', ''),
@@ -72,25 +83,40 @@ def create_donation(request):
             payment_status='pending'
         )
 
-        logger.info(f"Created donation {donation.id} for ${donation.amount}")
+        logger.info(f"Created donation {donation.id} for ${total_amount} ({ticket_quantity} tickets)")
 
-        session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[{
+        # Build Stripe line items
+        line_items = []
+        if ticket_quantity > 0:
+            line_items.append({
+                'price_data': {
+                    'currency': 'usd',
+                    'product_data': {'name': "Event Ticket — Matt's Freedom Fundraiser"},
+                    'unit_amount': TICKET_PRICE_CENTS,
+                },
+                'quantity': ticket_quantity,
+            })
+        if donation_amount > 0:
+            line_items.append({
                 'price_data': {
                     'currency': 'usd',
                     'product_data': {'name': f'Donation to {campaign.title}'},
-                    'unit_amount': int(data['amount'] * 100),
+                    'unit_amount': int(donation_amount * 100),
                 },
                 'quantity': 1,
-            }],
+            })
+
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=line_items,
             mode='payment',
             success_url=f"{settings.FRONTEND_URL}/success?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{settings.FRONTEND_URL}/cancel",
             metadata={
                 'donation_id': str(donation.id),
                 'campaign_id': str(campaign.id),
-                'amount': str(data['amount']),
+                'amount': str(total_amount),
+                'ticket_quantity': str(ticket_quantity),
                 'donor_name': data.get('donor_name', ''),
                 'donor_email': data.get('donor_email', ''),
             }

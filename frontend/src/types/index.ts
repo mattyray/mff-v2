@@ -1,5 +1,3 @@
-// Donation Platform Types - FIXED VERSION
-
 export interface Campaign {
   id: number;
   title: string;
@@ -7,26 +5,20 @@ export interface Campaign {
   goal_amount: number;
   current_amount: number;
   progress_percentage: number;
+  tickets_sold: number;
   is_active: boolean;
   start_date: string;
   end_date?: string;
   featured_image?: string;
-  featured_video_url?: string;  // ← ADDED THIS LINE
+  featured_video_url?: string;
   created_at: string;
   updated_at: string;
-}
-
-export interface DonationTier {
-  id: number;
-  name: string;
-  amount: number;
-  description: string;
-  campaign: number;
 }
 
 export interface Donation {
   id: number;
   amount: number;
+  ticket_quantity: number;
   donor_name?: string;
   donor_email?: string;
   message?: string;
@@ -34,7 +26,6 @@ export interface Donation {
   payment_status: 'pending' | 'completed' | 'failed' | 'refunded';
   created_at: string;
   campaign: number;
-  tier?: DonationTier;
 }
 
 export interface User {
@@ -62,7 +53,8 @@ export interface CampaignUpdate {
 }
 
 export interface CreateDonationRequest {
-  amount: number;
+  ticket_quantity: number;
+  donation_amount: number;
   donor_name?: string;
   donor_email?: string;
   message?: string;

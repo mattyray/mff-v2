@@ -16,11 +16,11 @@ function App() {
           </div>
           
           <h1 className="text-2xl font-bold text-[var(--ocean-deep)] mb-4">
-            Thank You! 🎉
+            Thank You!
           </h1>
-          
+
           <p className="text-[var(--ocean-driftwood)] mb-6">
-            Your donation has been successfully processed. You're helping make a real difference in Matt's journey!
+            Your purchase has been processed. You're helping make a real difference in Matt's journey — we'll see you at the event!
           </p>
           
           <button

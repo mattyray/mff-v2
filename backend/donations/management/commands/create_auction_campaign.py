@@ -19,13 +19,13 @@ class Command(BaseCommand):
             title="Matt's Freedom Fundraiser — 1st Annual Silent Auction",
             description=(
                 "A community fundraiser to support Matt Raynor, a Hampton Bays commercial "
-                "fisherman who became tetraplegic after a spinal cord injury. Live music, "
-                "a silent auction, 50/50 raffle, food, drinks, kids activities, and a night "
-                "of community. Every dollar raised goes directly to Matt's recovery fund — "
-                "helping cover the daily costs of living with a spinal cord injury that most "
-                "people never think about."
+                "fisherman who became tetraplegic after a spinal cord injury. Tickets are "
+                "$50 each and include live music, a silent auction, 50/50 raffle, food, "
+                "drinks, and a night of community. Every dollar raised goes directly to "
+                "Matt's recovery fund — helping cover the daily costs of living with a "
+                "spinal cord injury that most people never think about."
             ),
-            goal_amount=Decimal("10000.00"),
+            goal_amount=Decimal("5000.00"),
             current_amount=Decimal("0.00"),
             is_active=True,
             start_date=timezone.now(),

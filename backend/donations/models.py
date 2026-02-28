@@ -51,6 +51,7 @@ class Donation(models.Model):
     
     # Donation details
     amount = models.DecimalField(max_digits=8, decimal_places=2)
+    ticket_quantity = models.PositiveIntegerField(default=0)
     
     # Donor information (all optional)
     donor_name = models.CharField(max_length=100, blank=True)

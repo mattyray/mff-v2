@@ -51,8 +51,15 @@ const SupportersSection: React.FC = () => {
             {donations.map((donation) => (
               <div key={donation.id} className="card-ocean">
                 <div className="flex justify-between items-start mb-3">
-                  <div className="font-semibold text-[var(--ocean-deep)]">
-                    {donation.donor_name || 'Anonymous Supporter'}
+                  <div>
+                    <div className="font-semibold text-[var(--ocean-deep)]">
+                      {donation.donor_name || 'Anonymous Supporter'}
+                    </div>
+                    {donation.ticket_quantity > 0 && (
+                      <div className="text-xs text-[var(--ocean-teal)]">
+                        {donation.ticket_quantity} ticket{donation.ticket_quantity !== 1 ? 's' : ''}
+                      </div>
+                    )}
                   </div>
                   <div className="text-lg font-bold text-[var(--ocean-blue)]">
                     ${donation.amount}
