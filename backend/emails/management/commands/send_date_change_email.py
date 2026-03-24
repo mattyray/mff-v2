@@ -20,21 +20,31 @@ class Command(BaseCommand):
             action="store_true",
             help="Print emails that would be sent without actually sending",
         )
+        parser.add_argument(
+            "--test",
+            type=str,
+            help="Send a single test email to this address instead of all donors",
+        )
 
     def handle(self, *args, **options):
         dry_run = options["dry_run"]
+        test_email = options["test"]
 
-        # Get unique donor emails, exclude test transactions
-        emails = (
-            Donation.objects.filter(
-                payment_status="completed",
-                donor_email__gt="",
+        if test_email:
+            emails = [(test_email, "Matt")]
+            self.stdout.write(f"Sending test email to {test_email}...")
+        else:
+            # Get unique donor emails, exclude test transactions
+            emails = (
+                Donation.objects.filter(
+                    payment_status="completed",
+                    donor_email__gt="",
+                )
+                .exclude(donor_email__in=["mnraynor90@gmail.com", "mnraynor90@gmailc.om"])
+                .values_list("donor_email", "donor_name")
+                .distinct("donor_email")
+                .order_by("donor_email")
             )
-            .exclude(donor_email__in=["mnraynor90@gmail.com", "mnraynor90@gmailc.om"])
-            .values_list("donor_email", "donor_name")
-            .distinct("donor_email")
-            .order_by("donor_email")
-        )
 
         subject = "Date Change — Matt's Freedom Fundraiser Silent Auction is now May 14th"
 
