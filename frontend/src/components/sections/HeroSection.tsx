@@ -44,7 +44,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
         <div className="flex flex-col lg:flex-row items-center justify-between min-h-screen py-20">
 
           {/* Left Content */}
-          <div className={`lg:w-1/2 lg:pr-12 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div className={`${campaign?.featured_image ? 'lg:w-1/2 lg:pr-12' : 'lg:w-2/3 mx-auto'} transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
 
             {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
@@ -122,25 +122,19 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
           </div>
 
           {/* Right Content — Hero Image */}
-          <div className={`lg:w-1/2 mt-12 lg:mt-0 transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <div className="relative">
-              <div className="relative bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
-                {campaign?.featured_image ? (
+          {campaign?.featured_image && (
+            <div className={`lg:w-1/2 mt-12 lg:mt-0 transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+              <div className="relative">
+                <div className="relative bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
                   <img
                     src={campaign.featured_image}
                     alt="Matt's Freedom Fundraiser — 1st Annual Silent Auction"
                     className="w-full h-auto rounded-2xl object-cover"
                   />
-                ) : (
-                  <img
-                    src="/images/hero-selfie.jpeg"
-                    alt="Matt Raynor — Save the Date"
-                    className="w-full h-auto rounded-2xl object-cover"
-                  />
-                )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
         </div>
       </div>
