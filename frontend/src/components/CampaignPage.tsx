@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { DonationAPI } from '../services/api';
 import type { Campaign } from '../types/index';
 
+import { AlertTriangle } from 'lucide-react';
 import HeroSection from './sections/HeroSection';
 import TicketSection from './sections/TicketSection';
 import DonationSection from './sections/DonationSection';
@@ -50,6 +51,15 @@ const CampaignPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Date Change Announcement Banner */}
+      <div className="bg-[var(--ocean-sunrise)] text-white py-3 px-4 text-center">
+        <div className="container-custom flex items-center justify-center gap-2 flex-wrap">
+          <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+          <span className="font-semibold text-sm sm:text-base">
+            Date Change: The event has moved to Thursday, May 14th — same time, same place!
+          </span>
+        </div>
+      </div>
       <HeroSection campaign={campaign} />
       <TicketSection campaign={campaign} />
       <DonationSection campaign={campaign} />

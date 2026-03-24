@@ -161,7 +161,7 @@ const ProgressSection: React.FC<ProgressSectionProps> = ({ campaign }) => {
               <Calendar className="w-6 h-6 text-[var(--ocean-blue)]" />
             </div>
             <div className="text-2xl font-bold text-[var(--ocean-deep)] mb-2">
-              April 11
+              May 14
             </div>
             <div className="text-[var(--ocean-driftwood)] text-sm">
               Event Day

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Music, Gavel, Ticket, UtensilsCrossed } from 'lucide-react';
+import { Music, Gavel, UtensilsCrossed } from 'lucide-react';
 
 const EventDetailsSection: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -19,8 +19,7 @@ const EventDetailsSection: React.FC = () => {
   const activities = [
     { icon: Music, label: 'Live Music', description: 'Local bands performing throughout the evening' },
     { icon: Gavel, label: 'Silent Auction', description: 'Bid on items donated by local businesses' },
-    { icon: Ticket, label: '50/50 Raffle', description: 'Buy a ticket for a chance to win big' },
-    { icon: UtensilsCrossed, label: 'Food & Drinks', description: 'Great food and drinks all night' },
+    { icon: UtensilsCrossed, label: 'Food & Refreshments', description: 'Complimentary food and refreshments, cash bar' },
   ];
 
   return (
@@ -46,7 +45,7 @@ const EventDetailsSection: React.FC = () => {
         {/* What to Expect */}
         <div className={`transition-all duration-1000 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <h3 className="text-center text-[var(--ocean-deep)] mb-8">What to Expect</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
             {activities.map((activity) => (
               <div key={activity.label} className="text-center group">
                 <div className="w-16 h-16 bg-[var(--ocean-mist)] rounded-2xl flex items-center justify-center mx-auto mb-3 transition-colors duration-300">

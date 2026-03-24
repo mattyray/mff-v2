@@ -49,7 +49,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
               <Calendar className="w-4 h-4 text-[var(--ocean-sunrise)]" />
-              <span className="text-white/90 text-sm font-medium">Save the Date — April 11, 2026</span>
+              <span className="text-white/90 text-sm font-medium">Save the Date — May 14, 2026</span>
             </div>
 
             {/* Main Headline */}
@@ -65,7 +65,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
               <p className="mb-4">
                 A community fundraiser to support Matt Raynor, a Hampton Bays commercial fisherman
                 who became tetraplegic after a spinal cord injury. Live music, a silent auction,
-                50/50 raffle, food, drinks, and a night of community.
+                complimentary food and refreshments, cash bar, and a night of community.
               </p>
               <p>
                 Every dollar raised goes directly to Matt's recovery fund — helping cover the daily
@@ -79,8 +79,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ campaign }) => {
                 <div className="flex items-center gap-3">
                   <Calendar className="w-5 h-5 text-[var(--ocean-seafoam)] flex-shrink-0" />
                   <div>
-                    <div className="text-white font-semibold text-sm">Saturday</div>
-                    <div className="text-white/70 text-sm">April 11, 2026</div>
+                    <div className="text-white font-semibold text-sm">Thursday</div>
+                    <div className="text-white/70 text-sm">May 14, 2026</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">

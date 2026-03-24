@@ -6,10 +6,10 @@ Full-stack fundraising platform for collecting donations with Stripe payments, r
 
 ## Current Campaign: 1st Annual Silent Auction
 
-- **Event:** Saturday, April 11, 2026 — 5:00–8:00 PM
+- **Event:** Thursday, May 14, 2026 — 5:00–8:00 PM
 - **Venue:** Sundays on the Bay, 369 Dune Road, Hampton Bays, NY 11946
 - **Goal:** $10,000
-- **Activities:** Live music, silent auction, 50/50 raffle, food & drinks
+- **Activities:** Live music, silent auction, complimentary food & refreshments, cash bar
 - **Facebook Event:** https://www.facebook.com/events/877647888439782/
 - **Special Thanks:** Oakland Family & Sundays on the Bay
 
