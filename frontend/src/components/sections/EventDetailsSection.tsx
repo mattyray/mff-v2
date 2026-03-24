@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Music, Gavel, UtensilsCrossed } from 'lucide-react';
+import { Music, Gavel, Ticket, UtensilsCrossed } from 'lucide-react';
 
 const EventDetailsSection: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
