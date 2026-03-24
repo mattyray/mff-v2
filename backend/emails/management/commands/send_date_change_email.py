@@ -72,18 +72,26 @@ class Command(BaseCommand):
                     </div>
 
                     <p style="font-size: 16px; color: #1f2937; line-height: 1.6;">
-                        Same place, same time, just a new date. Live music, a silent auction,
-                        complimentary food and refreshments, and a night of community &mdash;
-                        all to support Matt's recovery fund.
+                        Same place, same time, just a new date. Join us for an evening of live music,
+                        a silent auction, complimentary food and refreshments, and community &mdash;
+                        all to support Matt Raynor, a Hampton Bays commercial fisherman who became
+                        tetraplegic after a spinal cord injury. Every dollar raised goes directly to
+                        Matt's recovery fund.
                     </p>
 
                     <p style="font-size: 16px; color: #1f2937; line-height: 1.6;">
-                        If you haven't grabbed your tickets yet, they're $50 each:
+                        Tickets are $50 each. Grab yours at the link below:
                     </p>
 
                     <div style="text-align: center; margin: 24px 0;">
                         <a href="https://mattsfreedomfundraiser.com" style="display: inline-block; background: #1E40AF; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
                             Get Your Tickets
+                        </a>
+                    </div>
+
+                    <div style="text-align: center; margin: 0 0 24px;">
+                        <a href="https://www.facebook.com/events/877647888439782/" style="display: inline-block; background: #1877F2; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">
+                            Facebook Event
                         </a>
                     </div>
 
@@ -97,9 +105,13 @@ class Command(BaseCommand):
                     </p>
                 </div>
 
-                <div style="background: #f9fafb; padding: 16px 32px; border-radius: 0 0 12px 12px; border: 1px solid #e5e7eb; border-top: none; text-align: center;">
-                    <p style="margin: 0; font-size: 12px; color: #9ca3af;">
+                <div style="background: #f9fafb; padding: 20px 32px; border-radius: 0 0 12px 12px; border: 1px solid #e5e7eb; border-top: none; text-align: center;">
+                    <p style="margin: 0 0 8px; font-size: 12px; color: #9ca3af;">
                         You're receiving this because you donated to Matt's Freedom Fundraiser.
+                    </p>
+                    <p style="margin: 0; font-size: 12px; color: #6b7280;">
+                        Want to support Matt by hiring him as a web developer? His stuff is awesome.
+                        <a href="https://www.matthewraynor.com/services" style="color: #1E40AF; text-decoration: underline;">Check it out</a>
                     </p>
                 </div>
             </div>
@@ -113,14 +125,19 @@ Thursday, May 14, 2026
 5:00 - 8:00 PM
 Sundays on the Bay, Hampton Bays, NY
 
-Same place, same time, just a new date. Live music, a silent auction, complimentary food and refreshments, and a night of community -- all to support Matt's recovery fund.
+Same place, same time, just a new date. Join us for an evening of live music, a silent auction, complimentary food and refreshments, and community -- all to support Matt Raynor, a Hampton Bays commercial fisherman who became tetraplegic after a spinal cord injury. Every dollar raised goes directly to Matt's recovery fund.
 
-If you haven't grabbed your tickets yet, they're $50 each at mattsfreedomfundraiser.com
+Tickets are $50 each: https://mattsfreedomfundraiser.com
+
+Facebook Event: https://www.facebook.com/events/877647888439782/
 
 Thank you for your support -- it means everything.
 
 With gratitude,
 Matt Raynor
+
+---
+Want to support Matt by hiring him as a web developer? Check out https://www.matthewraynor.com/services
 """
 
             if dry_run:
