@@ -17,3 +17,5 @@ class DonationAdmin(admin.ModelAdmin):
 class CampaignUpdateAdmin(admin.ModelAdmin):
     list_display = ['title', 'campaign', 'created_at']
     readonly_fields = ['created_at']
+
+    
